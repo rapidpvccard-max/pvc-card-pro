@@ -4,124 +4,782 @@
 
 {% set active_page = "dashboard" %}
 
+{% block extra_head %}
+<style>
+    /* =========================================================
+       PREMIUM COMMAND CENTER DASHBOARD STYLES
+       ========================================================= */
+
+    /* Hero Banner */
+    .hero-command-card {
+        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #0f172a 100%);
+        border-radius: 24px;
+        padding: 36px 40px;
+        color: #ffffff;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 32px;
+        box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    }
+    
+    .hero-command-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 450px;
+        height: 450px;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, rgba(37, 99, 235, 0.1) 50%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+    
+    .hero-command-card::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: 20%;
+        width: 350px;
+        height: 350px;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .hero-status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(16, 185, 129, 0.15);
+        border: 1px solid rgba(52, 211, 153, 0.3);
+        color: #6ee7b7;
+        padding: 5px 14px;
+        border-radius: 30px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        margin-bottom: 16px;
+        backdrop-filter: blur(4px);
+    }
+
+    .radar-beacon {
+        width: 8px;
+        height: 8px;
+        background: #34d399;
+        border-radius: 50%;
+        position: relative;
+    }
+
+    .radar-beacon::after {
+        content: '';
+        position: absolute;
+        inset: -4px;
+        border-radius: 50%;
+        border: 2px solid #34d399;
+        animation: radar-pulse 2s infinite ease-out;
+    }
+
+    @keyframes radar-pulse {
+        0% { transform: scale(0.6); opacity: 1; }
+        100% { transform: scale(2.2); opacity: 0; }
+    }
+
+    .hero-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        letter-spacing: -0.75px;
+        line-height: 1.2;
+        margin-bottom: 10px;
+        color: #ffffff !important;
+    }
+
+    .hero-desc {
+        font-size: 1rem;
+        color: #94a3b8;
+        max-width: 650px;
+        line-height: 1.6;
+        margin-bottom: 24px;
+    }
+
+    .hero-feature-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 28px;
+    }
+
+    .hero-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        padding: 6px 14px;
+        border-radius: 12px;
+        font-size: 0.82rem;
+        color: #e2e8f0;
+        font-weight: 600;
+    }
+
+    .hero-actions-wrap {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .btn-hero-primary {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: #ffffff;
+        padding: 14px 28px;
+        border-radius: 14px;
+        font-size: 1rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 10px 25px -3px rgba(16, 185, 129, 0.4);
+        transition: all 0.25s ease;
+        text-decoration: none;
+        border: none;
+    }
+
+    .btn-hero-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 30px -3px rgba(16, 185, 129, 0.55);
+        color: #ffffff;
+    }
+
+    .btn-hero-secondary {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #ffffff;
+        padding: 14px 24px;
+        border-radius: 14px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        backdrop-filter: blur(6px);
+    }
+
+    .btn-hero-secondary:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.35);
+        color: #ffffff;
+        transform: translateY(-2px);
+    }
+
+    /* Stats Grid */
+    .metrics-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        margin-bottom: 36px;
+    }
+
+    .metric-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        padding: 22px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .metric-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 24px -4px rgba(0, 0, 0, 0.07);
+    }
+
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+    }
+
+    .metric-card.blue::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+    .metric-card.purple::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+    .metric-card.green::before { background: linear-gradient(90deg, #10b981, #34d399); }
+    .metric-card.pink::before { background: linear-gradient(90deg, #ec4899, #f472b6); }
+
+    .metric-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+    }
+
+    .metric-icon-wrap {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .metric-icon-wrap.blue { background: #eff6ff; color: #2563eb; }
+    .metric-icon-wrap.purple { background: #f5f3ff; color: #7c3aed; }
+    .metric-icon-wrap.green { background: #ecfdf5; color: #059669; }
+    .metric-icon-wrap.pink { background: #fdf2f8; color: #db2777; }
+
+    .metric-pill-tag {
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .metric-pill-tag.blue { background: #eff6ff; color: #2563eb; }
+    .metric-pill-tag.purple { background: #f5f3ff; color: #7c3aed; }
+    .metric-pill-tag.green { background: #ecfdf5; color: #059669; }
+    .metric-pill-tag.pink { background: #fdf2f8; color: #db2777; }
+
+    .metric-label {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+
+    .metric-value {
+        font-size: 1.9rem;
+        font-weight: 800;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: #0f172a;
+        line-height: 1.1;
+    }
+
+    .metric-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 14px;
+        padding-top: 12px;
+        border-top: 1px solid #f1f5f9;
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+
+    /* Section Header */
+    .section-title-wrap {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 20px;
+    }
+
+    .section-heading {
+        font-size: 1.35rem;
+        font-weight: 800;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: #0f172a;
+        margin-bottom: 4px;
+    }
+
+    .section-subheading {
+        font-size: 0.88rem;
+        color: #64748b;
+    }
+
+    /* Service Cards (Aadhaar & Ayushman) */
+    .services-showcase-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 36px;
+    }
+
+    .service-showcase-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 24px;
+        padding: 32px;
+        position: relative;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+    }
+
+    .service-showcase-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.08);
+    }
+
+    .service-showcase-card.card-aadhaar:hover {
+        border-color: #3b82f6;
+        box-shadow: 0 20px 35px -5px rgba(37, 99, 235, 0.15);
+    }
+
+    .service-showcase-card.card-ayushman:hover {
+        border-color: #10b981;
+        box-shadow: 0 20px 35px -5px rgba(16, 185, 129, 0.15);
+    }
+
+    .service-price-pill {
+        position: absolute;
+        top: 24px;
+        right: 24px;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 800;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .service-price-pill.blue {
+        background: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
+    }
+
+    .service-price-pill.green {
+        background: #ecfdf5;
+        color: #047857;
+        border: 1px solid #a7f3d0;
+    }
+
+    .service-card-top {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .service-icon-box {
+        width: 72px;
+        height: 72px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .service-icon-box.blue {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: #ffffff;
+        box-shadow: 0 10px 20px -3px rgba(37, 99, 235, 0.35);
+    }
+
+    .service-icon-box.green {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: #ffffff;
+        box-shadow: 0 10px 20px -3px rgba(16, 185, 129, 0.35);
+    }
+
+    .service-name {
+        font-size: 1.45rem;
+        font-weight: 800;
+        color: #0f172a;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        margin-bottom: 4px;
+    }
+
+    .service-subtitle {
+        font-size: 0.92rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .service-features-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 24px;
+    }
+
+    .service-feature-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.88rem;
+        color: #334155;
+    }
+
+    .service-card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 18px;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .service-launch-link {
+        font-weight: 700;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: gap 0.2s ease;
+    }
+
+    .service-showcase-card:hover .service-launch-link {
+        gap: 12px;
+    }
+
+    .service-launch-link.blue { color: #2563eb; }
+    .service-launch-link.green { color: #059669; }
+
+    /* Recent Generations Section */
+    .recent-activity-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 24px 28px;
+        margin-bottom: 36px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+
+    .recent-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+    }
+
+    .recent-table th {
+        text-align: left;
+        padding: 12px 16px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .recent-table td {
+        padding: 14px 16px;
+        font-size: 0.88rem;
+        color: #1e293b;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .recent-table tr:hover td {
+        background: #f8fafc;
+    }
+
+    .status-badge-success {
+        background: #ecfdf5;
+        color: #047857;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .status-badge-failed {
+        background: #fef2f2;
+        color: #b91c1c;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .metrics-stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .services-showcase-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .hero-command-card {
+            padding: 24px 20px;
+        }
+        .hero-title {
+            font-size: 1.6rem;
+        }
+        .metrics-stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<!-- Welcome Banner -->
-<div class="welcome-banner">
-    <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.2); color: #6ee7b7; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; margin-bottom: 16px;">
-        <span class="live-dot" style="background: #34d399; box-shadow: none;"></span> CSC OPERATOR PORTAL ACTIVE
+<!-- Luxury Command Center Hero Banner -->
+<div class="hero-command-card">
+    <div class="hero-status-pill">
+        <span class="radar-beacon"></span>
+        <span>CSC OPERATOR COMMAND CENTER ACTIVE</span>
     </div>
-    <h2>Welcome back, <span id="banner-user-name">User</span></h2>
-    <p>Instant 1-Click PVC Card Generation Engine. Extract & print government-spec PVC cards for citizens with zero formatting errors.</p>
-    <a href="/generator" class="btn-primary" style="margin-top: 24px; background: var(--success); color: white;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-        Print New PVC Card
+    
+    <h1 class="hero-title">
+        Welcome back, <span id="banner-user-name" style="color: #60a5fa;">Operator</span> 👋
+    </h1>
+    
+    <p class="hero-desc">
+        Fast & automated government-spec PVC Card generation suite. Process Aadhaar and Ayushman cards in 1-click with AI auto-alignment and zero formatting errors.
+    </p>
+    
+    <div class="hero-feature-tags">
+        <span class="hero-tag">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            1-Click AI Auto-Alignment
+        </span>
+        <span class="hero-tag">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Indic Regional Languages Fix
+        </span>
+        <span class="hero-tag">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Multi-Card Duplex A4 PDF
+        </span>
+        <span class="hero-tag">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            5-Min Zero-Retention Privacy
+        </span>
+    </div>
+    
+    <div class="hero-actions-wrap">
+        <a href="/generator" class="btn-hero-primary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            Print New PVC Card
+        </a>
+        <a href="/subscription" class="btn-hero-secondary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            Recharge Wallet
+        </a>
+    </div>
+</div>
+
+<!-- 4 Key Metric Stat Cards -->
+<div class="metrics-stats-grid">
+    <!-- Stat 1: Total Cards -->
+    <div class="metric-card blue">
+        <div class="metric-top">
+            <div class="metric-icon-wrap blue">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <span class="metric-pill-tag blue">All Time</span>
+        </div>
+        <div class="metric-label">TOTAL CARDS GENERATED</div>
+        <div class="metric-value" id="stat-total-cards">0</div>
+        <div class="metric-footer">
+            <span>Print Production</span>
+            <strong style="color: #2563eb;">Output</strong>
+        </div>
+    </div>
+
+    <!-- Stat 2: Today's Activity -->
+    <div class="metric-card purple">
+        <div class="metric-top">
+            <div class="metric-icon-wrap purple">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <span class="metric-pill-tag purple">Live</span>
+        </div>
+        <div class="metric-label">TODAY'S ACTIVITY</div>
+        <div class="metric-value" id="stat-today-cards" style="color: #7c3aed;">0</div>
+        <div class="metric-footer">
+            <span>Today's Runs</span>
+            <strong style="color: #7c3aed;">Active</strong>
+        </div>
+    </div>
+
+    <!-- Stat 3: Remaining Balance -->
+    <div class="metric-card green">
+        <div class="metric-top">
+            <div class="metric-icon-wrap green">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            </div>
+            <a href="/subscription" class="metric-pill-tag green" style="text-decoration: none; cursor: pointer;">+ Topup</a>
+        </div>
+        <div class="metric-label">WALLET BALANCE</div>
+        <div class="metric-value" style="color: #059669;">
+            <span>₹</span><span id="stat-wallet-balance">0.00</span>
+        </div>
+        <div class="metric-footer">
+            <span>Instant Usage</span>
+            <a href="/subscription" style="color: #059669; font-weight: 700; text-decoration: none;">Recharge &rarr;</a>
+        </div>
+    </div>
+
+    <!-- Stat 4: Plan Validity -->
+    <div class="metric-card pink">
+        <div class="metric-top">
+            <div class="metric-icon-wrap pink">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <span class="metric-pill-tag pink">PRO TIER</span>
+        </div>
+        <div class="metric-label">PLAN VALIDITY</div>
+        <div class="metric-value" style="color: #db2777; font-size: 1.65rem;">Lifetime</div>
+        <div class="metric-footer">
+            <span>Expiry Status</span>
+            <strong style="color: #db2777;">Never Expires</strong>
+        </div>
+    </div>
+</div>
+
+<!-- PVC Card Services Section -->
+<div class="section-title-wrap" id="services" style="scroll-margin-top: 80px;">
+    <div>
+        <h2 class="section-heading">Supported PVC Card Services</h2>
+        <p class="section-subheading">Select a service below to instantly extract and print professional PVC cards.</p>
+    </div>
+    <a href="/generator" style="font-weight: 700; font-size: 0.9rem; color: #2563eb; text-decoration: none; display: flex; align-items: center; gap: 4px;">
+        Open Generator
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
     </a>
 </div>
 
-<!-- Stats Grid -->
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="flex justify-between items-start">
-            <div class="stat-icon" style="background: var(--primary-light); color: var(--primary);">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            </div>
-            <span style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted);">TOTAL</span>
-        </div>
-        <div class="stat-label">TOTAL CARDS GENERATED</div>
-        <div class="stat-value" id="stat-total-cards">0</div>
-    </div>
+<div class="services-showcase-grid">
     
-    <div class="stat-card">
-        <div class="flex justify-between items-start">
-            <div class="stat-icon" style="background: #f3e8ff; color: #a855f7;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    <!-- Aadhaar PVC Card -->
+    <div class="service-showcase-card card-aadhaar" onclick="window.location.href='/generator?type=aadhaar'">
+        <div class="service-price-pill blue">₹0.95 / card</div>
+        
+        <div>
+            <div class="service-card-top">
+                <div class="service-icon-box blue">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <div>
+                    <h3 class="service-name">Aadhaar PVC Card</h3>
+                    <p class="service-subtitle">e-Aadhaar & Enrolment PDF Auto-Extraction</p>
+                </div>
             </div>
-            <span style="font-size: 0.7rem; font-weight: 700; color: var(--primary); background: var(--primary-light); padding: 2px 8px; border-radius: 12px;">Live</span>
-        </div>
-        <div class="stat-label">TODAY'S GENERATIONS</div>
-        <div class="stat-value" style="color: var(--primary);">0</div>
-    </div>
-    
-    <div class="stat-card">
-        <div class="flex justify-between items-start">
-            <div class="stat-icon" style="background: var(--success-light); color: var(--success);">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            
+            <div class="service-features-list">
+                <div class="service-feature-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>1-Click Text, Photo & High-Precision QR Extraction</span>
+                </div>
+                <div class="service-feature-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Automatic Indic Language & Font Repair (Hindi, Gujarati, Telugu, etc.)</span>
+                </div>
+                <div class="service-feature-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Standard CR80 Geometry + Mirror Duplex A4 Sheet Print</span>
+                </div>
             </div>
-            <a href="/subscription" style="font-size: 0.75rem; font-weight: 700; color: var(--primary);">Recharge</a>
         </div>
-        <div class="stat-label">REMAINING BALANCE</div>
-        <div class="flex items-center gap-2">
-            <div class="stat-value" style="color: var(--success);">₹<span id="stat-wallet-balance">0.00</span></div>
-            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Balance</span>
+        
+        <div class="service-card-footer">
+            <span style="font-size: 0.82rem; color: #64748b; font-weight: 600;">Government Standard Format</span>
+            <span class="service-launch-link blue">
+                Generate Aadhaar Card &rarr;
+            </span>
         </div>
     </div>
-    
-    <div class="stat-card">
-        <div class="flex justify-between items-start">
-            <div class="stat-icon" style="background: #fce7f3; color: #ec4899;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+
+    <!-- Ayushman PVC Card -->
+    <div class="service-showcase-card card-ayushman" onclick="window.location.href='/generator?type=ayushman'">
+        <div class="service-price-pill green">₹0.95 / card</div>
+        
+        <div>
+            <div class="service-card-top">
+                <div class="service-icon-box green">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
+                </div>
+                <div>
+                    <h3 class="service-name">Ayushman PVC Card</h3>
+                    <p class="service-subtitle">PMJAY National Health Authority Golden Card</p>
+                </div>
             </div>
-            <span style="font-size: 0.7rem; font-weight: 700; color: #c026d3; background: #fdf4ff; padding: 2px 8px; border-radius: 12px;">Trial Pack</span>
+            
+            <div class="service-features-list">
+                <div class="service-feature-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Golden Card PMJAY Official Color & Typography Spec</span>
+                </div>
+                <div class="service-feature-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>High-Resolution QR Code Recovery Engine</span>
+                </div>
+                <div class="service-feature-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Crisp 300 DPI Photo Rendering & A4 Print Export</span>
+                </div>
+            </div>
         </div>
-        <div class="stat-label">PLAN VALIDITY</div>
-        <div class="stat-value" style="color: #c026d3;">Lifetime</div>
+        
+        <div class="service-card-footer">
+            <span style="font-size: 0.82rem; color: #64748b; font-weight: 600;">PMJAY Golden Card Spec</span>
+            <span class="service-launch-link green">
+                Generate Ayushman Card &rarr;
+            </span>
+        </div>
     </div>
+
 </div>
 
-<!-- Services Grid -->
-<div id="services" class="section-header flex justify-between items-center" style="scroll-margin-top: 90px;">
-    <div>
-        <h3 class="section-title">Select PVC Card Service</h3>
-        <p class="text-muted" style="font-size: 0.85rem;">Click on any service card below to extract & generate standard PVC cards.</p>
-    </div>
-    <a href="#services" style="font-size: 0.85rem; font-weight: 600;">View All Services &rarr;</a>
-</div>
-
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 16px; margin-bottom: 32px;">
-    
-    <div class="service-card blue" onclick="window.location.href='/generator?type=aadhaar'" style="padding: 40px; border-radius: 24px; border: 1px solid var(--border); box-shadow: 0 12px 24px rgba(0,0,0,0.04); text-align: left; display: flex; align-items: center; gap: 24px; background: linear-gradient(145deg, #ffffff, #f8fafc); transition: transform 0.3s ease, box-shadow 0.3s ease;">
-        <div class="service-price-tag" style="border-radius: 0 24px 0 16px; font-size: 0.85rem; padding: 6px 16px; font-weight: 800;">₹0.95 / card</div>
-        <div class="service-icon" style="flex-shrink: 0; width: 88px; height: 88px; border-radius: 24px; margin: 0; box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);">
-            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+<!-- Recent Generations Quick Table -->
+<div class="recent-activity-card">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0; font-family: 'Plus Jakarta Sans', sans-serif;">Recent Card Print Activity</h3>
+            <p style="font-size: 0.82rem; color: #64748b; margin: 2px 0 0 0;">Latest PVC cards generated from your account</p>
         </div>
-        <div style="flex: 1;">
-            <h4 class="service-title" style="font-size: 1.6rem; font-weight: 800; color: #1e3a8a; margin-bottom: 6px;">Aadhaar PVC Card</h4>
-            <p class="service-desc" style="font-size: 1.05rem; color: #475569; font-weight: 500;">1-Click AI Extraction & Auto-Alignment</p>
-        </div>
-        <div style="margin-left: auto; color: var(--primary); opacity: 0.7; transition: opacity 0.2s;">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </div>
-    </div>
-    
-    <div class="service-card green" onclick="window.location.href='/generator?type=ayushman'" style="padding: 40px; border-radius: 24px; border: 1px solid var(--border); box-shadow: 0 12px 24px rgba(0,0,0,0.04); text-align: left; display: flex; align-items: center; gap: 24px; background: linear-gradient(145deg, #ffffff, #f8fafc); transition: transform 0.3s ease, box-shadow 0.3s ease;">
-        <div class="service-price-tag" style="border-radius: 0 24px 0 16px; font-size: 0.85rem; padding: 6px 16px; font-weight: 800; background-color: var(--success);">₹0.95 / card</div>
-        <div class="service-icon" style="flex-shrink: 0; width: 88px; height: 88px; border-radius: 24px; margin: 0; box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);">
-            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
-        </div>
-        <div style="flex: 1;">
-            <h4 class="service-title" style="font-size: 1.6rem; font-weight: 800; color: #064e3b; margin-bottom: 6px;">Ayushman PVC Card</h4>
-            <p class="service-desc" style="font-size: 1.05rem; color: #475569; font-weight: 500;">PMJAY Health Card Professional Layout</p>
-        </div>
-        <div style="margin-left: auto; color: var(--success); opacity: 0.7; transition: opacity 0.2s;">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </div>
+        <a href="/history" style="font-weight: 700; font-size: 0.85rem; color: #2563eb; text-decoration: none;">View Full History &rarr;</a>
     </div>
 
+    <div style="overflow-x: auto;">
+        <table class="recent-table">
+            <thead>
+                <tr>
+                    <th>Document Type</th>
+                    <th>Run ID</th>
+                    <th>Generated Date</th>
+                    <th>Status</th>
+                    <th style="text-align: right;">Action</th>
+                </tr>
+            </thead>
+            <tbody id="recent-generations-body">
+                <tr>
+                    <td colspan="5" style="text-align: center; color: #94a3b8; padding: 24px;">Loading recent activities...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <!-- Promotional Banner (Dynamic from Admin Panel) -->
-<div id="dynamic-promo-banner-container" style="margin-top: 32px;">
+<div id="dynamic-promo-banner-container" style="margin-top: 24px; margin-bottom: 20px;">
     <!-- Default initial structure -->
-    <div id="dynamic-promo-banner" style="border-radius: var(--radius-lg); background: #0f172a; overflow: hidden; display: flex; align-items: center; justify-content: space-between; padding: 32px 40px; color: white;">
+    <div id="dynamic-promo-banner" style="border-radius: var(--radius-lg); background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); overflow: hidden; display: flex; align-items: center; justify-content: space-between; padding: 30px 36px; color: white; box-shadow: 0 10px 25px rgba(0,0,0,0.06); border: 1px solid rgba(255,255,255,0.05);">
         <div>
-            <div style="font-weight: 800; font-size: 2rem; font-style: italic; color: var(--warning); margin-bottom: 8px;">HIGH QUALITY PVC CARD</div>
-            <div style="display: flex; align-items: center; gap: 16px;">
-                <span style="background: var(--danger); padding: 4px 12px; font-weight: 800; font-size: 0.85rem; border-radius: 4px; transform: skewX(-10deg);">STARTING AT JUST</span>
-                <span style="font-size: 3rem; font-weight: 800;">₹ 0.95</span>
+            <div style="font-weight: 800; font-size: 1.8rem; font-style: italic; color: #f59e0b; margin-bottom: 6px;">HIGH QUALITY PVC CARD</div>
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <span style="background: #ef4444; padding: 4px 10px; font-weight: 800; font-size: 0.8rem; border-radius: 4px; transform: skewX(-8deg);">STARTING AT JUST</span>
+                <span style="font-size: 2.4rem; font-weight: 800; font-family: 'Plus Jakarta Sans', sans-serif;">₹ 0.95</span>
             </div>
         </div>
         <div style="text-align: right;">
-            <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 1.5rem; margin-bottom: 8px;">Professional PVC Cards<br>Made Easy!</div>
+            <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 1.3rem; margin-bottom: 6px; color: white;">Professional PVC Cards<br>Made Easy!</div>
         </div>
     </div>
 </div>
@@ -129,76 +787,116 @@
 
 {% block extra_scripts %}
 <script>
-    fetch('/api/user/me')
-        .then(res => res.json())
-        .then(data => {
-            if(data && data.name) {
-                const el = document.getElementById('banner-user-name');
-                if(el) el.textContent = data.name;
-            }
-        });
-        
-    fetch('/api/user/credits')
-        .then(res => res.json())
-        .then(data => {
-            if(data) {
-                const totalEl = document.getElementById('stat-total-cards');
-                if(totalEl && data.total_generated !== undefined) totalEl.textContent = data.total_generated;
-                
-                const balEl = document.getElementById('stat-wallet-balance');
-                if(balEl && data.wallet_balance !== undefined) balEl.textContent = parseFloat(data.wallet_balance).toFixed(2);
-            }
-        });
+    // Fast Parallel Async Data Loader
+    async function loadDashboardData() {
+        try {
+            const [dashRes, bannerRes] = await Promise.all([
+                fetch('/api/user/dashboard').then(r => r.ok ? r.json() : null),
+                fetch('/api/banner').then(r => r.ok ? r.json() : null).catch(() => null)
+            ]);
 
-    // Dynamic Admin Promo Banner Loader
-    fetch('/api/banner')
-        .then(res => res.json())
-        .then(banner => {
-            const container = document.getElementById('dynamic-promo-banner-container');
-            if (!container) return;
-            
-            if (!banner || !banner.enabled) {
-                container.style.display = 'none';
-                return;
+            // Populate User & Stats
+            if (dashRes) {
+                if (dashRes.user && dashRes.user.name) {
+                    const nameEl = document.getElementById('banner-user-name');
+                    if (nameEl) nameEl.textContent = dashRes.user.name;
+                }
+
+                if (dashRes.credits) {
+                    const totalEl = document.getElementById('stat-total-cards');
+                    if (totalEl && dashRes.credits.total_generated !== undefined) {
+                        totalEl.textContent = dashRes.credits.total_generated;
+                    }
+
+                    const balEl = document.getElementById('stat-wallet-balance');
+                    if (balEl && dashRes.credits.wallet_balance !== undefined) {
+                        balEl.textContent = parseFloat(dashRes.credits.wallet_balance).toFixed(2);
+                    }
+                }
+
+                // Calculate today's cards
+                if (dashRes.history) {
+                    const now = new Date();
+                    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+                    const todayCount = dashRes.history.filter(h => {
+                        if (!h.created_at) return false;
+                        const d = new Date(h.created_at).getTime();
+                        return d >= todayStart;
+                    }).length;
+
+                    const todayEl = document.getElementById('stat-today-cards');
+                    if (todayEl) todayEl.textContent = todayCount;
+
+                    // Render Recent Table (up to 5 items)
+                    const tbody = document.getElementById('recent-generations-body');
+                    if (tbody) {
+                        if (dashRes.history.length === 0) {
+                            tbody.innerHTML = `
+                                <tr>
+                                    <td colspan="5" style="text-align: center; color: #94a3b8; padding: 32px;">
+                                        <div style="font-size: 1.8rem; margin-bottom: 8px;">🖨️</div>
+                                        <div style="font-weight: 700; color: #475569;">No Cards Generated Yet</div>
+                                        <div style="font-size: 0.82rem; margin-top: 4px;">Click on 'Print New PVC Card' to generate your first card!</div>
+                                    </td>
+                                </tr>
+                            `;
+                        } else {
+                            tbody.innerHTML = dashRes.history.slice(0, 5).map(item => {
+                                const docType = (item.document_type || 'Aadhaar').toUpperCase();
+                                const isSuccess = item.status === 'success';
+                                const dateStr = item.created_at ? new Date(item.created_at).toLocaleString('en-IN', {
+                                    day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+                                }) : '--';
+
+                                return `
+                                    <tr>
+                                        <td>
+                                            <strong style="color: ${docType === 'AYUSHMAN' ? '#059669' : '#2563eb'};">
+                                                ${docType === 'AYUSHMAN' ? '🏥 Ayushman Card' : '🪪 Aadhaar Card'}
+                                            </strong>
+                                        </td>
+                                        <td style="font-family: monospace; font-size: 0.82rem; color: #64748b;">
+                                            ${(item.run_id || item.id || '').substring(0, 8)}...
+                                        </td>
+                                        <td style="color: #64748b; font-size: 0.82rem;">${dateStr}</td>
+                                        <td>
+                                            <span class="${isSuccess ? 'status-badge-success' : 'status-badge-failed'}">
+                                                ${isSuccess ? '✓ Success' : '✕ Failed'}
+                                            </span>
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <a href="/generator" style="color: #2563eb; font-weight: 700; font-size: 0.82rem; text-decoration: none;">
+                                                Generate &rarr;
+                                            </a>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('');
+                        }
+                    }
+                }
             }
-            
-            container.style.display = 'block';
-            
-            if (banner.banner_type === 'image' && banner.image_url) {
-                const targetLink = banner.link_url || '#';
-                container.innerHTML = `
-                    <a href="${targetLink}" style="display: block; text-decoration: none; border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); transition: transform 0.2s ease;">
-                        <img src="${banner.image_url}" alt="Promotional Offer" style="width: 100%; max-height: 220px; object-fit: cover; display: block; border-radius: var(--radius-lg);" />
-                    </a>
-                `;
-            } else {
-                const targetLink = banner.link_url || '#';
-                container.innerHTML = `
-                    <a href="${targetLink}" style="text-decoration: none; display: block; border-radius: var(--radius-lg); background: ${banner.bg_color || '#0f172a'}; overflow: hidden; padding: 32px 40px; color: ${banner.text_color || 'white'}; box-shadow: 0 10px 25px rgba(0,0,0,0.1); transition: transform 0.2s ease;">
-                        <div style="display: flex; align-items: center; justify-content: space-between;">
-                            <div>
-                                <div style="font-weight: 800; font-size: 2rem; font-style: italic; color: var(--warning); margin-bottom: 8px;">
-                                    ${banner.headline || 'HIGH QUALITY PVC CARD'}
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 16px;">
-                                    <span style="background: var(--danger); color: white; padding: 4px 12px; font-weight: 800; font-size: 0.85rem; border-radius: 4px; transform: skewX(-10deg);">
-                                        ${banner.badge_text || 'STARTING AT JUST'}
-                                    </span>
-                                    <span style="font-size: 3rem; font-weight: 800; color: white;">
-                                        ${banner.price_text || '₹ 0.95'}
-                                    </span>
-                                </div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 1.5rem; margin-bottom: 8px; color: white;">
-                                    ${banner.sub_text || 'Professional PVC Cards<br>Made Easy!'}
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                `;
+
+            // Populate Banner
+            if (bannerRes && bannerRes.enabled) {
+                const container = document.getElementById('dynamic-promo-banner-container');
+                if (container) {
+                    container.style.display = 'block';
+                    if (bannerRes.banner_type === 'image' && bannerRes.image_url) {
+                        const targetLink = bannerRes.link_url || '#';
+                        container.innerHTML = `
+                            <a href="${targetLink}" style="display: block; text-decoration: none; border-radius: 18px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.06); transition: transform 0.2s ease;">
+                                <img src="${bannerRes.image_url}" alt="Promotional Offer" style="width: 100%; max-height: 200px; object-fit: cover; display: block; border-radius: 18px;" />
+                            </a>
+                        `;
+                    }
+                }
             }
-        })
-        .catch(err => console.log('Banner load skipped', err));
+        } catch (e) {
+            console.error('Dashboard load error', e);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadDashboardData);
 </script>
 {% endblock %}
