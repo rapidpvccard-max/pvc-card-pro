@@ -171,22 +171,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const systemStatus = document.getElementById('system-status');
     const statusContainer = document.querySelector('.status-container');
     
-    fetch('/health')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && data.status === 'online') {
-                systemStatus.textContent = 'System Online';
-                statusContainer.classList.add('online');
-                statusContainer.classList.remove('offline');
-            } else {
-                throw new Error('API Offline');
-            }
-        })
-        .catch(() => {
-            systemStatus.textContent = 'System Offline';
-            statusContainer.classList.add('offline');
-            statusContainer.classList.remove('online');
-        });
+    if (systemStatus && statusContainer) {
+        fetch('/health')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.status === 'online') {
+                    systemStatus.textContent = 'System Online';
+                    statusContainer.classList.add('online');
+                    statusContainer.classList.remove('offline');
+                } else {
+                    throw new Error('API Offline');
+                }
+            })
+            .catch(() => {
+                systemStatus.textContent = 'System Offline';
+                statusContainer.classList.add('offline');
+                statusContainer.classList.remove('online');
+            });
+    }
 
     // Elements
     const fileDropArea = document.getElementById('file-drop-area');
@@ -311,10 +313,37 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
     
     function setStepState(stepIndex, state) {
+        if (!wfSteps[stepIndex]) return;
         const step = document.getElementById(wfSteps[stepIndex].id);
         if (!step) return;
         
-        if (state) { step.style.opacity = '1'; step.querySelector('.step-icon').style.background = 'var(--primary)'; step.querySelector('.step-icon').style.color = 'white'; } else { step.style.opacity = '0.5'; step.querySelector('.step-icon').style.background = 'var(--border)'; step.querySelector('.step-icon').style.color = 'var(--text-muted)'; }
+        const icon = step.querySelector('.step-icon') || step.querySelector('.step-icon-circle');
+        
+        if (state === 'active') {
+            step.classList.add('active');
+            step.classList.remove('completed');
+            step.style.opacity = '1';
+            if (icon) {
+                icon.style.background = '#2563eb';
+                icon.style.color = '#ffffff';
+            }
+        } else if (state === 'completed') {
+            step.classList.remove('active');
+            step.classList.add('completed');
+            step.style.opacity = '1';
+            if (icon) {
+                icon.style.background = '#10b981';
+                icon.style.color = '#ffffff';
+            }
+        } else {
+            step.classList.remove('active');
+            step.classList.remove('completed');
+            step.style.opacity = '0.5';
+            if (icon) {
+                icon.style.background = '#f1f5f9';
+                icon.style.color = '#64748b';
+            }
+        }
     }
 
     function resetProgress() {
