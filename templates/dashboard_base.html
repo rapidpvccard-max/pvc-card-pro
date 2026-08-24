@@ -9,62 +9,103 @@
 </head>
 <body class="dashboard-layout">
     
-    <!-- Sidebar -->
+    <!-- Luxury Modern Sidebar -->
     <aside class="sidebar">
+        <!-- Brand Header -->
         <div class="sidebar-header">
             <a href="/dashboard" class="brand-logo">
                 <div class="brand-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/><circle cx="7" cy="15" r="1"/></svg>
                 </div>
-                Rapid PVC
+                <div class="brand-text-wrap">
+                    <span class="brand-name">Rapid PVC</span>
+                    <span class="brand-badge-tag">PRO AI</span>
+                </div>
             </a>
         </div>
         
-        <a href="/profile" style="text-decoration: none; color: inherit; display: block;" title="View Profile">
-            <div class="user-profile-widget" style="transition: var(--transition); cursor: pointer;">
+        <!-- Operator Mini Hub Profile Card -->
+        <a href="/profile" style="text-decoration: none; display: block;" title="Manage Operator Profile">
+            <div class="user-profile-widget">
                 <div class="flex items-center gap-3">
-                    <div class="avatar" style="width: 32px; height: 32px; background: rgba(255,255,255,0.1); color: #fff;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <div class="user-avatar-ring">
+                        <span id="sidebar-user-initial">U</span>
+                        <span class="avatar-online-dot"></span>
                     </div>
-                    <div>
-                        <div class="name" id="sidebar-user-name">User</div>
-                        <div class="plan">Pro Pack</div>
+                    <div style="flex: 1; min-width: 0;">
+                        <div class="name truncate" id="sidebar-user-name">Operator</div>
+                        <div class="profile-tier-badge">⭐ Pro Operator</div>
                     </div>
                 </div>
-                <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 4px;">Validity: Lifetime</div>
+                <div class="profile-validity-bar">
+                    <span class="pulse-green-beacon"></span>
+                    <span>Live • Lifetime Validity</span>
+                </div>
             </div>
         </a>
 
+        <!-- Rich Navigation Menu -->
         <nav class="sidebar-nav">
+            <div class="nav-section-label">MAIN MENU</div>
+
             <a href="/dashboard" class="nav-item {% if active_page == 'dashboard' %}active{% endif %}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                Dashboard
+                <div class="nav-icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+                </div>
+                <span class="nav-label">Dashboard</span>
             </a>
+
             <a href="/dashboard#services" class="nav-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                Services
+                <div class="nav-icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </div>
+                <span class="nav-label">Services</span>
+                <span class="nav-pill-badge blue">2 Active</span>
             </a>
+
             <a href="/generator" class="nav-item {% if active_page == 'generator' %}active{% endif %}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                Generate Card
+                <div class="nav-icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                </div>
+                <span class="nav-label">Generate Card</span>
+                <span class="nav-pill-badge green">⚡ AI Print</span>
             </a>
+
             <a href="/history" class="nav-item {% if active_page == 'history' %}active{% endif %}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                History
+                <div class="nav-icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </div>
+                <span class="nav-label">Print History</span>
             </a>
+
+            <div class="nav-section-label" style="margin-top: 10px;">ACCOUNT & BILLING</div>
+
             <a href="/subscription" class="nav-item {% if active_page == 'subscription' %}active{% endif %}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                Subscription
+                <div class="nav-icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                </div>
+                <span class="nav-label">Recharge & Plans</span>
+                <span class="nav-pill-badge amber">₹0.95</span>
             </a>
+
             <a href="/profile" class="nav-item {% if active_page == 'profile' %}active{% endif %}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                Profile
+                <div class="nav-icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <span class="nav-label">Operator Profile</span>
             </a>
         </nav>
         
-        <div style="padding: 16px;">
-            <button onclick="logout()" class="btn-primary" style="width: 100%; justify-content: center; background-color: var(--primary-light); color: var(--primary);">
-                Logout
+        <!-- Sidebar Bottom Footer -->
+        <div class="sidebar-footer">
+            <div class="engine-status-widget">
+                <span class="engine-status-dot"></span>
+                <span>Chromium 300 DPI Ready</span>
+            </div>
+            
+            <button onclick="logout()" class="btn-logout">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Logout Session
             </button>
         </div>
     </aside>
@@ -105,6 +146,8 @@
                 if(data && data.name) {
                     const el = document.getElementById('sidebar-user-name');
                     if(el) el.textContent = data.name;
+                    const sideInit = document.getElementById('sidebar-user-initial');
+                    if(sideInit) sideInit.textContent = data.name.charAt(0).toUpperCase();
                     const init = document.getElementById('header-user-initial');
                     if(init) init.textContent = data.name.charAt(0).toUpperCase();
                 }
