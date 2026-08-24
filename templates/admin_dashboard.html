@@ -2331,8 +2331,8 @@
                 document.getElementById('stat-total-users').innerText = dashData.total_users;
                 document.getElementById('stat-active-users-pill').innerText = `${dashData.active_users} Active`;
                 document.getElementById('stat-total-cards').innerText = dashData.total_cards_generated;
-                document.getElementById('stat-outstanding-credits').innerText = dashData.outstanding_credits;
-                document.getElementById('stat-total-revenue').innerText = `$${dashData.total_revenue.toFixed(2)}`;
+                document.getElementById('stat-outstanding-credits').innerText = `₹${parseFloat(dashData.outstanding_credits || 0).toFixed(2)}`;
+                document.getElementById('stat-total-revenue').innerText = `₹${parseFloat(dashData.total_revenue || 0).toFixed(2)}`;
                 document.getElementById('stat-paid-orders-pill').innerText = `${dashData.successful_payments} Paid`;
             }
 

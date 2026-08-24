@@ -25,15 +25,15 @@ def get_admin_dashboard(
 ):
     total_users = db.query(models.User).count()
     active_users = db.query(models.User).filter(models.User.status == "active").count()
-    total_cards = db.query(func.sum(models.GenerationHistory.card_count)).filter(models.GenerationHistory.status == "success").scalar() or 0
+    total_cards = int(db.query(func.sum(models.GenerationHistory.card_count)).filter(models.GenerationHistory.status == "success").scalar() or 0)
     
-    total_revenue = db.query(func.sum(models.Order.amount)).filter(models.Order.status == "paid").scalar() or 0.0
+    total_revenue = round(float(db.query(func.sum(models.Order.amount)).filter(models.Order.status == "paid").scalar() or 0.0), 2)
     
     successful_payments = db.query(models.Order).filter(models.Order.status == "paid").count()
     pending_payments = db.query(models.Order).filter(models.Order.status == "pending").count()
     failed_payments = db.query(models.Order).filter(models.Order.status.in_(["failed", "cancelled"])).count()
     
-    outstanding_credits = db.query(func.sum(models.UserCredits.wallet_balance)).scalar() or 0
+    outstanding_credits = round(float(db.query(func.sum(models.UserCredits.wallet_balance)).scalar() or 0.0), 2)
     
     return {
         "total_users": total_users,
