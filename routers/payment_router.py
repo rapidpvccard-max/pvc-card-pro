@@ -1,4 +1,5 @@
 import os
+import uuid
 import stripe
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
 from sqlalchemy.orm import Session
@@ -17,6 +18,53 @@ router = APIRouter(prefix="/api/payment", tags=["payment"])
 def get_plans(db: Session = Depends(database.get_db)):
     plans = db.query(models.Plan).filter(models.Plan.active == True).all()
     return plans
+
+@router.post("/recharge-plan")
+def recharge_plan(
+    order_data: schemas.OrderCreate, 
+    current_user: models.User = Depends(auth.get_current_user), 
+    db: Session = Depends(database.get_db)
+):
+    plan = db.query(models.Plan).filter(models.Plan.id == order_data.plan_id, models.Plan.active == True).first()
+    if not plan:
+        raise HTTPException(status_code=404, detail="Plan not found")
+
+    user_credits = db.query(models.UserCredits).filter(models.UserCredits.user_id == current_user.id).first()
+    if not user_credits:
+        user_credits = models.UserCredits(user_id=current_user.id, wallet_balance=0.0, total_generated=0)
+        db.add(user_credits)
+        
+    user_credits.wallet_balance += float(plan.credits)
+    
+    order_id = str(uuid.uuid4())
+    order = models.Order(
+        id=order_id,
+        user_id=current_user.id,
+        provider_order_id=f"rec_{uuid.uuid4().hex[:12]}",
+        plan_id=plan.id,
+        amount=plan.price,
+        currency="INR",
+        status="paid"
+    )
+    db.add(order)
+    
+    tx = models.CreditTransaction(
+        user_id=current_user.id,
+        amount=float(plan.credits),
+        transaction_type="purchase",
+        reference_id=order_id,
+        balance_after=user_credits.wallet_balance
+    )
+    db.add(tx)
+    db.commit()
+    
+    return {
+        "success": True,
+        "message": f"Successfully recharged {plan.name} (₹{plan.price:.2f})!",
+        "plan_name": plan.name,
+        "amount_added": plan.credits,
+        "new_balance": user_credits.wallet_balance
+    }
 
 @router.post("/create-order")
 def create_order(
