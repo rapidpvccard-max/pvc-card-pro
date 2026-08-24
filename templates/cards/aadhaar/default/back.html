@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    {{ '<style>' | safe }}
+        {% include 'cards/aadhaar/default/style.css' %}
+    {{ '</style>' | safe }}
+</head>
+<body>
+    <div class="card {% if is_baal_aadhaar %}baal-aadhaar-card{% endif %}" style="background-image: url('data:image/png;base64,{{ template_back_base64 }}'); background-size: 100% 100%; position: relative;">
+
+        {# ── Baal Aadhaar: full-card light-blue tint overlay (back side) ── #}
+        {% if is_baal_aadhaar %}
+        <div class="baal-bg-overlay"></div>
+        {% endif %}
+        {% set headers_back = {
+            'Hindi':      'भारतीय विशिष्ट पहचान प्राधिकरण',
+            'Devanagari': 'भारतीय विशिष्ट पहचान प्राधिकरण',
+            'Marathi':    'भारतीय विशिष्ट ओळख प्राधिकरण',
+            'Gujarati':   'ભારતીય વિશિષ્ટ ઓળખ પ્રાધિકરણ',
+            'Bengali':    'ভারতীয় অনন্য সনাক্তকরণ কর্তৃপক্ষ',
+            'Tamil':      'இந்திய தனித்துவ அடையாள ஆணையம்',
+            'Telugu':     'భారత విశిష్ట గుర్తింపు ప్రాధికార సంస్థ',
+            'Kannada':    'ಭಾರತೀಯ ವಿಶಿಷ್ಟ ಗುರುತಿನ ಪ್ರಾಧಿಕಾರ',
+            'Malayalam':  'യുണീക് ഐഡന്റിഫിക്കേഷൻ അതോറിറ്റി ഓഫ് ഇന്ത്യ',
+            'Punjabi':    'ਭਾਰਤੀ ਵਿਲੱਖਣ ਪਛਾਣ ਅਥਾਰਟੀ',
+            'Gurmukhi':   'ਭਾਰਤੀ ਵਿਲੱਖਣ ਪਛਾਣ ਅਥਾਰਟੀ',
+            'Odia':       'ଭାରତୀୟ ବିଶିଷ୍ଟ ପରିଚୟ ପ୍ରାଧିକରଣ',
+            'Oriya':      'ଭାରତୀୟ ବିଶିଷ୍ଟ ପରିଚୟ ପ୍ରାଧିକରଣ',
+            'Assamese':   'ভাৰতীয় বিশিষ্ট চিনাক্তকৰণ প্ৰাধিকৰণ',
+            'Urdu':       'منفرد شناختی اتھارٹی آف انڈیا'
+        } %}
+        {% set dict_aadhaar = {
+            'Hindi':      'आधार',
+            'Devanagari': 'आधार',
+            'Marathi':    'आधार',
+            'Gujarati':   'આધાર',
+            'Bengali':    'আধার',
+            'Tamil':      'ஆதார்',
+            'Telugu':     'ఆధార్',
+            'Kannada':    'ಆಧಾರ್',
+            'Malayalam':  'ആധാർ',
+            'Punjabi':    'ਆਧਾਰ',
+            'Gurmukhi':   'ਆਧਾਰ',
+            'Odia':       'ଆଧାର',
+            'Oriya':      'ଆଧାର',
+            'Assamese':   'আধাৰ',
+            'Urdu':       'آدھار'
+        } %}
+        {% set dict_address = {
+            'Hindi':      'पता',
+            'Devanagari': 'पता',
+            'Marathi':    'पत्ता',
+            'Gujarati':   'સરનામું',
+            'Bengali':    'ঠিকানা',
+            'Tamil':      'முகவரி',
+            'Telugu':     'చిరునామా',
+            'Kannada':    'ವಿಳಾಸ',
+            'Malayalam':  'മേൽവിലാസം',
+            'Punjabi':    'ਪਤਾ',
+            'Gurmukhi':   'ਪਤਾ',
+            'Odia':       'ଠିକଣା',
+            'Oriya':      'ଠିକଣା',
+            'Assamese':   'ঠিকনা',
+            'Urdu':       'پتہ'
+        } %}
+        {% set dict_baal_label = {
+            'Hindi':      'बाल आधार',
+            'Devanagari': 'बाल आधार',
+            'Marathi':    'बाल आधार',
+            'Gujarati':   'બાળ આધાર',
+            'Bengali':    'বাল আধার',
+            'Tamil':      'பால் ஆதார்',
+            'Telugu':     'బాల్ ఆధార్',
+            'Kannada':    'ಬಾಲ್ ఆధಾರ್',
+            'Malayalam':  'ബാൽ ആധാർ',
+            'Punjabi':    'ਬਾਲ ਆਧਾਰ',
+            'Gurmukhi':   'ਬਾਲ ਆਧਾਰ',
+            'Odia':       'ବାଲ ଆଧାର',
+            'Oriya':      'ବାଲ ଆଧାର',
+            'Assamese':   'বাল আধাৰ',
+            'Urdu':       'بال آدھار'
+        } %}
+        {% set local_lang = language.name if language and language.name else 'Hindi' %}
+        {% set header_back_local = headers_back.get(local_lang) or headers_back.get(local_lang | title) or headers_back.get('Hindi') or 'भारतीय विशिष्ट पहचान प्राधिकरण' %}
+        {% set label_aadhaar = dict_aadhaar.get(local_lang) or dict_aadhaar.get(local_lang | title) or dict_aadhaar.get('Hindi') or 'आधार' %}
+        {% set baal_label = dict_baal_label.get(local_lang) or dict_baal_label.get(local_lang | title) or dict_baal_label.get('Hindi') or 'बाल आधार' %}
+        {% set label_addr = dict_address.get(local_lang) or dict_address.get(local_lang | title) or dict_address.get('Hindi') or 'पता' %}
+
+        <div class="back-header-local">{{ header_back_local }}</div>
+        <div class="back-header-eng">Unique Identification Authority of India</div>
+
+        <div class="top-right-label top-right-label-back {% if is_baal_aadhaar %}baal-top-right-label{% endif %}">{% if is_baal_aadhaar %}{{ baal_label }}{% else %}{{ label_aadhaar }}{% endif %}</div>
+
+        <div class="address-area">
+            <div class="address-label">{{ label_addr }}: / Address:</div>
+            {% if address.local %}
+            <div class="address-local">{{ address.local }}</div>
+            {% endif %}
+            <div class="address-eng">{{ address.full }}</div>
+        </div>
+        
+        <div class="qr-area">
+            {% if qr.available and qr_base64 %}
+                <img src="data:image/png;base64,{{ qr_base64 }}" class="qr-code">
+            {% else %}
+                <div class="qr-placeholder">QR Code<br>Unavailable</div>
+            {% endif %}
+        </div>
+        <div class="aadhaar-number aadhaar-number-back">{{ identity.aadhaar_number }}</div>
+        
+        {% if identity.enrolment_number %}
+        <div class="vid vid-back">VID : {{ identity.enrolment_number }}</div>
+        {% endif %}
+
+        <div class="contact-phone">1947</div>
+        <div class="contact-email">help@uidai.gov.in</div>
+        <div class="contact-website">www.uidai.gov.in</div>
+    </div>
+</body>
+</html>

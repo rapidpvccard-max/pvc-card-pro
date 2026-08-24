@@ -1,0 +1,30 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+.vscode/
+*.log
+.pytest_cache/
+.mypy_cache/
+
+# Databases
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+
+# Secrets
+.env
+
+# Dynamic Uploads & Generated Files (keep folder, ignore files)
+uploads/*
+!uploads/.gitkeep
+output/*
+!output/.gitkeep
+static/renders/*
+!static/renders/.gitkeep
+tests_output/
+

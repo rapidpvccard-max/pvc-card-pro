@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+jinja2
+python-multipart
+pymupdf
+Pillow
+pyzbar
+pdfplumber
+playwright
+sqlalchemy
+passlib
+bcrypt==3.2.2
+python-jose[cryptography]
+email-validator
+stripe
+
+python-dotenv

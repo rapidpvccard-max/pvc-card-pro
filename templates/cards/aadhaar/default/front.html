@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    {{ '<style>' | safe }}
+        {% include 'cards/aadhaar/default/style.css' %}
+    {{ '</style>' | safe }}
+</head>
+<body>
+    <div class="card {% if is_baal_aadhaar %}baal-aadhaar-card{% endif %}" style="background-image: url('data:image/png;base64,{{ template_front_base64 }}'); background-size: 100% 100%; position: relative;">
+
+        {# ── Baal Aadhaar: full-card light-blue tint overlay ── #}
+        {% if is_baal_aadhaar %}
+        <div class="baal-bg-overlay"></div>
+        {% endif %}
+        {% set headers = {
+            'Hindi':      'भारत सरकार',
+            'Devanagari': 'भारत सरकार',
+            'Marathi':    'भारत सरकार',
+            'Gujarati':   'ભારત સરકાર',
+            'Bengali':    'ভারত সরকার',
+            'Tamil':      'இந்திய அரசு',
+            'Telugu':     'భారత ప్రభుత్వం',
+            'Kannada':    'ಭಾರತ ಸರ್ಕಾರ',
+            'Malayalam':  'ഭാരത സർക്കാർ',
+            'Punjabi':    'ਭਾਰਤ ਸਰਕਾਰ',
+            'Gurmukhi':   'ਭਾਰਤ ਸਰਕਾਰ',
+            'Odia':       'ଭାରତ ସରକାର',
+            'Oriya':      'ଭାରତ ସରକାର',
+            'Assamese':   'ভাৰত চৰকাৰ',
+            'Urdu':       'حکومت ہند'
+        } %}
+        {% set dict_aadhaar = {
+            'Hindi':      'आधार',
+            'Devanagari': 'आधार',
+            'Marathi':    'आधार',
+            'Gujarati':   'આધાર',
+            'Bengali':    'আধার',
+            'Tamil':      'ஆதார்',
+            'Telugu':     'ఆధార్',
+            'Kannada':    'ಆಧಾರ್',
+            'Malayalam':  'ആധാർ',
+            'Punjabi':    'ਆਧਾਰ',
+            'Gurmukhi':   'ਆਧਾਰ',
+            'Odia':       'ଆଧାର',
+            'Oriya':      'ଆଧାର',
+            'Assamese':   'আধাৰ',
+            'Urdu':       'آدھار'
+        } %}
+        {% set dict_dob = {
+            'Hindi':      'जन्म तिथि',
+            'Devanagari': 'जन्म तिथि',
+            'Marathi':    'जन्म तारीख',
+            'Gujarati':   'જન્મ તારીખ',
+            'Bengali':    'জন্ম তারিখ',
+            'Tamil':      'பிறந்த தேதி',
+            'Telugu':     'పుట్టిన తేదీ',
+            'Kannada':    'ಹುಟ್ಟಿದ ದಿನಾಂಕ',
+            'Malayalam':  'ജനനത്തീയതി',
+            'Punjabi':    'ਜਨਮ ਤਰੀਕ',
+            'Gurmukhi':   'ਜਨਮ ਤਰੀਕ',
+            'Odia':       'ଜନ୍ମ ତାରିଖ',
+            'Oriya':      'ଜନ୍ମ ତାରିଖ',
+            'Assamese':   'জন্ম তাৰিখ',
+            'Urdu':       'تاریخ پیدائش'
+        } %}
+        {% set dict_male = {
+            'Hindi':      'पुरुष',
+            'Devanagari': 'पुरुष',
+            'Marathi':    'पुरुष',
+            'Gujarati':   'પુરુષ',
+            'Bengali':    'পুরুষ',
+            'Tamil':      'ஆண்',
+            'Telugu':     'పురుషుడు',
+            'Kannada':    'ಗಂಡು',
+            'Malayalam':  'പുരുഷൻ',
+            'Punjabi':    'ਪੁਰਸ਼',
+            'Gurmukhi':   'ਪੁਰਸ਼',
+            'Odia':       'ପୁରୁଷ',
+            'Oriya':      'ପୁରୁଷ',
+            'Assamese':   'পুৰুষ',
+            'Urdu':       'مرد'
+        } %}
+        {% set dict_female = {
+            'Hindi':      'महिला',
+            'Devanagari': 'महिला',
+            'Marathi':    'महिला',
+            'Gujarati':   'સ્ત્રી',
+            'Bengali':    'মহিলা',
+            'Tamil':      'பெண்',
+            'Telugu':     'స్త్రీ',
+            'Kannada':    'ಹೆಣ್ಣು',
+            'Malayalam':  'സ്ത്രീ',
+            'Punjabi':    'ਮਹਿਲਾ',
+            'Gurmukhi':   'ਮਹਿਲਾ',
+            'Odia':       'ମହିଳା',
+            'Oriya':      'ମହିଳା',
+            'Assamese':   'মহিলা',
+            'Urdu':       'عورت'
+        } %}
+        
+        {% set local_lang = language.name if language and language.name else 'Hindi' %}
+        {% set header_local = headers.get(local_lang) or headers.get(local_lang | title) or headers.get('Hindi') or 'भारत सरकार' %}
+        {% set label_aadhaar = dict_aadhaar.get(local_lang) or dict_aadhaar.get(local_lang | title) or dict_aadhaar.get('Hindi') or 'आधार' %}
+        {% set label_dob = dict_dob.get(local_lang) or dict_dob.get(local_lang | title) or dict_dob.get('Hindi') or 'जन्म तिथि' %}
+
+        {# ── Baal Aadhaar label dict ── #}
+        {% set dict_baal_label = {
+            'Hindi':      'बाल आधार',
+            'Devanagari': 'बाल आधार',
+            'Marathi':    'बाल आधार',
+            'Gujarati':   'બાળ આધાર',
+            'Bengali':    'বাল আধার',
+            'Tamil':      'பால் ஆதார்',
+            'Telugu':     'బాల్ ఆధార్',
+            'Kannada':    'ಬಾಲ್ ಆಧಾರ್',
+            'Malayalam':  'ബാൽ ആധാർ',
+            'Punjabi':    'ਬਾਲ ਆਧਾਰ',
+            'Gurmukhi':   'ਬਾਲ ਆਧਾਰ',
+            'Odia':       'ବାଲ ଆଧାର',
+            'Oriya':      'ବାଲ ଆଧାର',
+            'Assamese':   'বাল আধাৰ',
+            'Urdu':       'بال آدھار'
+        } %}
+        {# ── Baal Aadhaar 5-year validity notice (red, local language) ── #}
+        {% set dict_baal_notice = {
+            'Hindi':      'यह आधार कार्ड केवल ५ वर्ष की आयु तक ही मान्य है।',
+            'Devanagari': 'यह आधार कार्ड केवल ५ वर्ष की आयु तक ही मान्य है।',
+            'Marathi':    'हे आधार कार्ड केवळ ५ वर्षांपर्यंत वैध आहे.',
+            'Gujarati':   'આ આધારકાર્ડ માત્ર ૫ વર્ષ સુધી માન્ય છે.',
+            'Bengali':    'এই আধার কার্ড মাত্র ৫ বছর পর্যন্ত বৈধ।',
+            'Tamil':      'இந்த ஆதார் அட்டை 5 ஆண்டுகள் வரை மட்டுமே செல்லுபடியாகும்.',
+            'Telugu':     'ఈ ఆధార్ కార్డు కేవలం 5 సంవత్సరాల వరకు మాత్రమే చెల్లుతుంది.',
+            'Kannada':    'ಈ ಆಧಾರ್ ಕಾರ್ಡ್ ಕೇವಲ 5 ವರ್ಷಗಳವರೆಗೆ ಮಾನ್ಯವಾಗಿದೆ.',
+            'Malayalam':  'ഈ ആധാർ കാർഡ് 5 വർഷം വരെ മാത്രം സാധുതയുള്ളതാണ്.',
+            'Punjabi':    'ਇਹ ਆਧਾਰ ਕਾਰਡ ਕੇਵਲ 5 ਸਾਲਾਂ ਤੱਕ ਹੀ ਵੈਧ ਹੈ।',
+            'Gurmukhi':   'ਇਹ ਆਧਾਰ ਕਾਰਡ ਕੇਵਲ 5 ਸਾਲਾਂ ਤੱਕ ਹੀ ਵੈਧ ਹੈ।',
+            'Odia':       'ଏହି ଆଧାର କାର୍ଡ କେବଳ ୫ ବର୍ଷ ପର୍ଯ୍ୟନ୍ତ ବୈଧ।',
+            'Oriya':      'ଏହି ଆଧାର କାର୍ଡ କେବଳ ୫ ବର୍ଷ ପର୍ଯ୍ୟନ୍ତ ବୈଧ।',
+            'Assamese':   'এই আধাৰ কাৰ্ড কেৱল ৫ বছৰলৈকে বৈধ।',
+            'Urdu':       'یہ آدھار کارڈ صرف 5 سال تک درست ہے۔'
+        } %}
+        {% set baal_label = dict_baal_label.get(local_lang) or dict_baal_label.get(local_lang | title) or dict_baal_label.get('Hindi') or 'बाल आधार' %}
+        {% set baal_notice_local = dict_baal_notice.get(local_lang) or dict_baal_notice.get(local_lang | title) or dict_baal_notice.get('Hindi') or 'यह आधार कार्ड केवल ५ वर्ष की आयु तक ही मान्य है।' %}
+
+        {% set gen_raw = person.gender | upper if person.gender else '' %}
+        {% if gen_raw.startswith('M') or gen_raw == 'पु' or gen_raw == 'പു' or gen_raw == 'MALE' %}
+            {% set gen_eng = 'MALE' %}
+            {% set gen_loc = dict_male.get(local_lang) or dict_male.get(local_lang | title) or dict_male.get('Hindi') or 'पुरुष' %}
+        {% elif gen_raw.startswith('F') or gen_raw == 'म' or gen_raw == 'മ' or gen_raw == 'FEMALE' %}
+            {% set gen_eng = 'FEMALE' %}
+            {% set gen_loc = dict_female.get(local_lang) or dict_female.get(local_lang | title) or dict_female.get('Hindi') or 'महिला' %}
+        {% else %}
+            {% set gen_eng = gen_raw %}
+            {% set gen_loc = gen_raw %}
+        {% endif %}
+
+        <div class="header-area">
+            <div class="header-local">{{ header_local }}</div>
+            <div class="header-eng">Government of India</div>
+        </div>
+        
+        <div class="top-right-label {% if is_baal_aadhaar %}baal-top-right-label{% endif %}">{% if is_baal_aadhaar %}{{ baal_label }}{% else %}{{ label_aadhaar }}{% endif %}</div>
+        
+        <div class="photo-area">
+            {% if photo.available and photo_base64 %}
+                <img src="data:image/png;base64,{{ photo_base64 }}" class="photo">
+            {% else %}
+                <div class="photo-placeholder">Photo<br>Unavailable</div>
+            {% endif %}
+        </div>
+        
+        <div class="details-area">
+            {% if person.name_local and person.name_local != person.name %}
+            <div class="name-local">{{ person.name_local }}</div>
+            {% endif %}
+            <div class="name-eng">{{ person.name }}</div>
+            <div class="dob">{{ label_dob }} / DOB: {{ person.dob }}</div>
+            <div class="gender">{{ gen_loc }} / {{ gen_eng }}</div>
+            {% if contact.mobile %}
+            <div class="mobile-text">Mob: {{ contact.mobile }}</div>
+            {% endif %}
+        </div>
+        
+        {% set notice_locals = {
+            'Hindi':      'आधार पहचान का प्रमाण है, नागरिकता या जन्मतिथि का नहीं। इसका उपयोग सत्यापन (ऑनलाइन प्रमाणीकरण या क्यूआर कोड / ऑफलाइन एक्सएमएल स्कैनिंग) के साथ किया जाना चाहिए।',
+            'Devanagari': 'आधार पहचान का प्रमाण है, नागरिकता या जन्मतिथि का नहीं। इसका उपयोग सत्यापन (ऑनलाइन प्रमाणीकरण या क्यूआर कोड / ऑफलाइन एक्सएमएल स्कैनिंग) के साथ किया जाना चाहिए।',
+            'Marathi':    'आधार हे ओळखीचे प्रमाण आहे, नागरिकत्वाचे किंवा जन्मतारखेचे नाही. त्याचा वापर पडताळणीसह (ऑनलाइन प्रमाणीकरण किंवा क्यूआर कोड / ऑफलाइन एक्सएमएल स्कैनिंग) केला पाहिजे.',
+            'Gujarati':   'આધાર એ ઓળખની સાબિતી છે, નાગરિકતા કે જન્મતારીખની નથી. તેનો ઉપયોગ ચકાસણી (ઑનલાઇન પ્રમાણીકરણ, અથવા ક્યુઆર કોડ / ઑફલાઇન એક્સએમએલ સ્કેનિંગ) સાથે થવો જોઈએ.',
+            'Bengali':    'আধার পরিচয়ের প্রমাণ, नागरिकত্ব বা জন্ম তারিখের নয়। এটি যাচাইকরণের সাথে ব্যবহার করা উচিত (অনলাইন প্রামাণীকরণ বা কিউআর কোড / অফলাইন এক্সএমএল স্ক্যানিং)।',
+            'Tamil':      'ஆதார் என்பது அடையாளச் சான்று, குடியுரிமை அல்லது பிறந்த தேதிக்கான சான்றல்ல. ಇದು சரிபார்ப்புடன் பயன்படுத்தப்பட வேண்டும்.',
+            'Telugu':     'ఆధార్ గుర్తింపు నిరూపణ, పౌరసత్వం లేదా పుట్టిన తేదీ కాదు. దీనిని విచారణతో ఉపయోగించాలి.',
+            'Kannada':    'ಆಧಾರ್ ಗುರುತಿನ ಪುರಾವೆಯಾಗಿದೆ, ಪೌರತ್ವ ಅಥವಾ ಜನ್ಮ ದಿನಾಂಕದ್ದಲ್ಲ. ಇದನ್ನು ಪರಿಶೀಲನೆಯೊಂದಿಗೆ ಬಳಸಬೇಕು.',
+            'Malayalam':  'ആധാർ തിരിച്ചറിയൽ രേഖയാണ്, പൗരത്വത്തിന്റെയോ ജനനത്തീയതിയുടെയോ അല്ല. ഇത് പരിശോധനയോടെ ഉപയോഗിക്കണം.',
+            'Punjabi':    'ਆਧਾਰ ਪਛਾਣ ਦਾ ਸਬੂਤ ਹੈ, ਨਾਗਰਿਕਤਾ ਜਾਂ ਜਨਮ ਮਿਤੀ ਦਾ ਨਹੀਂ। ਇਸਦੀ ਵਰਤੋਂ ਤਸਦੀਕ ਨਾਲ ਕੀਤੀ ਜਾਣੀ ਚਾਹੀਦੀ ਹੈ।',
+            'Gurmukhi':   'ਆਧਾਰ ਪਛਾਣ ਦਾ ਸਬੂਤ ਹੈ, ਨਾਗਰਿਕਤਾ ਜਾਂ ਜਨਮ ਮਿਤੀ ਦਾ ਨਹੀਂ। ਇਸਦੀ ਵਰਤੋਂ ਤਸਦੀਕ ਨਾਲ ਕੀਤੀ ਜਾਣੀ ਚਾਹੀਦੀ ਹੈ।',
+            'Odia':       'ଆଧାର ପରିଚୟର ପ୍ରମାଣ, ନାଗରିକତା କିମ୍ବା ଜନ୍ମ ତାରିଖର ନୁହେଁ। ଏହା ଯାଞ୍ଚ ସହିତ ବ୍ୟବହୃତ ହେବା ଉଚିତ।',
+            'Oriya':      'ଆଧାର ପରିଚୟର ପ୍ରମାଣ, ନାଗରିକତା କିମ୍ବା ଜନ୍ମ ତାରିଖର ନୁହେଁ। ଏହା ଯାଞ୍ଚ ସହିତ ବ୍ୟବହୃତ ହେବା ଉଚିତ।',
+            'Assamese':   'আধাৰ পৰিচয়ৰ প্ৰমাণ, নাগৰিকত্ব বা জন্ম তাৰিখৰ ନହয়। ইয়াক সত্যাপনৰ সৈতে ব্যৱহাৰ কৰিব লাগে।',
+            'Urdu':       'آدھار شناخت کا ثبوت ہے، شہریت یا تاریخ پیدائش کا نہیں۔ اس کا استعمال تصدیق کے ساتھ کیا جانا چاہئے۔'
+        } %}
+        {% set notice_local = notice_locals.get(local_lang) or notice_locals.get(local_lang | title) or notice_locals.get('Hindi') or 'आधार पहचान का प्रमाण है, नागरिकता या जन्मतिथि का नहीं। इसका उपयोग सत्यापन (ऑनलाइन प्रमाणीकरण या क्यूआर कोड / ऑफलाइन एक्सएमएल स्कैनिंग) के साथ किया जाना चाहिए।' %}
+        
+        {% if is_baal_aadhaar %}
+        {# ── Baal Aadhaar: small red label above notice box top-left corner ── #}
+        <div class="baal-corner-label">{{ baal_label }} &nbsp;|&nbsp; Baal Aadhaar</div>
+        {% endif %}
+        <div class="notice-box {% if is_baal_aadhaar %}baal-notice-box{% endif %}">
+            {% if is_baal_aadhaar %}
+            {# ── Baal Aadhaar: 5-year validity warning in RED (local + English) ── #}
+            <div class="baal-validity-notice-local">{{ baal_notice_local }}</div>
+            <div class="baal-validity-notice-eng">Aadhaar is valid till 5 years of age only. Biometrics are required to be updated on attaining 5 years of age, failing which, it will be deactivated.</div>
+            {% else %}
+            <div class="notice-local">{{ notice_local }}</div>
+            <div class="notice-eng">Aadhaar is proof of identity, not of citizenship or date of birth. It should be used with verification (online authentication, or scanning of QR code / offline XML).</div>
+            {% endif %}
+        </div>
+        
+        <div class="aadhaar-number">{{ identity.aadhaar_number }}</div>
+        
+        {% if identity.enrolment_number %}
+        <div class="vid">VID : {{ identity.enrolment_number }}</div>
+        {% endif %}
+        
+        {% set taglines = {
+            'Hindi':      'मेरा <span class="tagline-red">आधार</span>, मेरी पहचान',
+            'Devanagari': 'मेरा <span class="tagline-red">आधार</span>, मेरी पहचान',
+            'Marathi':    'माझा <span class="tagline-red">आधार</span>, माझी ओळख',
+            'Gujarati':   'મારો <span class="tagline-red">આધાર</span>, મારી ઓળખ',
+            'Bengali':    'আমার <span class="tagline-red">আধার</span>, আমার পরিচয়',
+            'Tamil':      'என் <span class="tagline-red">ஆதார்</span>, என் அடையாளம்',
+            'Telugu':     'నా <span class="tagline-red">ఆధార్</span>, నా గుర్తింపు',
+            'Kannada':    'ನನ್ನ <span class="tagline-red">ಆಧಾರ್</span>, ನನ್ನ ಗುರುತು',
+            'Malayalam':  'എന്റെ <span class="tagline-red">ആധാർ</span>, എന്റെ തിരിച്ചറിയൽ',
+            'Punjabi':    'ਮੇਰਾ <span class="tagline-red">ਆਧਾਰ</span>, ਮੇਰੀ ਪਹਿਚਾਣ',
+            'Gurmukhi':   'ਮੇਰਾ <span class="tagline-red">ਆਧਾਰ</span>, ਮੇਰੀ ਪਹਿਚਾਣ',
+            'Odia':       'ମୋ <span class="tagline-red">ଆଧାର</span>, ମୋ ପରିଚୟ',
+            'Oriya':      'ମୋ <span class="tagline-red">ଆଧାର</span>, ମୋ ପରିଚୟ',
+            'Assamese':   'মোৰ <span class="tagline-red">আধাৰ</span>, মোৰ পৰিচয়',
+            'Urdu':       'میرا <span class="tagline-red">آدھار</span>، میری پہچان'
+        } %}
+        {% set tagline = taglines.get(local_lang) or taglines.get(local_lang | title) or taglines.get('Hindi') or 'मेरा <span class="tagline-red">आधार</span>, मेरी पहचान' %}
+        <div class="footer-tagline">{{ tagline | safe }}</div>
+    </div>
+</body>
+</html>

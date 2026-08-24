@@ -1,0 +1,204 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% set active_page = "dashboard" %}
+
+{% block content %}
+<!-- Welcome Banner -->
+<div class="welcome-banner">
+    <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.2); color: #6ee7b7; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; margin-bottom: 16px;">
+        <span class="live-dot" style="background: #34d399; box-shadow: none;"></span> CSC OPERATOR PORTAL ACTIVE
+    </div>
+    <h2>Welcome back, <span id="banner-user-name">User</span></h2>
+    <p>Instant 1-Click PVC Card Generation Engine. Extract & print government-spec PVC cards for citizens with zero formatting errors.</p>
+    <a href="/generator" class="btn-primary" style="margin-top: 24px; background: var(--success); color: white;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Print New PVC Card
+    </a>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="flex justify-between items-start">
+            <div class="stat-icon" style="background: var(--primary-light); color: var(--primary);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <span style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted);">TOTAL</span>
+        </div>
+        <div class="stat-label">TOTAL CARDS GENERATED</div>
+        <div class="stat-value" id="stat-total-cards">0</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="flex justify-between items-start">
+            <div class="stat-icon" style="background: #f3e8ff; color: #a855f7;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <span style="font-size: 0.7rem; font-weight: 700; color: var(--primary); background: var(--primary-light); padding: 2px 8px; border-radius: 12px;">Live</span>
+        </div>
+        <div class="stat-label">TODAY'S GENERATIONS</div>
+        <div class="stat-value" style="color: var(--primary);">0</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="flex justify-between items-start">
+            <div class="stat-icon" style="background: var(--success-light); color: var(--success);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            </div>
+            <a href="/subscription" style="font-size: 0.75rem; font-weight: 700; color: var(--primary);">Recharge</a>
+        </div>
+        <div class="stat-label">REMAINING BALANCE</div>
+        <div class="flex items-center gap-2">
+            <div class="stat-value" style="color: var(--success);" id="stat-wallet-balance">0.00</div>
+            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Credits</span>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="flex justify-between items-start">
+            <div class="stat-icon" style="background: #fce7f3; color: #ec4899;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <span style="font-size: 0.7rem; font-weight: 700; color: #c026d3; background: #fdf4ff; padding: 2px 8px; border-radius: 12px;">Trial Pack</span>
+        </div>
+        <div class="stat-label">PLAN VALIDITY</div>
+        <div class="stat-value" style="color: #c026d3;">Lifetime</div>
+    </div>
+</div>
+
+<!-- Services Grid -->
+<div id="services" class="section-header flex justify-between items-center" style="scroll-margin-top: 90px;">
+    <div>
+        <h3 class="section-title">Select PVC Card Service</h3>
+        <p class="text-muted" style="font-size: 0.85rem;">Click on any service card below to extract & generate standard PVC cards.</p>
+    </div>
+    <a href="#services" style="font-size: 0.85rem; font-weight: 600;">View All Services &rarr;</a>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 16px; margin-bottom: 32px;">
+    
+    <div class="service-card blue" onclick="window.location.href='/generator?type=aadhaar'" style="padding: 40px; border-radius: 24px; border: 1px solid var(--border); box-shadow: 0 12px 24px rgba(0,0,0,0.04); text-align: left; display: flex; align-items: center; gap: 24px; background: linear-gradient(145deg, #ffffff, #f8fafc); transition: transform 0.3s ease, box-shadow 0.3s ease;">
+        <div class="service-price-tag" style="border-radius: 0 24px 0 16px; font-size: 0.85rem; padding: 6px 16px; font-weight: 800;">₹0.95 / card</div>
+        <div class="service-icon" style="flex-shrink: 0; width: 88px; height: 88px; border-radius: 24px; margin: 0; box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div style="flex: 1;">
+            <h4 class="service-title" style="font-size: 1.6rem; font-weight: 800; color: #1e3a8a; margin-bottom: 6px;">Aadhaar PVC Card</h4>
+            <p class="service-desc" style="font-size: 1.05rem; color: #475569; font-weight: 500;">1-Click AI Extraction & Auto-Alignment</p>
+        </div>
+        <div style="margin-left: auto; color: var(--primary); opacity: 0.7; transition: opacity 0.2s;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+    </div>
+    
+    <div class="service-card green" onclick="window.location.href='/generator?type=ayushman'" style="padding: 40px; border-radius: 24px; border: 1px solid var(--border); box-shadow: 0 12px 24px rgba(0,0,0,0.04); text-align: left; display: flex; align-items: center; gap: 24px; background: linear-gradient(145deg, #ffffff, #f8fafc); transition: transform 0.3s ease, box-shadow 0.3s ease;">
+        <div class="service-price-tag" style="border-radius: 0 24px 0 16px; font-size: 0.85rem; padding: 6px 16px; font-weight: 800; background-color: var(--success);">₹0.95 / card</div>
+        <div class="service-icon" style="flex-shrink: 0; width: 88px; height: 88px; border-radius: 24px; margin: 0; box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
+        </div>
+        <div style="flex: 1;">
+            <h4 class="service-title" style="font-size: 1.6rem; font-weight: 800; color: #064e3b; margin-bottom: 6px;">Ayushman PVC Card</h4>
+            <p class="service-desc" style="font-size: 1.05rem; color: #475569; font-weight: 500;">PMJAY Health Card Professional Layout</p>
+        </div>
+        <div style="margin-left: auto; color: var(--success); opacity: 0.7; transition: opacity 0.2s;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+    </div>
+
+</div>
+
+<!-- Promotional Banner (Dynamic from Admin Panel) -->
+<div id="dynamic-promo-banner-container" style="margin-top: 32px;">
+    <!-- Default initial structure -->
+    <div id="dynamic-promo-banner" style="border-radius: var(--radius-lg); background: #0f172a; overflow: hidden; display: flex; align-items: center; justify-content: space-between; padding: 32px 40px; color: white;">
+        <div>
+            <div style="font-weight: 800; font-size: 2rem; font-style: italic; color: var(--warning); margin-bottom: 8px;">HIGH QUALITY PVC CARD</div>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <span style="background: var(--danger); padding: 4px 12px; font-weight: 800; font-size: 0.85rem; border-radius: 4px; transform: skewX(-10deg);">STARTING AT JUST</span>
+                <span style="font-size: 3rem; font-weight: 800;">₹ 0.95</span>
+            </div>
+        </div>
+        <div style="text-align: right;">
+            <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 1.5rem; margin-bottom: 8px;">Professional PVC Cards<br>Made Easy!</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    fetch('/api/user/me')
+        .then(res => res.json())
+        .then(data => {
+            if(data && data.name) {
+                const el = document.getElementById('banner-user-name');
+                if(el) el.textContent = data.name;
+            }
+        });
+        
+    fetch('/api/user/credits')
+        .then(res => res.json())
+        .then(data => {
+            if(data) {
+                const totalEl = document.getElementById('stat-total-cards');
+                if(totalEl && data.total_generated !== undefined) totalEl.textContent = data.total_generated;
+                
+                const balEl = document.getElementById('stat-wallet-balance');
+                if(balEl && data.wallet_balance !== undefined) balEl.textContent = parseFloat(data.wallet_balance).toFixed(2);
+            }
+        });
+
+    // Dynamic Admin Promo Banner Loader
+    fetch('/api/banner')
+        .then(res => res.json())
+        .then(banner => {
+            const container = document.getElementById('dynamic-promo-banner-container');
+            if (!container) return;
+            
+            if (!banner || !banner.enabled) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            
+            if (banner.banner_type === 'image' && banner.image_url) {
+                const targetLink = banner.link_url || '#';
+                container.innerHTML = `
+                    <a href="${targetLink}" style="display: block; text-decoration: none; border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); transition: transform 0.2s ease;">
+                        <img src="${banner.image_url}" alt="Promotional Offer" style="width: 100%; max-height: 220px; object-fit: cover; display: block; border-radius: var(--radius-lg);" />
+                    </a>
+                `;
+            } else {
+                const targetLink = banner.link_url || '#';
+                container.innerHTML = `
+                    <a href="${targetLink}" style="text-decoration: none; display: block; border-radius: var(--radius-lg); background: ${banner.bg_color || '#0f172a'}; overflow: hidden; padding: 32px 40px; color: ${banner.text_color || 'white'}; box-shadow: 0 10px 25px rgba(0,0,0,0.1); transition: transform 0.2s ease;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <div style="font-weight: 800; font-size: 2rem; font-style: italic; color: var(--warning); margin-bottom: 8px;">
+                                    ${banner.headline || 'HIGH QUALITY PVC CARD'}
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 16px;">
+                                    <span style="background: var(--danger); color: white; padding: 4px 12px; font-weight: 800; font-size: 0.85rem; border-radius: 4px; transform: skewX(-10deg);">
+                                        ${banner.badge_text || 'STARTING AT JUST'}
+                                    </span>
+                                    <span style="font-size: 3rem; font-weight: 800; color: white;">
+                                        ${banner.price_text || '₹ 0.95'}
+                                    </span>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 1.5rem; margin-bottom: 8px; color: white;">
+                                    ${banner.sub_text || 'Professional PVC Cards<br>Made Easy!'}
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                `;
+            }
+        })
+        .catch(err => console.log('Banner load skipped', err));
+</script>
+{% endblock %}

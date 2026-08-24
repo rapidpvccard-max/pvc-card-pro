@@ -1,0 +1,434 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;600;700;800;900&family=Noto+Sans+Gujarati:wght@400;600;700;800;900&family=Noto+Sans+Tamil:wght@400;600;700;800&family=Noto+Sans+Telugu:wght@400;600;700;800&family=Noto+Sans+Bengali:wght@400;600;700;800&family=Noto+Sans+Kannada:wght@400;600;700;800&family=Noto+Sans+Malayalam:wght@400;600;700;800&family=Noto+Sans+Gurmukhi:wght@400;600;700;800&family=Noto+Sans+Oriya:wght@400;600;700;800&display=swap');
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    width: 1016px;
+    height: 638px;
+    font-family: 'Noto Sans', 'Noto Sans Devanagari', 'Noto Sans Gujarati', 'Noto Sans Telugu', 'Noto Sans Tamil', 'Noto Sans Bengali', 'Noto Sans Kannada', 'Noto Sans Malayalam', 'Noto Sans Gurmukhi', 'Noto Sans Oriya', 'Nirmala UI', 'Shruti', 'Mangal', 'Gautami', 'Latha', 'Vrinda', 'Raavi', 'Kalinga', 'Kartika', 'Tunga', sans-serif;
+    background-color: transparent;
+    overflow: hidden;
+}
+
+.card {
+    width: 1016px;
+    height: 638px;
+    position: relative;
+    /* Background is injected via HTML inline style using the base64 template */
+}
+
+/* --------------------------------------------------
+   FRONT LAYOUT
+   -------------------------------------------------- */
+
+.header-area {
+    position: absolute;
+    top: 35px;
+    left: 210px;
+    width: 560px;
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+}
+
+.header-local {
+    font-size: 38px;
+    font-weight: bold;
+    color: #000;
+    text-align: center;
+    width: 100%;
+    line-height: 1.1;
+}
+
+.header-eng {
+    font-size: 34px;
+    font-weight: bold;
+    color: #000;
+    text-align: center;
+    width: 100%;
+    line-height: 1.1;
+}
+
+.back-header-local {
+    position: absolute;
+    top: 40px;
+    left: 202px;
+    font-size: 26.5px;
+    font-weight: bold;
+    color: #000000;
+    line-height: 1;
+    letter-spacing: 0.1px;
+    white-space: nowrap;
+    text-align: left;
+    z-index: 10;
+}
+
+.back-header-eng {
+    position: absolute;
+    top: 86px;
+    left: 202px;
+    font-size: 23.5px;
+    font-weight: bold;
+    color: #000000;
+    line-height: 1;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+    text-align: left;
+    z-index: 10;
+}
+
+.top-right-label {
+    position: absolute;
+    top: 129px;
+    right: 30px;
+    width: 220px;
+    text-align: center;
+    font-size: 32px;
+    font-weight: 800;
+    color: #e7040f;
+    letter-spacing: 0.8px;
+    line-height: 1;
+    z-index: 10;
+}
+
+.top-right-label-back {
+    top: 114px;
+    right: 34px;
+    width: 220px;
+    text-align: center;
+    font-size: 32px;
+    font-weight: 800;
+    color: #e7040f;
+}
+
+.photo-area {
+    position: absolute;
+    top: 155px;
+    left: 45px;
+    width: 235px;
+    height: 295px;
+    border: 3px solid #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    overflow: hidden;
+    z-index: 10;
+}
+
+.photo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center center;
+}
+
+.photo-placeholder {
+    color: #999;
+    font-size: 24px;
+    text-align: center;
+}
+
+.details-area {
+    position: absolute;
+    top: 155px;
+    left: 295px;
+    width: 675px;
+    z-index: 10;
+}
+
+.name-local {
+    font-size: 37px;
+    font-weight: bold;
+    color: #000;
+    margin-bottom: 5px;
+    line-height: 1.2;
+}
+
+.name-eng {
+    font-size: 33px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+    line-height: 1.2;
+}
+
+.dob,
+.gender,
+.mobile-text {
+    font-size: 28px;
+    color: #000;
+    margin-bottom: 8px;
+    line-height: 1.2;
+}
+
+.notice-box {
+    position: absolute;
+    top: 372px;
+    left: 295px;
+    width: 675px;
+    border: 2px solid #d32f2f;
+    border-radius: 6px;
+    padding: 8px 12px;
+    background-color: #ffffff;
+    z-index: 10;
+}
+
+.notice-local {
+    font-size: 14px;
+    font-weight: bold;
+    color: #000000;
+    line-height: 1.25;
+    margin-bottom: 4px;
+    text-align: left;
+}
+
+.notice-eng {
+    font-size: 13px;
+    font-weight: 500;
+    color: #222222;
+    line-height: 1.25;
+    text-align: left;
+}
+
+.aadhaar-number {
+    position: absolute;
+    bottom: 94px;
+    left: 0;
+    width: 1016px;
+    text-align: center;
+    font-size: 50px;
+    font-weight: bold;
+    letter-spacing: 5px;
+    color: #000;
+    line-height: 1;
+    z-index: 10;
+}
+
+.vid {
+    position: absolute;
+    bottom: 72px;
+    left: 0;
+    width: 1016px;
+    text-align: center;
+    font-size: 20px;
+    color: #333;
+    z-index: 10;
+}
+
+/* --------------------------------------------------
+   BACK LAYOUT
+   -------------------------------------------------- */
+
+.address-area {
+    position: absolute;
+    top: 130px;
+    left: 40px;
+    width: 610px;
+    max-height: 380px;
+    z-index: 10;
+}
+
+.address-label {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #000000;
+    line-height: 1.2;
+}
+
+.address-local {
+    font-size: 27px;
+    font-weight: 400;
+    margin-bottom: 18px;
+    line-height: 1.38;
+    color: #000000;
+    word-break: break-word;
+}
+
+.address-eng {
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1.38;
+    color: #000000;
+    word-break: break-word;
+}
+
+.qr-area {
+    position: absolute;
+    top: 165px;
+    right: 55px;
+    width: 295px;
+    height: 295px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid #ccc;
+    background-color: #fff;
+    border-radius: 10px;
+    z-index: 10;
+}
+
+.qr-code {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.qr-placeholder {
+    color: #999;
+    font-size: 28px;
+    text-align: center;
+}
+
+.aadhaar-number-back {
+    bottom: 120px;
+}
+
+.vid-back {
+    bottom: 96px;
+}
+
+/* --------------------------------------------------
+   BACK FOOTER CONTACTS
+   -------------------------------------------------- */
+
+.contact-phone {
+    position: absolute;
+    left: 118px;
+    top: 572px;
+    font-size: 23px;
+    font-weight: bold;
+    color: #000;
+    line-height: 1;
+    z-index: 10;
+}
+
+.contact-email {
+    position: absolute;
+    left: 352px;
+    top: 572px;
+    font-size: 22px;
+    font-weight: bold;
+    color: #000;
+    line-height: 1;
+    z-index: 10;
+}
+
+.contact-website {
+    position: absolute;
+    left: 722px;
+    top: 572px;
+    font-size: 22px;
+    font-weight: bold;
+    color: #000;
+    line-height: 1;
+    z-index: 10;
+}
+
+/* --------------------------------------------------
+   FOOTER TAGLINE
+   -------------------------------------------------- */
+
+.footer-tagline {
+    position: absolute;
+    bottom: 11px;
+    left: 0;
+    width: 1016px;
+    text-align: center;
+    font-size: 44px;
+    font-weight: bold;
+    color: #000000;
+    letter-spacing: 1px;
+    line-height: 1;
+    z-index: 100;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tagline-red {
+    color: #e7040f;
+}
+
+/* --------------------------------------------------
+   BAAL AADHAAR — Light Sky Blue theme overrides
+   (Applied when is_baal_aadhaar = True)
+   -------------------------------------------------- */
+
+/* ── Full-card semi-transparent light-blue overlay ── */
+/* z-index: 6 → sits BELOW all HTML elements (z-index: 10)
+   so Ashok Stambh, text, logos, orange/green stripes all show on top clearly */
+.baal-bg-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1016px;
+    height: 638px;
+    background-color: rgba(179, 217, 247, 0.22); /* Ultra-light soft sky blue tint */
+    z-index: 6;
+    pointer-events: none;
+}
+
+/* ── "Baal Aadhaar" label: RIGHT side, same level as mobile number, above notice box ── */
+.baal-corner-label {
+    position: absolute;
+    top: 338px;               /* same vertical level as mobile number line */
+    right: 34px;              /* right-aligned, above the notice box right edge */
+    font-size: 15px;
+    font-weight: 900;
+    color: #c62828;           /* deep red — prominent */
+    letter-spacing: 1px;
+    font-family: 'Noto Sans Gujarati', 'Noto Sans Devanagari', 'Noto Sans', sans-serif;
+    z-index: 25;
+    white-space: nowrap;
+    text-align: right;
+}
+
+/* ── Notice box: Baal Aadhaar uses RED border + light-red bg ── */
+/* (The original PDF shows the 5-year notice in red to draw attention) */
+.baal-notice-box {
+    border: 2px solid #c62828 !important;
+    background-color: #fff8f8 !important;
+}
+
+/* ── 5-year validity warning text — LOCAL LANGUAGE (bold red) ── */
+.baal-validity-notice-local {
+    font-size: 14px;
+    font-weight: 900;
+    color: #c62828;            /* Deep red — matches original PDF */
+    line-height: 1.3;
+    margin-bottom: 4px;
+    font-family: 'Noto Sans Gujarati', 'Noto Sans Devanagari', 'Noto Sans', sans-serif;
+}
+
+/* ── 5-year validity warning text — ENGLISH (bold red) ── */
+.baal-validity-notice-eng {
+    font-size: 13px;
+    font-weight: 700;
+    color: #c62828;            /* Deep red */
+    line-height: 1.3;
+}
+
+/* ── Top-right Aadhaar label: RED for Baal Aadhaar (matching original Aadhaar) ── */
+.baal-top-right-label {
+    color: #e7040f !important;
+}
+
+/* ── Footer tagline: blue word for Baal Aadhaar ── */
+.baal-tagline .tagline-red {
+    color: #0288D1;
+}
+
+/* ── Header text override for Baal Aadhaar — white text on blue ── */
+.baal-header-text {
+    color: #ffffff !important;
+}

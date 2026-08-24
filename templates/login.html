@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Rapid PVC</title>
+    <link rel="stylesheet" href="/static/css/rapid_theme.css?v=3">
+</head>
+<body class="auth-layout">
+    
+    <div class="auth-left">
+        <div style="max-width: 480px; margin: 0 auto;">
+            <div class="brand-logo" style="color: white; font-size: 1.5rem; margin-bottom: 24px;">
+                <div class="brand-icon" style="background: white; color: var(--primary);">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                </div>
+                Rapid PVC
+            </div>
+            
+            <div style="display: inline-block; background: rgba(16, 185, 129, 0.2); color: #6ee7b7; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; margin-bottom: 24px;">
+                <span class="live-dot" style="background: #34d399; display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 6px;"></span> 25,000+ CSC CENTERS CONNECTED
+            </div>
+            
+            <h1 style="color: white; font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 16px;">India's #1 PVC Card Generation Platform</h1>
+            
+            <p style="color: #cbd5e1; font-size: 1.1rem; line-height: 1.6; margin-bottom: 40px;">
+                Extract PDF data, auto-correct regional Indic language scripts using Google Gemini AI, and print government-spec PVC cards in under 30 seconds.
+            </p>
+            
+            <div style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: var(--radius-md); padding: 24px;">
+                <div class="flex gap-4 mb-4">
+                    <div style="color: #60a5fa;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 4px;">Google Gemini AI Neural Engine</div>
+                        <div style="font-size: 0.85rem; color: #cbd5e1;">Automatic Indic language spelling repair for 8+ scripts.</div>
+                    </div>
+                </div>
+                
+                <div class="flex gap-4">
+                    <div style="color: #34d399;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 4px;">100% Lifetime Validity Credits</div>
+                        <div style="font-size: 0.85rem; color: #cbd5e1;">Credits never expire. Top-up anytime with zero loss.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="auth-right">
+        <div class="auth-form-container">
+            <h2 style="font-size: 1.8rem; font-weight: 800; text-align: center; margin-bottom: 8px;">Welcome Back</h2>
+            <p class="text-muted" style="text-align: center; font-size: 0.95rem; margin-bottom: 32px;">Please enter your credentials to access your operator dashboard.</p>
+            
+            <!-- Error message if redirected with error -->
+            <div id="error-alert" style="display: none; background: #fef2f2; border: 1.5px solid #f87171; border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 20px; color: #991b1b; font-size: 0.88rem; font-weight: 600; text-align: center;">
+                <span id="error-alert-text"></span>
+            </div>
+
+            <a href="/auth/google/login" class="btn-outline" style="width: 100%; justify-content: center; color: var(--text-main); border-color: var(--border); margin-bottom: 24px; padding: 12px; display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 600; background: white; border-radius: var(--radius-sm); transition: var(--transition); box-shadow: var(--shadow-sm);">
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
+                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                </svg>
+                Continue with Google
+            </a>
+            
+            <div style="display: flex; align-items: center; margin-bottom: 24px;">
+                <div style="flex: 1; height: 1px; background: var(--border);"></div>
+                <div style="padding: 0 16px; font-size: 0.75rem; font-weight: 700; color: var(--text-light); text-transform: uppercase;">OR SIGN IN WITH EMAIL</div>
+                <div style="flex: 1; height: 1px; background: var(--border);"></div>
+            </div>
+            
+            <form id="login-form">
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address</label>
+                    <div style="position: relative;">
+                        <span style="position: absolute; left: 14px; top: 12px; color: var(--text-light);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"/></svg>
+                        </span>
+                        <input type="email" id="email" name="email" class="form-input" style="padding-left: 44px;" placeholder="officialoperator@gmail.com" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="form-label" for="password" style="margin-bottom: 0;">Password</label>
+                        <a href="/forgot-password" style="font-size: 0.8rem; font-weight: 600; color: var(--primary); text-decoration: none;">Forgot Password?</a>
+                    </div>
+                    <div style="position: relative;">
+                        <span style="position: absolute; left: 14px; top: 12px; color: var(--text-light);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        </span>
+                        <input type="password" id="password" name="password" class="form-input" style="padding-left: 44px;" placeholder="••••••••" required>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-2 mb-6" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">
+                    <input type="checkbox" id="remember" style="width: 16px; height: 16px; accent-color: var(--primary);">
+                    <label for="remember">Remember me for 30 days</label>
+                </div>
+                
+                <button type="submit" id="btn-login-submit" class="btn-primary" style="width: 100%; justify-content: center; padding: 14px; font-size: 1rem;">
+                    Sign In to Account &rarr;
+                </button>
+            </form>
+            
+            <p style="text-align: center; margin-top: 32px; font-size: 0.9rem; color: var(--text-muted);">
+                Don't have an operator account? <a href="/register" style="font-weight: 700;">Create Account</a>
+            </p>
+            
+            <div style="text-align: center; margin-top: 40px; font-size: 0.75rem; font-weight: 600; color: var(--success); display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                ISO 27001 Encrypted & Privacy Compliant System
+            </div>
+            
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+        const errBox = document.getElementById('error-alert');
+        const errText = document.getElementById('error-alert-text');
+        
+        if (error && errBox && errText) {
+            errText.textContent = error;
+            errBox.style.display = 'block';
+        }
+
+        const loginForm = document.getElementById('login-form');
+        const submitBtn = document.getElementById('btn-login-submit');
+
+        if (loginForm) {
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (errBox) errBox.style.display = 'none';
+                
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
+
+                if (!email || !password) return;
+
+                const origBtnText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = 'Signing In...';
+
+                try {
+                    const res = await fetch('/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+
+                    const data = await res.json().catch(() => ({}));
+
+                    if (!res.ok) {
+                        throw new Error(data.detail || 'Incorrect email or password');
+                    }
+
+                    // Successful login
+                    if (data.user && data.user.is_admin) {
+                        window.location.href = '/admin';
+                    } else {
+                        window.location.href = '/dashboard';
+                    }
+                } catch (err) {
+                    if (errBox && errText) {
+                        errText.textContent = err.message || 'Login failed. Please try again.';
+                        errBox.style.display = 'block';
+                    }
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = origBtnText;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

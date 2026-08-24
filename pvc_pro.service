@@ -1,0 +1,15 @@
+[Unit]
+Description=Gunicorn daemon for PVC Card Pro FastAPI Application
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/path/to/PVC_Python_Tool
+Environment="PATH=/path/to/PVC_Python_Tool/venv/bin"
+EnvironmentFile=/path/to/PVC_Python_Tool/.env
+# Use Gunicorn with Uvicorn workers for production concurrency
+ExecStart=/path/to/PVC_Python_Tool/venv/bin/gunicorn app:app -w 4 -k uvicorn.workers.UvicornWorker --bind 127.0.0.1:8000
+
+[Install]
+WantedBy=multi-user.target

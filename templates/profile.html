@@ -1,0 +1,228 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}My Profile{% endblock %}
+
+{% set active_page = "profile" %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center" style="margin-bottom: 24px;">
+    <div>
+        <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--text-main);">My Account & Profile</h2>
+        <p class="text-muted" style="font-size: 0.9rem;">Manage your personal profile, credentials, and wallet settings.</p>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start;">
+    
+    <!-- Left Column: User Summary & Wallet Info -->
+    <div style="display: flex; flex-direction: column; gap: 24px;">
+        
+        <!-- User Badge Card -->
+        <div class="card" style="padding: 32px; text-align: center; position: relative; overflow: hidden;">
+            <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #3b82f6); color: white; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 800; margin: 0 auto 16px; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);" id="profile-avatar-big">
+                U
+            </div>
+            <h3 id="profile-name-display" style="font-size: 1.3rem; font-weight: 800; margin-bottom: 4px;">User</h3>
+            <p id="profile-email-display" class="text-muted" style="font-size: 0.9rem; margin-bottom: 16px;">user@example.com</p>
+            
+            <div style="display: flex; justify-content: center; gap: 8px;">
+                <span style="background: var(--success-light); color: var(--success); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">
+                    Active Account
+                </span>
+                <span style="background: #fdf4ff; color: #c026d3; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">
+                    Pro Pack (Lifetime)
+                </span>
+            </div>
+        </div>
+
+        <!-- Wallet Card -->
+        <div class="card" style="padding: 24px; background: linear-gradient(145deg, #ffffff, #f8fafc);">
+            <div class="flex justify-between items-center" style="margin-bottom: 16px;">
+                <div>
+                    <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Wallet Balance</div>
+                    <div id="profile-wallet-balance" style="font-size: 2rem; font-weight: 800; color: var(--success); font-family: 'Plus Jakarta Sans', sans-serif;">₹0.00</div>
+                </div>
+                <a href="/subscription" class="btn-primary" style="padding: 10px 20px; font-size: 0.9rem;">
+                    Recharge Balance
+                </a>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 12px;">
+                Generation rate: <strong>₹0.95</strong> per standard PVC card.
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Right Column: Edit Forms -->
+    <div style="display: flex; flex-direction: column; gap: 24px;">
+        
+        <!-- Update Profile Details -->
+        <div class="card" style="padding: 28px;">
+            <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; color: var(--text-main);">Update Personal Details</h4>
+            
+            <form id="form-update-profile" onsubmit="handleUpdateProfile(event)">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" id="input-profile-name" class="form-input" required placeholder="Enter full name">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Email Address (Read-only)</label>
+                    <input type="email" id="input-profile-email" class="form-input" disabled style="background-color: #f1f5f9; cursor: not-allowed;">
+                </div>
+
+                <div id="profile-msg" style="display: none; margin-bottom: 16px; font-size: 0.85rem; font-weight: 600; padding: 10px; border-radius: var(--radius-sm);"></div>
+
+                <button type="submit" class="btn-primary" id="btn-save-profile" style="padding: 10px 24px;">
+                    Save Profile Changes
+                </button>
+            </form>
+        </div>
+
+        <!-- Change Password -->
+        <div class="card" style="padding: 28px;">
+            <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; color: var(--text-main);">Change Security Password</h4>
+            
+            <form id="form-change-password" onsubmit="handleChangePassword(event)">
+                <div class="form-group">
+                    <label class="form-label">Current Password</label>
+                    <input type="password" id="input-old-password" class="form-input" required placeholder="Enter current password">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">New Password (Min 6 chars)</label>
+                    <input type="password" id="input-new-password" class="form-input" required placeholder="Enter new password">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Confirm New Password</label>
+                    <input type="password" id="input-confirm-password" class="form-input" required placeholder="Re-enter new password">
+                </div>
+
+                <div id="password-msg" style="display: none; margin-bottom: 16px; font-size: 0.85rem; font-weight: 600; padding: 10px; border-radius: var(--radius-sm);"></div>
+
+                <button type="submit" class="btn-outline" id="btn-save-password" style="padding: 10px 24px; border-color: var(--primary);">
+                    Update Password
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Load initial user data
+    fetch('/api/user/me')
+        .then(res => res.json())
+        .then(user => {
+            if(user) {
+                document.getElementById('profile-name-display').textContent = user.name || 'User';
+                document.getElementById('profile-email-display').textContent = user.email || '';
+                document.getElementById('input-profile-name').value = user.name || '';
+                document.getElementById('input-profile-email').value = user.email || '';
+                if(user.name) {
+                    document.getElementById('profile-avatar-big').textContent = user.name.charAt(0).toUpperCase();
+                }
+            }
+        });
+
+    fetch('/api/user/credits')
+        .then(res => res.json())
+        .then(credits => {
+            if(credits && credits.wallet_balance !== undefined) {
+                document.getElementById('profile-wallet-balance').textContent = '₹' + parseFloat(credits.wallet_balance).toFixed(2);
+            }
+        });
+
+    async function handleUpdateProfile(e) {
+        e.preventDefault();
+        const name = document.getElementById('input-profile-name').value;
+        const msgEl = document.getElementById('profile-msg');
+        const btn = document.getElementById('btn-save-profile');
+        
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+        msgEl.style.display = 'none';
+
+        try {
+            const res = await fetch('/api/user/update-profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                msgEl.style.display = 'block';
+                msgEl.style.background = 'var(--success-light)';
+                msgEl.style.color = '#065f46';
+                msgEl.textContent = 'Profile updated successfully!';
+                document.getElementById('profile-name-display').textContent = name;
+                document.getElementById('sidebar-user-name').textContent = name;
+                document.getElementById('profile-avatar-big').textContent = name.charAt(0).toUpperCase();
+                document.getElementById('header-user-initial').textContent = name.charAt(0).toUpperCase();
+            } else {
+                throw new Error(data.detail || 'Failed to update profile');
+            }
+        } catch (err) {
+            msgEl.style.display = 'block';
+            msgEl.style.background = '#fef2f2';
+            msgEl.style.color = '#dc2626';
+            msgEl.textContent = err.message;
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Save Profile Changes';
+        }
+    }
+
+    async function handleChangePassword(e) {
+        e.preventDefault();
+        const old_password = document.getElementById('input-old-password').value;
+        const new_password = document.getElementById('input-new-password').value;
+        const confirm_password = document.getElementById('input-confirm-password').value;
+        const msgEl = document.getElementById('password-msg');
+        const btn = document.getElementById('btn-save-password');
+
+        msgEl.style.display = 'none';
+
+        if (new_password !== confirm_password) {
+            msgEl.style.display = 'block';
+            msgEl.style.background = '#fef2f2';
+            msgEl.style.color = '#dc2626';
+            msgEl.textContent = 'New passwords do not match!';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Updating...';
+
+        try {
+            const res = await fetch('/api/user/change-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ old_password, new_password })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                msgEl.style.display = 'block';
+                msgEl.style.background = 'var(--success-light)';
+                msgEl.style.color = '#065f46';
+                msgEl.textContent = 'Password changed successfully!';
+                document.getElementById('form-change-password').reset();
+            } else {
+                throw new Error(data.detail || 'Failed to change password');
+            }
+        } catch (err) {
+            msgEl.style.display = 'block';
+            msgEl.style.background = '#fef2f2';
+            msgEl.style.color = '#dc2626';
+            msgEl.textContent = err.message;
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Update Password';
+        }
+    }
+</script>
+{% endblock %}

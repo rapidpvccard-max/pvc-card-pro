@@ -1,0 +1,21 @@
+/* Ayushman Card CSS Stylesheet */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Noto+Sans+Gujarati:wght@400;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;600;700;800;900&display=swap');
+
+:root {
+    --card-width: 1016px;
+    --card-height: 638px;
+    --orange-primary: #ef6c00;
+    --orange-dark: #d84315;
+    --green-primary: #1b5e20;
+    --text-black: #111827;
+}
+
+body {
+    width: var(--card-width);
+    height: var(--card-height);
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+    font-family: 'Plus Jakarta Sans', 'Noto Sans Gujarati', 'Noto Sans Devanagari', sans-serif;
+    -webkit-font-smoothing: antialiased;
+}

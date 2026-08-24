@@ -1,0 +1,221 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Generate Card{% endblock %}
+
+{% set active_page = "generator" %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center">
+    <div>
+        <h2 id="hero-title" style="font-size: 1.5rem; font-weight: 800;">Card Generator Workspace</h2>
+        <p id="hero-desc" class="text-muted" style="font-size: 0.9rem;">Upload your PDF to securely extract and format your PVC card instantly.</p>
+    </div>
+</div>
+
+<div class="flex" style="gap: 24px; align-items: flex-start;">
+    
+    <!-- Left Stepper (Workflow) -->
+    <div class="card" style="width: 240px; flex-shrink: 0; padding: 20px;">
+        <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px;">Workflow Status</h4>
+        <div style="display: flex; flex-direction: column; gap: 16px;" id="workflow-indicator">
+            <div class="flex items-center gap-3" id="wf-step-1">
+                <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; box-shadow: 0 0 10px rgba(37, 99, 235, 0.3);" class="step-icon">1</div>
+                <div>
+                    <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-main);">Upload</div>
+                </div>
+            </div>
+            
+            <div style="width: 2px; height: 20px; background: var(--border); margin-left: 13px;"></div>
+            
+            <div class="flex items-center gap-3" id="wf-step-2">
+                <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--border); color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem;" class="step-icon">2</div>
+                <div>
+                    <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Processing</div>
+                </div>
+            </div>
+            
+            <div style="width: 2px; height: 20px; background: var(--border); margin-left: 13px;"></div>
+            
+            <div class="flex items-center gap-3" id="wf-step-3">
+                <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--border); color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem;" class="step-icon">3</div>
+                <div>
+                    <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">PVC Layout</div>
+                </div>
+            </div>
+            
+            <div style="width: 2px; height: 20px; background: var(--border); margin-left: 13px;"></div>
+            
+            <div class="flex items-center gap-3" id="wf-step-4">
+                <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--border); color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem;" class="step-icon">4</div>
+                <div>
+                    <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Ready</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Main Content -->
+    <div class="card" style="flex: 1; padding: 32px;" id="main-card">
+        
+        <!-- Upload Section -->
+        <div id="upload-section">
+            <form id="upload-form">
+                <input type="hidden" name="document_type" id="selected-document-type" value="aadhaar">
+                
+                <label id="file-drop-area" for="pdf-file" style="display: block; width: 100%; border: 2px dashed #cbd5e1; border-radius: var(--radius-md); padding: 40px 20px; text-align: center; cursor: pointer; transition: var(--transition); background-color: #f8fafc;">
+                    <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    </div>
+                    <div style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 8px;" id="upload-zone-text">Upload Source PDF</div>
+                    <div style="font-size: 0.9rem; color: var(--text-muted);">Drag & drop your file here or <span style="color: var(--primary); font-weight: 600;">Browse</span></div>
+                    <div style="font-size: 0.75rem; color: var(--text-light); margin-top: 8px;">Max size: 10MB</div>
+                    <input type="file" id="pdf-file" class="form-input" name="file" accept="application/pdf" required style="display:none;">
+                </label>
+
+                <div id="file-info" style="display: none; align-items: center; justify-content: space-between; padding: 16px; background: var(--success-light); border: 1px solid #a7f3d0; border-radius: var(--radius-sm); margin-top: 16px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <svg width="24" height="24" style="color: var(--success);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        <div>
+                            <div id="filename-display" style="color: #064e3b; font-weight: 600; font-size: 0.9rem;">filename.pdf</div>
+                            <div id="filesize-display" style="color: #047857; font-size: 0.8rem;">1.2 MB</div>
+                        </div>
+                    </div>
+                    <button type="button" id="btn-remove-file" style="background: none; border: none; color: #047857; cursor: pointer;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+
+                <!-- Instant High-Visibility Password Error Box (Placed ABOVE password input) -->
+                <div id="password-error-box" class="password-error-card" style="display: none; margin-top: 20px; margin-bottom: 12px;">
+                    <div style="display: flex; align-items: flex-start; gap: 12px;">
+                        <div style="flex-shrink: 0; color: #dc2626; margin-top: 2px;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        </div>
+                        <div style="flex: 1;">
+                            <div id="password-error-title" style="font-weight: 800; font-size: 1rem; color: #b91c1c; margin-bottom: 4px;">
+                                Galat Password! Kripya Sahi Password Dalein
+                            </div>
+                            <div id="password-error-desc" style="font-size: 0.86rem; color: #7f1d1d; line-height: 1.45; font-weight: 500;">
+                                PDF unlock nahi hui. Kripya sahi password dalkar dobara try karein.
+                            </div>
+                            <div id="password-hint-guide" style="margin-top: 10px; font-size: 0.82rem; background: rgba(255, 255, 255, 0.9); border: 1.5px dashed #f87171; padding: 10px 14px; border-radius: 8px; color: #991b1b;">
+                                💡 <strong>Aadhaar Password Format:</strong> Naam ke pehle 4 Akshar CAPITAL me + Janm ka Saal (YYYY).<br>
+                                <span style="display: inline-block; margin-top: 4px;">Udaharan: <em>SURESH (1995) &rarr;</em> <strong style="font-family: monospace; font-size: 0.95rem; letter-spacing: 1px; background: #fee2e2; padding: 3px 8px; border-radius: 4px; color: #b91c1c; border: 1px solid #fca5a5;">SURE1995</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" id="password-group-container" style="margin-top: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label class="form-label" id="password-field-label" style="text-transform: none; font-size: 0.85rem; margin-bottom: 0; font-weight: 700;">PDF Password (Optional)</label>
+                        <span id="password-hint-pill" style="font-size: 0.72rem; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; padding: 2px 8px; border-radius: 12px; font-weight: 600;">
+                            Aadhaar Hint: NAME4 + YOB (e.g. SURE1995)
+                        </span>
+                    </div>
+                    <div style="position: relative;" id="password-input-wrapper">
+                        <input type="password" id="pdf-password" name="password" class="form-input" placeholder="Enter password if document is protected" style="padding-right: 44px; transition: var(--transition);">
+                        <span onclick="togglePassword()" style="position: absolute; right: 14px; top: 12px; cursor: pointer; color: var(--text-light); user-select: none;" id="pw-toggle-btn" title="Toggle password view">
+                            <svg id="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary" id="upload-btn" disabled style="width: 100%; margin-top: 16px; justify-content: center; padding: 14px; font-size: 1rem;">
+                    Generate PVC Card (-₹0.95)
+                </button>
+            </form>
+        </div>
+
+        <!-- Processing Section -->
+        <div id="processing-section" style="display: none; text-align: center; padding: 60px 20px;">
+            <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 24px;">
+                <div style="position: absolute; inset: 0; border: 4px solid var(--primary-light); border-radius: 50%;"></div>
+                <div style="position: absolute; inset: 0; border: 4px solid var(--primary); border-radius: 50%; border-right-color: transparent; border-top-color: transparent; animation: spin 1s linear infinite;"></div>
+                <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                </div>
+            </div>
+            <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 8px;">Processing PVC Card...</h3>
+            <p class="text-muted" style="font-size: 0.95rem; max-width: 400px; margin: 0 auto;">Our Google Gemini AI is currently extracting and perfectly aligning your card. This takes just a few seconds.</p>
+            <style>
+                @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+            </style>
+        </div>
+
+        <!-- Result Section -->
+        <div id="result-section" style="display: none; padding-top: 16px;">
+            <div style="text-align: center; margin-bottom: 32px;">
+                <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; background: var(--success-light); color: var(--success); border-radius: 50%; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <h3 style="font-size: 1.8rem; font-weight: 800; color: var(--text-main);">PVC Card Ready</h3>
+                <p class="text-muted" style="font-size: 0.95rem;">High quality 300 DPI layout generated successfully.</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
+                <div style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; text-align: center; background: white; box-shadow: var(--shadow-sm);">
+                    <div style="font-size: 0.8rem; font-weight: 800; color: var(--text-muted); margin-bottom: 16px; letter-spacing: 1px;">FRONT PREVIEW</div>
+                    <div style="background: #f8fafc; padding: 12px; border-radius: var(--radius-sm); margin-bottom: 20px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; min-height: 180px;">
+                        <img id="front-preview" src="" alt="Front Preview" style="max-width: 100%; border-radius: 6px; box-shadow: 0 8px 16px rgba(0,0,0,0.1);">
+                    </div>
+                    <button id="btn-dl-front" class="btn-outline" style="width: 100%; justify-content: center; font-size: 0.9rem; padding: 10px; border-color: var(--border);">Download Front</button>
+                </div>
+                
+                <div style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; text-align: center; background: white; box-shadow: var(--shadow-sm);">
+                    <div style="font-size: 0.8rem; font-weight: 800; color: var(--text-muted); margin-bottom: 16px; letter-spacing: 1px;">BACK PREVIEW</div>
+                    <div style="background: #f8fafc; padding: 12px; border-radius: var(--radius-sm); margin-bottom: 20px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; min-height: 180px;">
+                        <img id="back-preview" src="" alt="Back Preview" style="max-width: 100%; border-radius: 6px; box-shadow: 0 8px 16px rgba(0,0,0,0.1);">
+                    </div>
+                    <button id="btn-dl-back" class="btn-outline" style="width: 100%; justify-content: center; font-size: 0.9rem; padding: 10px; border-color: var(--border);">Download Back</button>
+                </div>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%); border: 1px solid #bfdbfe; border-radius: var(--radius-lg); padding: 32px; text-align: center; box-shadow: inset 0 2px 10px rgba(255,255,255,0.5);">
+                <div style="display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: white; color: var(--primary); border-radius: 50%; margin-bottom: 16px; box-shadow: var(--shadow-sm);">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                </div>
+                <h4 style="font-size: 1.25rem; font-weight: 800; color: #1e3a8a; margin-bottom: 8px;">A4 Print Ready PDF</h4>
+                <p style="font-size: 0.95rem; color: #475569; margin-bottom: 24px; max-width: 400px; margin-left: auto; margin-right: auto;">Perfectly aligned for A4 photo paper. Just print with 100% scale and mirror options.</p>
+                
+                <button id="btn-dl-a4" class="btn-primary" style="margin: 0 auto; min-width: 280px; justify-content: center; padding: 16px; font-size: 1.05rem; box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);">
+                    Download A4 Print File
+                </button>
+            </div>
+            
+            <div style="margin-top: 32px; text-align: center;">
+                <button id="btn-start-over" class="btn-outline" style="border: none; color: var(--text-muted); font-weight: 600;">&larr; Generate another card</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="toast-container" style="position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;"></div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function togglePassword() {
+        const input = document.getElementById('pdf-password');
+        input.type = input.type === 'password' ? 'text' : 'password';
+    }
+    
+    // Check URL params for document type selection
+    window.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const type = urlParams.get('type');
+        if (type) {
+            if (typeof setDocumentType === 'function') {
+                setDocumentType(type);
+            }
+        }
+    });
+</script>
+<script src="/static/js/app.js?v=9"></script>
+{% endblock %}
+
+
+
+
+

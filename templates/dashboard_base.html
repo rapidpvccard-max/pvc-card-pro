@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard{% endblock %} - Rapid PVC</title>
+    <link rel="stylesheet" href="/static/css/rapid_theme.css?v=7">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="dashboard-layout">
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="/dashboard" class="brand-logo">
+                <div class="brand-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                </div>
+                Rapid PVC
+            </a>
+        </div>
+        
+        <a href="/profile" style="text-decoration: none; color: inherit; display: block;" title="View Profile">
+            <div class="user-profile-widget" style="transition: var(--transition); cursor: pointer;">
+                <div class="flex items-center gap-3">
+                    <div class="avatar" style="width: 32px; height: 32px; background: rgba(255,255,255,0.1); color: #fff;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                    <div>
+                        <div class="name" id="sidebar-user-name">User</div>
+                        <div class="plan">Pro Pack</div>
+                    </div>
+                </div>
+                <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 4px;">Validity: Lifetime</div>
+            </div>
+        </a>
+
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item {% if active_page == 'dashboard' %}active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                Dashboard
+            </a>
+            <a href="/dashboard#services" class="nav-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                Services
+            </a>
+            <a href="/generator" class="nav-item {% if active_page == 'generator' %}active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                Generate Card
+            </a>
+            <a href="/history" class="nav-item {% if active_page == 'history' %}active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                History
+            </a>
+            <a href="/subscription" class="nav-item {% if active_page == 'subscription' %}active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                Subscription
+            </a>
+            <a href="/profile" class="nav-item {% if active_page == 'profile' %}active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Profile
+            </a>
+        </nav>
+        
+        <div style="padding: 16px;">
+            <button onclick="logout()" class="btn-primary" style="width: 100%; justify-content: center; background-color: var(--primary-light); color: var(--primary);">
+                Logout
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="header-actions">
+                <div style="display: flex; align-items: center; gap: 8px; background: #fdf4ff; color: #c026d3; padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 0.8rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    AI Neural Core Active
+                </div>
+                
+                <div class="credit-badge">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                    <span id="header-wallet-balance">...</span> Credits
+                    <a href="/subscription" style="background: #059669; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.65rem; margin-left: 4px; text-decoration: none;">Topup</a>
+                </div>
+                
+                <a href="/profile" title="View Profile" style="text-decoration: none;">
+                    <div class="avatar" id="header-user-initial" style="cursor: pointer; transition: transform 0.2s;">U</div>
+                </a>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <div class="page-container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <script>
+        // Fetch credits and user profile on load
+        fetch('/api/user/me')
+            .then(res => res.json())
+            .then(data => {
+                if(data && data.name) {
+                    const el = document.getElementById('sidebar-user-name');
+                    if(el) el.textContent = data.name;
+                    const init = document.getElementById('header-user-initial');
+                    if(init) init.textContent = data.name.charAt(0).toUpperCase();
+                }
+            }).catch(e => console.error(e));
+
+        fetch('/api/user/credits')
+            .then(res => res.json())
+            .then(data => {
+                const el = document.getElementById('header-wallet-balance');
+                if(el && data.wallet_balance !== undefined) {
+                    el.textContent = '₹' + parseFloat(data.wallet_balance).toFixed(2);
+                }
+            }).catch(e => console.error(e));
+            
+        function logout() {
+            fetch('/auth/logout', { method: 'POST' }).then(() => window.location.href = '/login');
+        }
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
