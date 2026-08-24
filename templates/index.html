@@ -4,89 +4,542 @@
 
 {% set active_page = "generator" %}
 
+{% block extra_head %}
+<style>
+    /* =========================================================
+       LUXURY CARD GENERATOR WORKSPACE STYLES
+       ========================================================= */
+
+    /* Document Type Selector Tabs */
+    .doc-type-selector-bar {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+
+    .doc-type-btn {
+        flex: 1;
+        min-width: 260px;
+        background: #ffffff;
+        border: 2px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        text-align: left;
+        position: relative;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+
+    .doc-type-btn:hover {
+        border-color: #cbd5e1;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+    }
+
+    .doc-type-btn.active.aadhaar-tab {
+        border-color: #2563eb;
+        background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+        box-shadow: 0 10px 20px -3px rgba(37, 99, 235, 0.15);
+    }
+
+    .doc-type-btn.active.ayushman-tab {
+        border-color: #10b981;
+        background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 100%);
+        box-shadow: 0 10px 20px -3px rgba(16, 185, 129, 0.15);
+    }
+
+    .doc-tab-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+    }
+
+    .doc-type-btn.aadhaar-tab .doc-tab-icon {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .doc-type-btn.active.aadhaar-tab .doc-tab-icon {
+        background: #2563eb;
+        color: #ffffff;
+        box-shadow: 0 6px 14px rgba(37, 99, 235, 0.35);
+    }
+
+    .doc-type-btn.ayushman-tab .doc-tab-icon {
+        background: #ecfdf5;
+        color: #059669;
+    }
+
+    .doc-type-btn.active.ayushman-tab .doc-tab-icon {
+        background: #10b981;
+        color: #ffffff;
+        box-shadow: 0 6px 14px rgba(16, 185, 129, 0.35);
+    }
+
+    .doc-tab-content {
+        flex: 1;
+    }
+
+    .doc-tab-title {
+        font-weight: 800;
+        font-size: 1.05rem;
+        color: #0f172a;
+        margin-bottom: 2px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .doc-tab-subtitle {
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+
+    .doc-tab-badge {
+        font-size: 0.72rem;
+        font-weight: 800;
+        padding: 3px 8px;
+        border-radius: 12px;
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .doc-type-btn.active.aadhaar-tab .doc-tab-badge {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .doc-type-btn.active.ayushman-tab .doc-tab-badge {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+    /* Generator Layout Grid */
+    .generator-workspace-grid {
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        gap: 24px;
+        align-items: flex-start;
+    }
+
+    /* Left Sidebar Workflow Card */
+    .workflow-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 22px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .workflow-header {
+        font-size: 0.72rem;
+        font-weight: 800;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.75px;
+        margin-bottom: 18px;
+    }
+
+    .workflow-step {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        position: relative;
+    }
+
+    .step-icon-circle {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 0.82rem;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .workflow-step.active .step-icon-circle {
+        background: #2563eb;
+        color: #ffffff;
+        box-shadow: 0 0 12px rgba(37, 99, 235, 0.4);
+        border-color: #93c5fd;
+    }
+
+    .workflow-step.completed .step-icon-circle {
+        background: #10b981;
+        color: #ffffff;
+        box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+    }
+
+    .step-text-title {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #64748b;
+        line-height: 1.2;
+    }
+
+    .workflow-step.active .step-text-title {
+        color: #0f172a;
+        font-weight: 800;
+    }
+
+    .step-text-sub {
+        font-size: 0.72rem;
+        color: #94a3b8;
+    }
+
+    .step-connector-line {
+        width: 2px;
+        height: 18px;
+        background: #e2e8f0;
+        margin-left: 15px;
+        margin-top: 4px;
+        margin-bottom: 4px;
+    }
+
+    /* Left Info Box */
+    .pro-tips-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 14px;
+        margin-top: 20px;
+    }
+
+    .pro-tips-title {
+        font-size: 0.76rem;
+        font-weight: 800;
+        color: #0f172a;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 6px;
+    }
+
+    .pro-tips-desc {
+        font-size: 0.75rem;
+        color: #64748b;
+        line-height: 1.45;
+    }
+
+    /* Main Action Card */
+    .main-workspace-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 24px;
+        padding: 32px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+    }
+
+    /* Modern Drag & Drop Zone */
+    .luxury-dropzone {
+        display: block;
+        width: 100%;
+        border: 2px dashed #93c5fd;
+        border-radius: 20px;
+        padding: 44px 24px;
+        text-align: center;
+        cursor: pointer;
+        background: linear-gradient(180deg, #f8fafc 0%, #eff6ff 100%);
+        transition: all 0.25s ease;
+        position: relative;
+    }
+
+    .luxury-dropzone:hover {
+        border-color: #2563eb;
+        background: linear-gradient(180deg, #f0f7ff 0%, #e0f2fe 100%);
+        transform: translateY(-2px);
+    }
+
+    .dropzone-icon-box {
+        width: 68px;
+        height: 68px;
+        border-radius: 20px;
+        background: #ffffff;
+        color: #2563eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        box-shadow: 0 8px 20px -3px rgba(37, 99, 235, 0.25);
+        transition: transform 0.2s ease;
+    }
+
+    .luxury-dropzone:hover .dropzone-icon-box {
+        transform: scale(1.08);
+    }
+
+    .dropzone-title {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #0f172a;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        margin-bottom: 6px;
+    }
+
+    .dropzone-subtitle {
+        font-size: 0.92rem;
+        color: #64748b;
+    }
+
+    .dropzone-limit {
+        font-size: 0.76rem;
+        color: #94a3b8;
+        margin-top: 8px;
+        font-weight: 600;
+    }
+
+    /* File Attached Banner */
+    .file-attached-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        border-radius: 14px;
+        margin-top: 18px;
+        box-shadow: 0 4px 10px rgba(16, 185, 129, 0.08);
+    }
+
+    /* Password Input Container */
+    .password-card-container {
+        margin-top: 20px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 18px 20px;
+    }
+
+    .password-label-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .password-input-field {
+        width: 100%;
+        padding: 12px 46px 12px 16px;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        background: #ffffff;
+        color: #0f172a;
+        transition: all 0.2s ease;
+        outline: none;
+    }
+
+    .password-input-field:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    /* Submit Button */
+    .btn-generate-main {
+        width: 100%;
+        margin-top: 20px;
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: #ffffff;
+        padding: 16px 24px;
+        border-radius: 14px;
+        font-size: 1.05rem;
+        font-weight: 800;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        box-shadow: 0 10px 24px -3px rgba(37, 99, 235, 0.4);
+        transition: all 0.25s ease;
+    }
+
+    .btn-generate-main:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 28px -3px rgba(37, 99, 235, 0.55);
+    }
+
+    .btn-generate-main:disabled {
+        background: #cbd5e1;
+        box-shadow: none;
+        cursor: not-allowed;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+        .generator-workspace-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="mb-6 flex justify-between items-center">
-    <div>
-        <h2 id="hero-title" style="font-size: 1.5rem; font-weight: 800;">Card Generator Workspace</h2>
-        <p id="hero-desc" class="text-muted" style="font-size: 0.9rem;">Upload your PDF to securely extract and format your PVC card instantly.</p>
+<!-- Top Header & Document Type Switcher Tabs -->
+<div class="mb-4">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px;">
+        <div>
+            <h1 id="hero-title" style="font-size: 1.7rem; font-weight: 800; font-family: 'Plus Jakarta Sans', sans-serif; color: #0f172a; margin-bottom: 4px;">
+                Create Professional PVC Cards
+            </h1>
+            <p id="hero-desc" style="color: #64748b; font-size: 0.92rem;">
+                Fast & accurate 1-Click extraction with AI alignment and duplex print export.
+            </p>
+        </div>
+        <div style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.8rem; display: flex; align-items: center; gap: 6px;">
+            <span>⚡ Rate: ₹0.95 / Card</span>
+        </div>
+    </div>
+
+    <!-- Quick Document Type Switcher Tabs -->
+    <div class="doc-type-selector-bar">
+        <button type="button" class="doc-type-btn aadhaar-tab active" id="doc-btn-aadhaar" onclick="setDocumentType('aadhaar')">
+            <div class="doc-tab-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div class="doc-tab-content">
+                <div class="doc-tab-title">Aadhaar PVC Card</div>
+                <div class="doc-tab-subtitle">e-Aadhaar & Enrolment Slip</div>
+            </div>
+            <span class="doc-tab-badge">₹0.95</span>
+        </button>
+
+        <button type="button" class="doc-type-btn ayushman-tab" id="doc-btn-ayushman" onclick="setDocumentType('ayushman')">
+            <div class="doc-tab-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
+            </div>
+            <div class="doc-tab-content">
+                <div class="doc-tab-title">Ayushman PVC Card</div>
+                <div class="doc-tab-subtitle">PMJAY Golden Card Layout</div>
+            </div>
+            <span class="doc-tab-badge">₹0.95</span>
+        </button>
     </div>
 </div>
 
-<div class="flex" style="gap: 24px; align-items: flex-start;">
+<div class="generator-workspace-grid">
     
-    <!-- Left Stepper (Workflow) -->
-    <div class="card" style="width: 240px; flex-shrink: 0; padding: 20px;">
-        <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px;">Workflow Status</h4>
-        <div style="display: flex; flex-direction: column; gap: 16px;" id="workflow-indicator">
-            <div class="flex items-center gap-3" id="wf-step-1">
-                <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; box-shadow: 0 0 10px rgba(37, 99, 235, 0.3);" class="step-icon">1</div>
-                <div>
-                    <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-main);">Upload</div>
+    <!-- Left Stepper (Workflow Status & Tips) -->
+    <div>
+        <div class="workflow-card">
+            <div class="workflow-header">Workflow Status</div>
+            
+            <div id="workflow-indicator" style="display: flex; flex-direction: column;">
+                <!-- Step 1 -->
+                <div class="workflow-step active" id="wf-step-1">
+                    <div class="step-icon-circle">1</div>
+                    <div>
+                        <div class="step-text-title">Upload PDF</div>
+                        <div class="step-text-sub">Source document</div>
+                    </div>
+                </div>
+                
+                <div class="step-connector-line"></div>
+                
+                <!-- Step 2 -->
+                <div class="workflow-step" id="wf-step-2">
+                    <div class="step-icon-circle">2</div>
+                    <div>
+                        <div class="step-text-title">Processing</div>
+                        <div class="step-text-sub">AI extraction</div>
+                    </div>
+                </div>
+                
+                <div class="step-connector-line"></div>
+                
+                <!-- Step 3 -->
+                <div class="workflow-step" id="wf-step-3">
+                    <div class="step-icon-circle">3</div>
+                    <div>
+                        <div class="step-text-title">PVC Layout</div>
+                        <div class="step-text-sub">CR80 dual spec</div>
+                    </div>
+                </div>
+                
+                <div class="step-connector-line"></div>
+                
+                <!-- Step 4 -->
+                <div class="workflow-step" id="wf-step-4">
+                    <div class="step-icon-circle">4</div>
+                    <div>
+                        <div class="step-text-title">Print Ready</div>
+                        <div class="step-text-sub">A4 duplex PDF</div>
+                    </div>
                 </div>
             </div>
-            
-            <div style="width: 2px; height: 20px; background: var(--border); margin-left: 13px;"></div>
-            
-            <div class="flex items-center gap-3" id="wf-step-2">
-                <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--border); color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem;" class="step-icon">2</div>
-                <div>
-                    <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Processing</div>
+
+            <!-- Operator Quick Guidelines -->
+            <div class="pro-tips-card">
+                <div class="pro-tips-title">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    Print Guidelines
+                </div>
+                <div class="pro-tips-desc">
+                    Print on 4x6 / A4 glossy photo paper at <strong>100% Scale</strong> (Actual Size) with mirror duplex option.
                 </div>
             </div>
-            
-            <div style="width: 2px; height: 20px; background: var(--border); margin-left: 13px;"></div>
-            
-            <div class="flex items-center gap-3" id="wf-step-3">
-                <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--border); color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem;" class="step-icon">3</div>
-                <div>
-                    <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">PVC Layout</div>
-                </div>
-            </div>
-            
-            <div style="width: 2px; height: 20px; background: var(--border); margin-left: 13px;"></div>
-            
-            <div class="flex items-center gap-3" id="wf-step-4">
-                <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--border); color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem;" class="step-icon">4</div>
-                <div>
-                    <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Ready</div>
-                </div>
+
+            <!-- Privacy Guarantee -->
+            <div style="margin-top: 12px; font-size: 0.72rem; color: #94a3b8; display: flex; align-items: center; gap: 6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span>Zero-Retention: Auto-deleted in 5 mins</span>
             </div>
         </div>
     </div>
     
-    <!-- Right Main Content -->
-    <div class="card" style="flex: 1; padding: 32px;" id="main-card">
+    <!-- Right Main Workspace Content -->
+    <div class="main-workspace-card" id="main-card">
         
         <!-- Upload Section -->
         <div id="upload-section">
             <form id="upload-form">
                 <input type="hidden" name="document_type" id="selected-document-type" value="aadhaar">
                 
-                <label id="file-drop-area" for="pdf-file" style="display: block; width: 100%; border: 2px dashed #cbd5e1; border-radius: var(--radius-md); padding: 40px 20px; text-align: center; cursor: pointer; transition: var(--transition); background-color: #f8fafc;">
-                    <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <!-- Luxury Interactive Dropzone -->
+                <label id="file-drop-area" for="pdf-file" class="luxury-dropzone">
+                    <div class="dropzone-icon-box">
+                        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     </div>
-                    <div style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 8px;" id="upload-zone-text">Upload Source PDF</div>
-                    <div style="font-size: 0.9rem; color: var(--text-muted);">Drag & drop your file here or <span style="color: var(--primary); font-weight: 600;">Browse</span></div>
-                    <div style="font-size: 0.75rem; color: var(--text-light); margin-top: 8px;">Max size: 10MB</div>
+                    <div class="dropzone-title" id="upload-zone-text">Upload Aadhaar PDF</div>
+                    <div class="dropzone-subtitle">Drag & drop your PDF file here or <span style="color: #2563eb; font-weight: 700;">Browse Files</span></div>
+                    <div class="dropzone-limit">Supports standard e-Aadhaar, Enrolment slips & Ayushman PMJAY (Max: 10MB)</div>
                     <input type="file" id="pdf-file" class="form-input" name="file" accept="application/pdf" required style="display:none;">
                 </label>
 
-                <div id="file-info" style="display: none; align-items: center; justify-content: space-between; padding: 16px; background: var(--success-light); border: 1px solid #a7f3d0; border-radius: var(--radius-sm); margin-top: 16px;">
+                <!-- File Selected Info Banner -->
+                <div id="file-info" class="file-attached-card" style="display: none;">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <svg width="24" height="24" style="color: var(--success);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        <div style="width: 40px; height: 40px; border-radius: 10px; background: #d1fae5; color: #059669; display: flex; align-items: center; justify-content: center;">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        </div>
                         <div>
-                            <div id="filename-display" style="color: #064e3b; font-weight: 600; font-size: 0.9rem;">filename.pdf</div>
-                            <div id="filesize-display" style="color: #047857; font-size: 0.8rem;">1.2 MB</div>
+                            <div id="filename-display" style="color: #064e3b; font-weight: 700; font-size: 0.95rem;">filename.pdf</div>
+                            <div id="filesize-display" style="color: #047857; font-size: 0.8rem; font-weight: 600;">1.2 MB • Ready for processing</div>
                         </div>
                     </div>
-                    <button type="button" id="btn-remove-file" style="background: none; border: none; color: #047857; cursor: pointer;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    <button type="button" id="btn-remove-file" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #dc2626; border-radius: 8px; padding: 6px 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; font-size: 0.8rem; font-weight: 700;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        Remove
                     </button>
                 </div>
 
-                <!-- Instant High-Visibility Password Error Box (Placed ABOVE password input) -->
-                <div id="password-error-box" class="password-error-card" style="display: none; margin-top: 20px; margin-bottom: 12px;">
+                <!-- High-Visibility Password Error Box -->
+                <div id="password-error-box" class="password-error-card" style="display: none; margin-top: 20px; margin-bottom: 12px; background: #fef2f2; border: 1.5px solid #f87171; border-radius: 14px; padding: 18px;">
                     <div style="display: flex; align-items: flex-start; gap: 12px;">
                         <div style="flex-shrink: 0; color: #dc2626; margin-top: 2px;">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -106,22 +559,25 @@
                     </div>
                 </div>
 
-                <div class="form-group" id="password-group-container" style="margin-top: 16px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                        <label class="form-label" id="password-field-label" style="text-transform: none; font-size: 0.85rem; margin-bottom: 0; font-weight: 700;">PDF Password (Optional)</label>
-                        <span id="password-hint-pill" style="font-size: 0.72rem; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; padding: 2px 8px; border-radius: 12px; font-weight: 600;">
+                <!-- Password Input Box -->
+                <div class="password-card-container" id="password-group-container">
+                    <div class="password-label-row">
+                        <label class="form-label" id="password-field-label" style="text-transform: none; font-size: 0.88rem; margin-bottom: 0; font-weight: 700; color: #0f172a;">PDF Password (Optional)</label>
+                        <span id="password-hint-pill" style="font-size: 0.73rem; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; padding: 3px 10px; border-radius: 12px; font-weight: 600;">
                             Aadhaar Hint: NAME4 + YOB (e.g. SURE1995)
                         </span>
                     </div>
                     <div style="position: relative;" id="password-input-wrapper">
-                        <input type="password" id="pdf-password" name="password" class="form-input" placeholder="Enter password if document is protected" style="padding-right: 44px; transition: var(--transition);">
-                        <span onclick="togglePassword()" style="position: absolute; right: 14px; top: 12px; cursor: pointer; color: var(--text-light); user-select: none;" id="pw-toggle-btn" title="Toggle password view">
+                        <input type="password" id="pdf-password" name="password" class="password-input-field" placeholder="Enter password if document is protected">
+                        <span onclick="togglePassword()" style="position: absolute; right: 14px; top: 12px; cursor: pointer; color: #94a3b8; user-select: none;" id="pw-toggle-btn" title="Toggle password view">
                             <svg id="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         </span>
                     </div>
                 </div>
 
-                <button type="submit" class="btn-primary" id="upload-btn" disabled style="width: 100%; margin-top: 16px; justify-content: center; padding: 14px; font-size: 1rem;">
+                <!-- Submit Button -->
+                <button type="submit" class="btn-generate-main" id="upload-btn" disabled>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                     Generate PVC Card (-₹0.95)
                 </button>
             </form>
@@ -129,62 +585,77 @@
 
         <!-- Processing Section -->
         <div id="processing-section" style="display: none; text-align: center; padding: 60px 20px;">
-            <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 24px;">
-                <div style="position: absolute; inset: 0; border: 4px solid var(--primary-light); border-radius: 50%;"></div>
-                <div style="position: absolute; inset: 0; border: 4px solid var(--primary); border-radius: 50%; border-right-color: transparent; border-top-color: transparent; animation: spin 1s linear infinite;"></div>
-                <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--primary);">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+            <div style="position: relative; width: 88px; height: 88px; margin: 0 auto 24px;">
+                <div style="position: absolute; inset: 0; border: 4px solid #eff6ff; border-radius: 50%;"></div>
+                <div style="position: absolute; inset: 0; border: 4px solid #2563eb; border-radius: 50%; border-right-color: transparent; border-top-color: transparent; animation: spin 1s linear infinite;"></div>
+                <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #2563eb;">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
                 </div>
             </div>
-            <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 8px;">Processing PVC Card...</h3>
-            <p class="text-muted" style="font-size: 0.95rem; max-width: 400px; margin: 0 auto;">Our Google Gemini AI is currently extracting and perfectly aligning your card. This takes just a few seconds.</p>
+            <h3 style="font-size: 1.6rem; font-weight: 800; font-family: 'Plus Jakarta Sans', sans-serif; color: #0f172a; margin-bottom: 8px;">Processing PVC Card...</h3>
+            <p style="font-size: 0.95rem; color: #64748b; max-width: 420px; margin: 0 auto 16px;">Our AI engine is extracting citizen details, reconstructing QR codes and aligning duplex print layout.</p>
+            <div style="display: inline-flex; align-items: center; gap: 8px; background: #f1f5f9; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; color: #475569;">
+                <span style="width: 8px; height: 8px; background: #2563eb; border-radius: 50%; display: inline-block;"></span>
+                <span>Rendering High-Res 300 DPI Spec</span>
+            </div>
             <style>
                 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
             </style>
         </div>
 
         <!-- Result Section -->
-        <div id="result-section" style="display: none; padding-top: 16px;">
-            <div style="text-align: center; margin-bottom: 32px;">
-                <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; background: var(--success-light); color: var(--success); border-radius: 50%; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        <div id="result-section" style="display: none; padding-top: 10px;">
+            <div style="text-align: center; margin-bottom: 28px;">
+                <div style="display: inline-flex; align-items: center; justify-content: center; width: 68px; height: 68px; background: #ecfdf5; color: #059669; border-radius: 50%; margin-bottom: 14px; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25);">
+                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
-                <h3 style="font-size: 1.8rem; font-weight: 800; color: var(--text-main);">PVC Card Ready</h3>
-                <p class="text-muted" style="font-size: 0.95rem;">High quality 300 DPI layout generated successfully.</p>
+                <h2 style="font-size: 1.85rem; font-weight: 800; color: #0f172a; font-family: 'Plus Jakarta Sans', sans-serif; margin-bottom: 4px;">PVC Card Ready to Print!</h2>
+                <p style="color: #64748b; font-size: 0.95rem;">High-fidelity 300 DPI layout generated successfully with zero formatting errors.</p>
             </div>
 
+            <!-- Dual Card Preview Grid -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
-                <div style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; text-align: center; background: white; box-shadow: var(--shadow-sm);">
-                    <div style="font-size: 0.8rem; font-weight: 800; color: var(--text-muted); margin-bottom: 16px; letter-spacing: 1px;">FRONT PREVIEW</div>
-                    <div style="background: #f8fafc; padding: 12px; border-radius: var(--radius-sm); margin-bottom: 20px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; min-height: 180px;">
-                        <img id="front-preview" src="" alt="Front Preview" style="max-width: 100%; border-radius: 6px; box-shadow: 0 8px 16px rgba(0,0,0,0.1);">
+                <div style="border: 1px solid #e2e8f0; border-radius: 18px; padding: 20px; text-align: center; background: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+                    <div style="font-size: 0.8rem; font-weight: 800; color: #64748b; margin-bottom: 14px; letter-spacing: 0.75px; text-transform: uppercase;">FRONT PREVIEW</div>
+                    <div style="background: #f8fafc; padding: 14px; border-radius: 12px; margin-bottom: 18px; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; min-height: 180px;">
+                        <img id="front-preview" src="" alt="Front Preview" style="max-width: 100%; border-radius: 8px; box-shadow: 0 8px 18px rgba(0,0,0,0.12);">
                     </div>
-                    <button id="btn-dl-front" class="btn-outline" style="width: 100%; justify-content: center; font-size: 0.9rem; padding: 10px; border-color: var(--border);">Download Front</button>
+                    <button id="btn-dl-front" class="btn-outline" style="width: 100%; justify-content: center; font-size: 0.9rem; padding: 11px; border-color: #cbd5e1; font-weight: 700; color: #334155;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Download Front (PNG)
+                    </button>
                 </div>
                 
-                <div style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; text-align: center; background: white; box-shadow: var(--shadow-sm);">
-                    <div style="font-size: 0.8rem; font-weight: 800; color: var(--text-muted); margin-bottom: 16px; letter-spacing: 1px;">BACK PREVIEW</div>
-                    <div style="background: #f8fafc; padding: 12px; border-radius: var(--radius-sm); margin-bottom: 20px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; min-height: 180px;">
-                        <img id="back-preview" src="" alt="Back Preview" style="max-width: 100%; border-radius: 6px; box-shadow: 0 8px 16px rgba(0,0,0,0.1);">
+                <div style="border: 1px solid #e2e8f0; border-radius: 18px; padding: 20px; text-align: center; background: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+                    <div style="font-size: 0.8rem; font-weight: 800; color: #64748b; margin-bottom: 14px; letter-spacing: 0.75px; text-transform: uppercase;">BACK PREVIEW</div>
+                    <div style="background: #f8fafc; padding: 14px; border-radius: 12px; margin-bottom: 18px; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; min-height: 180px;">
+                        <img id="back-preview" src="" alt="Back Preview" style="max-width: 100%; border-radius: 8px; box-shadow: 0 8px 18px rgba(0,0,0,0.12);">
                     </div>
-                    <button id="btn-dl-back" class="btn-outline" style="width: 100%; justify-content: center; font-size: 0.9rem; padding: 10px; border-color: var(--border);">Download Back</button>
+                    <button id="btn-dl-back" class="btn-outline" style="width: 100%; justify-content: center; font-size: 0.9rem; padding: 11px; border-color: #cbd5e1; font-weight: 700; color: #334155;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Download Back (PNG)
+                    </button>
                 </div>
             </div>
 
-            <div style="background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%); border: 1px solid #bfdbfe; border-radius: var(--radius-lg); padding: 32px; text-align: center; box-shadow: inset 0 2px 10px rgba(255,255,255,0.5);">
-                <div style="display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: white; color: var(--primary); border-radius: 50%; margin-bottom: 16px; box-shadow: var(--shadow-sm);">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <!-- Master A4 Print PDF Download Box -->
+            <div style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); border-radius: 20px; padding: 32px; text-align: center; color: #ffffff; box-shadow: 0 14px 30px -5px rgba(15, 23, 42, 0.35);">
+                <div style="display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 52px; background: rgba(255,255,255,0.1); color: #60a5fa; border-radius: 14px; margin-bottom: 14px; border: 1px solid rgba(255,255,255,0.15);">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
                 </div>
-                <h4 style="font-size: 1.25rem; font-weight: 800; color: #1e3a8a; margin-bottom: 8px;">A4 Print Ready PDF</h4>
-                <p style="font-size: 0.95rem; color: #475569; margin-bottom: 24px; max-width: 400px; margin-left: auto; margin-right: auto;">Perfectly aligned for A4 photo paper. Just print with 100% scale and mirror options.</p>
+                <h3 style="font-size: 1.45rem; font-weight: 800; font-family: 'Plus Jakarta Sans', sans-serif; margin-bottom: 6px; color: #ffffff;">Download A4 Print Ready PDF</h3>
+                <p style="font-size: 0.92rem; color: #94a3b8; margin-bottom: 22px; max-width: 440px; margin-left: auto; margin-right: auto;">Standard CR80 dual alignment on A4 sheet. Print with 100% Scale on glossy photo sheet.</p>
                 
-                <button id="btn-dl-a4" class="btn-primary" style="margin: 0 auto; min-width: 280px; justify-content: center; padding: 16px; font-size: 1.05rem; box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);">
-                    Download A4 Print File
+                <button id="btn-dl-a4" class="btn-primary" style="margin: 0 auto; min-width: 290px; justify-content: center; padding: 15px 28px; font-size: 1.05rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download A4 Print File (PDF)
                 </button>
             </div>
             
-            <div style="margin-top: 32px; text-align: center;">
-                <button id="btn-start-over" class="btn-outline" style="border: none; color: var(--text-muted); font-weight: 600;">&larr; Generate another card</button>
+            <div style="margin-top: 28px; text-align: center;">
+                <button id="btn-start-over" class="btn-outline" style="border: none; color: #64748b; font-weight: 700; font-size: 0.95rem; cursor: pointer;">
+                    &larr; Generate another card
+                </button>
             </div>
         </div>
 
@@ -212,10 +683,5 @@
         }
     });
 </script>
-<script src="/static/js/app.js?v=9"></script>
+<script src="/static/js/app.js?v=12"></script>
 {% endblock %}
-
-
-
-
-
