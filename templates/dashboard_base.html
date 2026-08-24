@@ -4,12 +4,337 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Dashboard{% endblock %} - Rapid PVC</title>
-    <link rel="stylesheet" href="/static/css/rapid_theme.css?v=7">
+    <link rel="stylesheet" href="/static/css/rapid_theme.css?v=12">
+    <style>
+        /* Bulletproof Modern Sidebar Styling (Bypasses Browser Cache) */
+        .sidebar {
+            width: 260px !important;
+            background: #ffffff !important;
+            border-right: 1px solid #e2e8f0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            bottom: 0 !important;
+            height: 100vh !important;
+            z-index: 50 !important;
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.03) !important;
+        }
+
+        .sidebar-header {
+            height: 72px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid #f1f5f9;
+            flex-shrink: 0;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .brand-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            flex-shrink: 0;
+        }
+
+        .brand-name {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+            white-space: nowrap;
+        }
+
+        .brand-badge-tag {
+            font-size: 0.62rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: #ffffff;
+            padding: 2px 6px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+
+        /* Operator Profile Hub Card */
+        .user-profile-widget {
+            margin: 14px 14px 8px 14px;
+            padding: 12px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            border-radius: 14px;
+            color: #ffffff;
+            box-shadow: 0 8px 16px -4px rgba(15, 23, 42, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-decoration: none;
+            display: block;
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+
+        .user-profile-widget:hover {
+            transform: translateY(-2px);
+        }
+
+        .user-avatar-ring {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .avatar-online-dot {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 9px;
+            height: 9px;
+            background: #10b981;
+            border: 2px solid #0f172a;
+            border-radius: 50%;
+        }
+
+        .user-profile-widget .name {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #ffffff;
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .profile-tier-badge {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: #60a5fa;
+            margin-top: 1px;
+        }
+
+        .profile-validity-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-top: 8px;
+            padding-top: 6px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            white-space: nowrap;
+        }
+
+        .pulse-green-beacon {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #34d399;
+            box-shadow: 0 0 6px #34d399;
+            flex-shrink: 0;
+            display: inline-block;
+        }
+
+        /* Navigation Menu */
+        .sidebar-nav {
+            flex: 1;
+            padding: 8px 10px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-section-label {
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.75px;
+            padding: 8px 12px 2px 12px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 10px;
+            color: #475569;
+            font-weight: 600;
+            font-size: 0.88rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .nav-icon-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            color: #64748b;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .nav-icon-box svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .nav-label {
+            flex: 1;
+            white-space: nowrap;
+        }
+
+        .nav-pill-badge {
+            font-size: 0.66rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 8px;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .nav-pill-badge.blue {
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #bfdbfe;
+        }
+
+        .nav-pill-badge.green {
+            background: #ecfdf5;
+            color: #059669;
+            border: 1px solid #a7f3d0;
+        }
+
+        .nav-pill-badge.amber {
+            background: #fef3c7;
+            color: #b45309;
+            border: 1px solid #fde68a;
+        }
+
+        .nav-item:hover {
+            background: #f8fafc;
+            color: #0f172a;
+            transform: translateX(3px);
+        }
+
+        .nav-item:hover .nav-icon-box {
+            background: #f1f5f9;
+            color: #2563eb;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(90deg, #eff6ff 0%, #f8fafc 100%);
+            color: #1d4ed8;
+            font-weight: 700;
+            box-shadow: inset 3px 0 0 #2563eb;
+        }
+
+        .nav-item.active .nav-icon-box {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        /* Sidebar Footer */
+        .sidebar-footer {
+            padding: 12px 14px 16px 14px;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-shrink: 0;
+            background: #ffffff;
+        }
+
+        .engine-status-widget {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 7px 10px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.72rem;
+            color: #64748b;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .engine-status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 6px #10b981;
+            flex-shrink: 0;
+        }
+
+        .btn-logout {
+            width: 100%;
+            background: #fef2f2;
+            border: 1px solid #fee2e2;
+            color: #dc2626;
+            padding: 9px 12px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-logout:hover {
+            background: #dc2626;
+            border-color: #dc2626;
+            color: #ffffff;
+            box-shadow: 0 6px 16px -2px rgba(220, 38, 38, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .main-content {
+            margin-left: 260px !important;
+            flex: 1;
+            min-height: 100vh;
+        }
+    </style>
     {% block extra_head %}{% endblock %}
 </head>
 <body class="dashboard-layout">
     
-    <!-- Luxury Modern Sidebar -->
+    <!-- Modern Luxury Sidebar -->
     <aside class="sidebar">
         <!-- Brand Header -->
         <div class="sidebar-header">
@@ -17,15 +342,15 @@
                 <div class="brand-icon">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/><circle cx="7" cy="15" r="1"/></svg>
                 </div>
-                <div class="brand-text-wrap">
+                <div style="display: flex; align-items: center;">
                     <span class="brand-name">Rapid PVC</span>
-                    <span class="brand-badge-tag">PRO AI</span>
+                    <span class="brand-badge-tag">PRO</span>
                 </div>
             </a>
         </div>
         
         <!-- Operator Mini Hub Profile Card -->
-        <a href="/profile" style="text-decoration: none; display: block;" title="Manage Operator Profile">
+        <a href="/profile" style="text-decoration: none;" title="Manage Operator Profile">
             <div class="user-profile-widget">
                 <div class="flex items-center gap-3">
                     <div class="user-avatar-ring">
@@ -68,7 +393,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                 </div>
                 <span class="nav-label">Generate Card</span>
-                <span class="nav-pill-badge green">⚡ AI Print</span>
+                <span class="nav-pill-badge green">⚡ AI</span>
             </a>
 
             <a href="/history" class="nav-item {% if active_page == 'history' %}active{% endif %}">
@@ -78,13 +403,13 @@
                 <span class="nav-label">Print History</span>
             </a>
 
-            <div class="nav-section-label" style="margin-top: 10px;">ACCOUNT & BILLING</div>
+            <div class="nav-section-label" style="margin-top: 8px;">ACCOUNT & BILLING</div>
 
             <a href="/subscription" class="nav-item {% if active_page == 'subscription' %}active{% endif %}">
                 <div class="nav-icon-box">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                 </div>
-                <span class="nav-label">Recharge & Plans</span>
+                <span class="nav-label">Recharge Plans</span>
                 <span class="nav-pill-badge amber">₹0.95</span>
             </a>
 
@@ -104,7 +429,7 @@
             </div>
             
             <button onclick="logout()" class="btn-logout">
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                 Logout Session
             </button>
         </div>
