@@ -86,7 +86,19 @@ class PersistentBrowserWorker:
             try:
                 from playwright.sync_api import sync_playwright
                 with sync_playwright() as p:
-                    browser = p.chromium.launch(headless=True)
+                    browser = p.chromium.launch(
+                        headless=True,
+                        args=[
+                            "--no-sandbox",
+                            "--disable-setuid-sandbox",
+                            "--disable-dev-shm-usage",
+                            "--disable-gpu",
+                            "--disable-software-rasterizer",
+                            "--no-first-run",
+                            "--no-zygote",
+                            "--single-process"
+                        ]
+                    )
                     ctx = browser.new_context(
                         viewport={"width": 1016, "height": 638},
                         device_scale_factor=1
@@ -101,12 +113,12 @@ class PersistentBrowserWorker:
                             break
                         front_html, back_html, front_path, back_path, res_queue = task
                         try:
-                            # Render Front (use load with timeout to prevent network font hang)
-                            page.set_content(front_html, wait_until="load", timeout=15000)
+                            # Render Front (instant rendering without network block)
+                            page.set_content(front_html, wait_until="domcontentloaded", timeout=10000)
                             page.screenshot(path=front_path, type="png")
 
                             # Render Back
-                            page.set_content(back_html, wait_until="load", timeout=15000)
+                            page.set_content(back_html, wait_until="domcontentloaded", timeout=10000)
                             page.screenshot(path=back_path, type="png")
 
                             res_queue.put((True, None))
@@ -147,12 +159,20 @@ class PersistentBrowserWorker:
 def _cold_start_render_html(front_html: str, back_html: str, front_path: str, back_path: str):
     from playwright.sync_api import sync_playwright
     with sync_playwright() as p:
-        b = p.chromium.launch(headless=True)
+        b = p.chromium.launch(
+            headless=True,
+            args=[
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-gpu"
+            ]
+        )
         c = b.new_context(viewport={"width": 1016, "height": 638}, device_scale_factor=1)
         pg = c.new_page()
-        pg.set_content(front_html, wait_until="load", timeout=15000)
+        pg.set_content(front_html, wait_until="domcontentloaded", timeout=10000)
         pg.screenshot(path=front_path, type="png")
-        pg.set_content(back_html, wait_until="load", timeout=15000)
+        pg.set_content(back_html, wait_until="domcontentloaded", timeout=10000)
         pg.screenshot(path=back_path, type="png")
         b.close()
     return front_path, back_path
