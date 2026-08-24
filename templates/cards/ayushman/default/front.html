@@ -401,33 +401,39 @@
     <!-- ── Beneficiary Details Section (Larger & Prominent) ── -->
     <div class="details-section">
         <div class="name-label">નામ / NAME</div>
-        <div class="name-value">{{ person.name or 'Not Available' }}</div>
+        <div class="name-value">{{ person.name or '-' }}</div>
 
         <div class="row-inline">
             <div class="row-item">
                 <span class="lbl-orange">જન્મ વર્ષ / YOB :</span>
-                <span class="val-black">{{ person.yob or 'Not Available' }}</span>
+                <span class="val-black">{{ person.yob or '-' }}</span>
             </div>
             <div class="row-item">
                 <span class="lbl-orange">જાતિ / GENDER :</span>
-                <span class="val-black">{{ person.gender or 'Not Available' }}</span>
+                <span class="val-black">{{ person.gender or '-' }}</span>
             </div>
         </div>
 
+        {% if person.village_ward %}
         <div class="detail-line">
             <span class="lbl-orange">ગામ/વોર્ડ - Village/Ward :</span>
-            <span class="val-black">{{ person.village_ward or 'Not Available' }}</span>
+            <span class="val-black">{{ person.village_ward }}</span>
         </div>
+        {% endif %}
 
+        {% if person.subdivision_town %}
         <div class="detail-line">
             <span class="lbl-orange">તાલુકા/શહેર - Subdivision/Town :</span>
-            <span class="val-black">{{ person.subdivision_town or 'Not Available' }}</span>
+            <span class="val-black">{{ person.subdivision_town }}</span>
         </div>
+        {% endif %}
 
+        {% if person.district %}
         <div class="detail-line">
             <span class="lbl-orange">જિલ્લા/District :</span>
-            <span class="val-black">{{ person.district or 'Not Available' }}</span>
+            <span class="val-black">{{ person.district }}</span>
         </div>
+        {% endif %}
     </div>
 
     <!-- ── Bottom ID Rows ── -->
@@ -435,21 +441,25 @@
         <div class="id-row">
             <div class="id-col-left">
                 <span class="id-lbl">Mobile:</span>
-                <span class="id-val-mobile">{{ contact.mobile or 'Not Available' }}</span>
+                <span class="id-val-mobile">{{ contact.mobile or '-' }}</span>
             </div>
             <div class="id-col-right">
                 <span class="id-lbl">PM-JAY ID:</span>
-                <span class="id-val-pmjay">{{ identity.pmjay_id or 'Not Available' }}</span>
+                <span class="id-val-pmjay">{{ identity.pmjay_id or '-' }}</span>
             </div>
         </div>
         <div class="id-row">
             <div class="id-col-left">
+                {% if identity.abha_number %}
                 <span class="id-lbl">ABHA Number:</span>
-                <span class="id-val-text">{{ identity.abha_number or 'Not Available' }}</span>
+                <span class="id-val-text">{{ identity.abha_number }}</span>
+                {% endif %}
             </div>
             <div class="id-col-right">
+                {% if identity.ration_other_id %}
                 <span class="id-lbl">Ration/Other ID:</span>
-                <span class="id-val-text">{{ identity.ration_other_id or 'Not Available' }}</span>
+                <span class="id-val-text">{{ identity.ration_other_id }}</span>
+                {% endif %}
             </div>
         </div>
     </div>

@@ -1,4 +1,6 @@
 import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import shutil
 from PIL import Image
 from engine.ayushman_extractor import extract_ayushman_data

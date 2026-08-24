@@ -101,12 +101,12 @@ class PersistentBrowserWorker:
                             break
                         front_html, back_html, front_path, back_path, res_queue = task
                         try:
-                            # Render Front
-                            page.set_content(front_html, wait_until="networkidle")
+                            # Render Front (use load with timeout to prevent network font hang)
+                            page.set_content(front_html, wait_until="load", timeout=15000)
                             page.screenshot(path=front_path, type="png")
 
                             # Render Back
-                            page.set_content(back_html, wait_until="networkidle")
+                            page.set_content(back_html, wait_until="load", timeout=15000)
                             page.screenshot(path=back_path, type="png")
 
                             res_queue.put((True, None))
@@ -150,9 +150,9 @@ def _cold_start_render_html(front_html: str, back_html: str, front_path: str, ba
         b = p.chromium.launch(headless=True)
         c = b.new_context(viewport={"width": 1016, "height": 638}, device_scale_factor=1)
         pg = c.new_page()
-        pg.set_content(front_html, wait_until="networkidle")
+        pg.set_content(front_html, wait_until="load", timeout=15000)
         pg.screenshot(path=front_path, type="png")
-        pg.set_content(back_html, wait_until="networkidle")
+        pg.set_content(back_html, wait_until="load", timeout=15000)
         pg.screenshot(path=back_path, type="png")
         b.close()
     return front_path, back_path

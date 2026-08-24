@@ -458,9 +458,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // SUCCESS STATE
             
-            // Populate previews (add timestamp to bust cache if necessary)
-            frontPreview.src = data.front_url + "?t=" + new Date().getTime();
-            backPreview.src = data.back_url + "?t=" + new Date().getTime();
+            // Populate previews (add timestamp to bust cache with auto-retry)
+            const bustTime = Date.now();
+            frontPreview.style.opacity = '0';
+            backPreview.style.opacity = '0';
+            
+            frontPreview.onload = () => { frontPreview.style.transition = 'opacity 0.3s ease'; frontPreview.style.opacity = '1'; };
+            backPreview.onload = () => { backPreview.style.transition = 'opacity 0.3s ease'; backPreview.style.opacity = '1'; };
+            
+            frontPreview.onerror = () => {
+                setTimeout(() => { frontPreview.src = data.front_url + "?retry=1&t=" + Date.now(); }, 400);
+            };
+            backPreview.onerror = () => {
+                setTimeout(() => { backPreview.src = data.back_url + "?retry=1&t=" + Date.now(); }, 400);
+            };
+
+            frontPreview.src = data.front_url + "?t=" + bustTime;
+            backPreview.src = data.back_url + "?t=" + bustTime;
             
             if(processingSection) processingSection.style.display = 'none';
             resultSection.style.display = 'block';
