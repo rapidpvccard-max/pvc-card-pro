@@ -55,7 +55,7 @@ def test_mock_payment_flow(plan_id):
     # Verify Balance
     r_dash = session.get(f"{BASE_URL}/api/user/dashboard")
     dash = r_dash.json()
-    print(f"Remaining cards: {dash['credits']['remaining_cards']}")
+    print(f"Wallet balance: ₹{dash['credits']['wallet_balance']}")
     print(f"Total TX: {len(dash['transactions'])}")
 
 if __name__ == "__main__":

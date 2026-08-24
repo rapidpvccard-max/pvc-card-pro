@@ -74,7 +74,7 @@ def run_qa():
 
     print("\n--- 2. Dashboard & Ledger Integrity ---")
     dash = s.get(f"{BASE_URL}/api/user/dashboard").json()
-    print_result("Dashboard Format", "credits" in dash and "remaining_cards" in dash["credits"])
+    print_result("Dashboard Format", "credits" in dash and "wallet_balance" in dash["credits"])
     
     print("\n--- All tests passed! ---")
 

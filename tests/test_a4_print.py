@@ -1,4 +1,6 @@
 import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from engine.a4_print import create_a4_print_pdf
 
 def test_print_layouts():

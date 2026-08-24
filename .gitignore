@@ -27,4 +27,6 @@ output/*
 static/renders/*
 !static/renders/.gitkeep
 tests_output/
+*.pdf
+!tests/*.pdf
 

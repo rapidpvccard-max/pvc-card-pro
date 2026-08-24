@@ -162,7 +162,7 @@ def google_callback(
         data={"sub": str(user.id)}, expires_delta=access_token_expires
     )
     
-    is_prod = os.environ.get("ENVIRONMENT") == "production"
+    use_secure = is_secure_request(request)
     redirect_target = "/admin" if is_admin_user else "/dashboard"
     redirect_res = RedirectResponse(url=redirect_target, status_code=status.HTTP_303_SEE_OTHER)
     redirect_res.set_cookie(
@@ -170,7 +170,7 @@ def google_callback(
         value=access_token,
         httponly=True,
         samesite="lax",
-        secure=is_prod,
+        secure=use_secure,
         max_age=auth.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         path="/"
     )
@@ -204,8 +204,14 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(database.get_d
     
     return new_user
 
+def is_secure_request(request: Request) -> bool:
+    if not request:
+        return False
+    scheme = request.headers.get("x-forwarded-proto", request.url.scheme).lower()
+    return scheme == "https"
+
 @router.post("/login")
-def login(response: Response, user_data: schemas.UserLogin, db: Session = Depends(database.get_db)):
+def login(request: Request, response: Response, user_data: schemas.UserLogin, db: Session = Depends(database.get_db)):
     user = db.query(models.User).filter(models.User.email == user_data.email.strip().lower()).first()
     if not user or not auth.verify_password(user_data.password, user.hashed_password):
         raise HTTPException(
@@ -230,7 +236,7 @@ def login(response: Response, user_data: schemas.UserLogin, db: Session = Depend
         data={"sub": str(user.id)}, expires_delta=access_token_expires
     )
     
-    is_prod = os.environ.get("ENVIRONMENT") == "production"
+    use_secure = is_secure_request(request)
     
     # Set HttpOnly cookie
     response.set_cookie(
@@ -238,7 +244,7 @@ def login(response: Response, user_data: schemas.UserLogin, db: Session = Depend
         value=access_token,
         httponly=True,
         samesite="lax",
-        secure=is_prod,
+        secure=use_secure,
         max_age=auth.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         path="/"
     )
@@ -253,27 +259,27 @@ def login(response: Response, user_data: schemas.UserLogin, db: Session = Depend
     }
 
 @router.get("/logout")
-def logout_get(response: Response):
-    is_prod = os.environ.get("ENVIRONMENT") == "production"
+def logout_get(request: Request, response: Response):
+    use_secure = is_secure_request(request)
     redirect_res = RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
     redirect_res.delete_cookie(
         "access_token", 
         path="/", 
         httponly=True, 
         samesite="lax", 
-        secure=is_prod
+        secure=use_secure
     )
     return redirect_res
 
 @router.post("/logout")
-def logout_post(response: Response):
-    is_prod = os.environ.get("ENVIRONMENT") == "production"
+def logout_post(request: Request, response: Response):
+    use_secure = is_secure_request(request)
     response.delete_cookie(
         "access_token", 
         path="/", 
         httponly=True, 
         samesite="lax", 
-        secure=is_prod
+        secure=use_secure
     )
     return {"message": "Successfully logged out"}
 
