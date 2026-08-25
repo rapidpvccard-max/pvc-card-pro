@@ -54,6 +54,77 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
+def ensure_database_schema(engine):
+    try:
+        from sqlalchemy import inspect, text
+        import models
+        models.Base.metadata.create_all(bind=engine)
+        inspector = inspect(engine)
+        
+        schema_defs = {
+            'users': [
+                ('name', 'VARCHAR(255)'),
+                ('hashed_password', 'VARCHAR(255)'),
+                ('google_id', 'VARCHAR(255)'),
+                ('avatar_url', 'VARCHAR(500)'),
+                ('status', "VARCHAR(50) DEFAULT 'active'"),
+                ('is_admin', 'BOOLEAN DEFAULT FALSE'),
+                ('created_at', 'TIMESTAMP'),
+                ('updated_at', 'TIMESTAMP'),
+            ],
+            'user_credits': [
+                ('wallet_balance', 'FLOAT DEFAULT 5.0'),
+                ('total_generated', 'INTEGER DEFAULT 0'),
+                ('updated_at', 'TIMESTAMP'),
+            ],
+            'generation_history': [
+                ('run_id', 'VARCHAR(255)'),
+                ('document_type', "VARCHAR(50) DEFAULT 'aadhaar'"),
+                ('status', 'VARCHAR(50)'),
+                ('created_at', 'TIMESTAMP'),
+                ('completed_at', 'TIMESTAMP'),
+                ('card_count', 'INTEGER DEFAULT 1'),
+            ],
+            'orders': [
+                ('provider_order_id', 'VARCHAR(255)'),
+                ('provider_payment_id', 'VARCHAR(255)'),
+                ('plan_id', 'INTEGER'),
+                ('amount', 'FLOAT DEFAULT 0.0'),
+                ('currency', "VARCHAR(10) DEFAULT 'USD'"),
+                ('status', "VARCHAR(50) DEFAULT 'pending'"),
+                ('created_at', 'TIMESTAMP'),
+                ('updated_at', 'TIMESTAMP'),
+            ],
+            'credit_transactions': [
+                ('amount', 'FLOAT DEFAULT 0.0'),
+                ('transaction_type', 'VARCHAR(100)'),
+                ('reference_id', 'VARCHAR(255)'),
+                ('balance_after', 'FLOAT DEFAULT 0.0'),
+                ('created_at', 'TIMESTAMP'),
+            ],
+            'admin_audit_logs': [
+                ('admin_id', 'INTEGER'),
+                ('action', 'VARCHAR(100)'),
+                ('target_user_id', 'INTEGER'),
+                ('details', 'TEXT'),
+                ('created_at', 'TIMESTAMP'),
+            ]
+        }
+        
+        with engine.begin() as conn:
+            for table_name, cols in schema_defs.items():
+                if not inspector.has_table(table_name):
+                    continue
+                existing_cols = {c['name'].lower() for c in inspector.get_columns(table_name)}
+                for col_name, col_type in cols:
+                    if col_name.lower() not in existing_cols:
+                        try:
+                            conn.execute(text(f"ALTER TABLE {table_name} ADD COLUMN {col_name} {col_type}"))
+                        except Exception as err:
+                            print(f"[Schema Auto-Migration] Note on {table_name}.{col_name}: {err}")
+    except Exception as e:
+        print(f"[Schema Auto-Migration Warning] {e}")
+
 def get_db():
     db = SessionLocal()
     try:

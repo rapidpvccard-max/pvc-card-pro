@@ -20,7 +20,7 @@ import models
 import auth
 from routers import auth_router, user_router, payment_router, admin_router
 
-models.Base.metadata.create_all(bind=database.engine)
+database.ensure_database_schema(database.engine)
 
 # Background cleanup task (Zero-Retention Privacy Sweeper)
 async def cleanup_temporary_files():

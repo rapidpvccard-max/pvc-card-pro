@@ -80,28 +80,28 @@ class DashboardResponse(BaseModel):
     plans: List[PlanResponse]
 
 class AdminDashboardResponse(BaseModel):
-    total_users: int
-    active_users: int
-    total_cards_generated: int
-    total_revenue: float
-    successful_payments: int
-    pending_payments: int
-    failed_payments: int
-    outstanding_credits: float = 0.0
+    total_users: Optional[int] = 0
+    active_users: Optional[int] = 0
+    total_cards_generated: Optional[int] = 0
+    total_revenue: Optional[float] = 0.0
+    successful_payments: Optional[int] = 0
+    pending_payments: Optional[int] = 0
+    failed_payments: Optional[int] = 0
+    outstanding_credits: Optional[float] = 0.0
 
 class AdminUserResponse(BaseModel):
     id: int
-    name: str
+    name: Optional[str] = "Operator"
     email: str
-    status: str
-    is_admin: bool
-    created_at: datetime
-    auth_provider: str = "email"
+    status: Optional[str] = "active"
+    is_admin: Optional[bool] = False
+    created_at: Optional[datetime] = None
+    auth_provider: Optional[str] = "email"
     avatar_url: Optional[str] = None
-    wallet_balance: float = 0.0
-    total_cards_generated: int = 0
-    total_spent: float = 0.0
-    paid_orders_count: int = 0
+    wallet_balance: Optional[float] = 0.0
+    total_cards_generated: Optional[int] = 0
+    total_spent: Optional[float] = 0.0
+    paid_orders_count: Optional[int] = 0
     last_active: Optional[datetime] = None
     credits: Optional[UserCreditsResponse] = None
     
@@ -124,23 +124,23 @@ class AdminAuditLogResponse(BaseModel):
     action: str
     target_user_id: Optional[int] = None
     details: Optional[str] = None
-    created_at: datetime
+    created_at: Optional[datetime] = None
     
     class Config:
         from_attributes = True
 
 class SystemActivityItem(BaseModel):
     id: str
-    activity_type: str # "generation", "registration", "credit_tx", "order", "admin_audit"
-    title: str
-    description: str
+    activity_type: Optional[str] = "info"
+    title: Optional[str] = ""
+    description: Optional[str] = ""
     user_id: Optional[int] = None
     user_name: Optional[str] = None
     user_email: Optional[str] = None
     status: Optional[str] = "success"
-    badge_label: str
-    badge_type: str # "success", "info", "purple", "cyan", "danger"
-    created_at: datetime
+    badge_label: Optional[str] = "INFO"
+    badge_type: Optional[str] = "info"
+    created_at: Optional[datetime] = None
 
 class ForgotPasswordRequest(BaseModel):
     email: EmailStr

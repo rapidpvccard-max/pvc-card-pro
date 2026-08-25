@@ -2309,12 +2309,17 @@
 
         async function refreshCurrentTab() {
             setRefreshSpinning(true);
-            if (currentTab === 'dashboard') await loadDashboard();
-            else if (currentTab === 'users') await loadUsers();
-            else if (currentTab === 'audit') await loadAuditLogs();
-            else if (currentTab === 'banner') await loadBannerConfig();
-            setRefreshSpinning(false);
-            showToast('Synchronized with live database', 'info');
+            try {
+                if (currentTab === 'dashboard') await loadDashboard();
+                else if (currentTab === 'users') await loadUsers();
+                else if (currentTab === 'audit') await loadAuditLogs();
+                else if (currentTab === 'banner') await loadBannerConfig();
+                showToast('Synchronized with live database', 'info');
+            } catch (e) {
+                console.error(e);
+            } finally {
+                setRefreshSpinning(false);
+            }
         }
 
         let cachedActivity = [];
@@ -2328,12 +2333,12 @@
             
             if (dashData) {
                 cachedDashboard = dashData;
-                document.getElementById('stat-total-users').innerText = dashData.total_users;
-                document.getElementById('stat-active-users-pill').innerText = `${dashData.active_users} Active`;
-                document.getElementById('stat-total-cards').innerText = dashData.total_cards_generated;
+                document.getElementById('stat-total-users').innerText = dashData.total_users ?? 0;
+                document.getElementById('stat-active-users-pill').innerText = `${dashData.active_users ?? 0} Active`;
+                document.getElementById('stat-total-cards').innerText = dashData.total_cards_generated ?? 0;
                 document.getElementById('stat-outstanding-credits').innerText = `₹${parseFloat(dashData.outstanding_credits || 0).toFixed(2)}`;
                 document.getElementById('stat-total-revenue').innerText = `₹${parseFloat(dashData.total_revenue || 0).toFixed(2)}`;
-                document.getElementById('stat-paid-orders-pill').innerText = `${dashData.successful_payments} Paid`;
+                document.getElementById('stat-paid-orders-pill').innerText = `${dashData.successful_payments ?? 0} Paid`;
             }
 
             if (actData) {
