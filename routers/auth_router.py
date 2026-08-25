@@ -122,8 +122,7 @@ def google_callback(
     picture = userinfo.get("picture")
     
     # 3. Find or Create User in DB
-    admin_emails = [e.strip().lower() for e in os.environ.get("ADMIN_EMAILS", "rapidpvccard@gmail.com").split(",") if e.strip()]
-    is_admin_user = email.lower() in admin_emails
+    is_admin_user = auth.is_admin_email(email)
 
     user = db.query(models.User).filter(models.User.email == email).first()
     if not user:
@@ -151,7 +150,8 @@ def google_callback(
             user.google_id = google_id
         if not user.avatar_url and picture:
             user.avatar_url = picture
-        user.is_admin = is_admin_user
+        if is_admin_user and not user.is_admin:
+            user.is_admin = True
         if user.status != "active":
             return RedirectResponse(url="/login?error=Account+is+inactive.+Please+contact+support.")
         db.commit()
@@ -163,7 +163,7 @@ def google_callback(
     )
     
     use_secure = is_secure_request(request)
-    redirect_target = "/admin" if is_admin_user else "/dashboard"
+    redirect_target = "/admin" if (user.is_admin or is_admin_user) else "/dashboard"
     redirect_res = RedirectResponse(url=redirect_target, status_code=status.HTTP_303_SEE_OTHER)
     redirect_res.set_cookie(
         key="access_token",
@@ -182,8 +182,7 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(database.get_d
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
         
-    admin_emails = [e.strip().lower() for e in os.environ.get("ADMIN_EMAILS", "rapidpvccard@gmail.com").split(",") if e.strip()]
-    is_admin = user.email.strip().lower() in admin_emails
+    is_admin = auth.is_admin_email(user.email)
 
     hashed_password = auth.get_password_hash(user.password)
     new_user = models.User(
@@ -225,8 +224,7 @@ def login(request: Request, response: Response, user_data: schemas.UserLogin, db
             detail="Account is inactive. Please contact support."
         )
         
-    admin_emails = [e.strip().lower() for e in os.environ.get("ADMIN_EMAILS", "rapidpvccard@gmail.com").split(",") if e.strip()]
-    is_admin_user = user.email.strip().lower() in admin_emails
+    is_admin_user = auth.is_admin_email(user.email) or bool(user.is_admin)
     if user.is_admin != is_admin_user:
         user.is_admin = is_admin_user
         db.commit()

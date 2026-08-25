@@ -131,7 +131,12 @@ async def admin_page(request: Request, db: Session = Depends(database.get_db)):
         if not user_id:
             return RedirectResponse(url="/login?error=Please+login+as+Admin")
         user = db.query(models.User).filter(models.User.id == int(user_id)).first()
-        if not user or not user.is_admin:
+        if not user:
+            return RedirectResponse(url="/login?error=Session+expired.+Please+login+again.")
+        if auth.is_admin_email(user.email) and not user.is_admin:
+            user.is_admin = True
+            db.commit()
+        if not user.is_admin:
             return RedirectResponse(url="/login?error=Access+denied.+Administrator+privileges+required.")
     except Exception:
         return RedirectResponse(url="/login?error=Session+expired.+Please+login+again.")

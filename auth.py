@@ -73,9 +73,24 @@ def get_current_user(request: Request, db: Session = Depends(database.get_db)):
             detail="Inactive user"
         )
         
-    return user
+DEFAULT_ADMIN_EMAILS = "rapidpvccard@gmail.com,officialoperator@gmail.com,officialavinashpatil404@gmail.com,patil.bhushan.naval@gmail.com"
 
-def get_current_admin(current_user: models.User = Depends(get_current_user)):
+def get_admin_emails() -> list:
+    raw = os.environ.get("ADMIN_EMAILS", DEFAULT_ADMIN_EMAILS)
+    return [e.strip().lower() for e in raw.split(",") if e.strip()]
+
+def is_admin_email(email: Optional[str]) -> bool:
+    if not email:
+        return False
+    return email.strip().lower() in get_admin_emails()
+
+def get_current_admin(current_user: models.User = Depends(get_current_user), db: Session = Depends(database.get_db)):
+    if is_admin_email(current_user.email) and not current_user.is_admin:
+        current_user.is_admin = True
+        try:
+            db.commit()
+        except Exception:
+            db.rollback()
     if not current_user.is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
