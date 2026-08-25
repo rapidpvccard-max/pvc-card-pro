@@ -75,7 +75,7 @@ def get_current_user(request: Request, db: Session = Depends(database.get_db)):
         
     return user
 
-DEFAULT_ADMIN_EMAILS = "rapidpvccard@gmail.com,officialoperator@gmail.com,officialavinashpatil404@gmail.com,patil.bhushan.naval@gmail.com"
+DEFAULT_ADMIN_EMAILS = "rapidpvccard@gmail.com"
 
 def get_admin_emails() -> list:
     raw = os.environ.get("ADMIN_EMAILS", DEFAULT_ADMIN_EMAILS)

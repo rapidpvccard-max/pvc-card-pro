@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 import database
 import models
 import schemas
@@ -113,18 +114,19 @@ def google_callback(
     except Exception as e:
         return RedirectResponse(url=f"/login?error=Failed+to+fetch+user+profile+from+Google:+{urllib.parse.quote(str(e))}")
         
-    email = userinfo.get("email")
-    if not email:
+    raw_email = userinfo.get("email")
+    if not raw_email:
         return RedirectResponse(url="/login?error=No+email+associated+with+Google+account")
         
+    email = raw_email.strip().lower()
     name = userinfo.get("name") or email.split("@")[0]
     google_id = userinfo.get("id")
     picture = userinfo.get("picture")
     
-    # 3. Find or Create User in DB
+    # 3. Find or Create User in DB (strictly case-insensitive)
     is_admin_user = auth.is_admin_email(email)
 
-    user = db.query(models.User).filter(models.User.email == email).first()
+    user = db.query(models.User).filter(func.lower(models.User.email) == email).first()
     if not user:
         dummy_pwd = auth.get_password_hash(secrets.token_urlsafe(32))
         user = models.User(
@@ -140,12 +142,13 @@ def google_callback(
         db.commit()
         db.refresh(user)
         
-        # Give starting credits (1000 for admin, 0 for normal user)
+        # Give starting credits (1000 ONLY for admin, 0 for all regular users)
         start_bal = 1000.0 if is_admin_user else 0.0
         new_credits = models.UserCredits(user_id=user.id, wallet_balance=start_bal, total_generated=0)
         db.add(new_credits)
         db.commit()
     else:
+        # Existing user: DO NOT reset wallet balance!
         if not user.google_id and google_id:
             user.google_id = google_id
         if not user.avatar_url and picture:
@@ -154,6 +157,10 @@ def google_callback(
             user.is_admin = True
         if user.status != "active":
             return RedirectResponse(url="/login?error=Account+is+inactive.+Please+contact+support.")
+        if not user.credits:
+            start_bal = 1000.0 if is_admin_user else 0.0
+            new_credits = models.UserCredits(user_id=user.id, wallet_balance=start_bal, total_generated=0)
+            db.add(new_credits)
         db.commit()
         
     # 4. Generate App JWT Token & set Cookie
@@ -178,16 +185,17 @@ def google_callback(
 
 @router.post("/register", response_model=schemas.UserResponse)
 def register_user(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
-    db_user = db.query(models.User).filter(models.User.email == user.email.strip().lower()).first()
+    clean_email = user.email.strip().lower()
+    db_user = db.query(models.User).filter(func.lower(models.User.email) == clean_email).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
         
-    is_admin = auth.is_admin_email(user.email)
+    is_admin = auth.is_admin_email(clean_email)
 
     hashed_password = auth.get_password_hash(user.password)
     new_user = models.User(
         name=user.name, 
-        email=user.email.strip().lower(), 
+        email=clean_email, 
         hashed_password=hashed_password,
         is_admin=is_admin
     )
@@ -211,7 +219,8 @@ def is_secure_request(request: Request) -> bool:
 
 @router.post("/login")
 def login(request: Request, response: Response, user_data: schemas.UserLogin, db: Session = Depends(database.get_db)):
-    user = db.query(models.User).filter(models.User.email == user_data.email.strip().lower()).first()
+    clean_email = user_data.email.strip().lower()
+    user = db.query(models.User).filter(func.lower(models.User.email) == clean_email).first()
     if not user or not auth.verify_password(user_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -290,7 +299,7 @@ def forgot_password(
     db: Session = Depends(database.get_db)
 ):
     email = payload.email.strip().lower()
-    user = db.query(models.User).filter(models.User.email == email).first()
+    user = db.query(models.User).filter(func.lower(models.User.email) == email).first()
     
     # Generic security message (prevents account enumeration attacks)
     if not user:
