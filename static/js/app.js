@@ -391,7 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await generatePromise;
             setStepState(1, 'completed');
             setStepState(2, 'completed');
-            setStepState(3, 'active');
+            setStepState(3, 'completed');
             
             if (response.status === 401) {
                 window.location.href = '/login';
@@ -401,7 +401,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error("Insufficient credits to generate a card. Please top up your account.");
             }
             
-            const data = await response.json();
+            let data;
+            try {
+                data = await response.json();
+            } catch (jsonErr) {
+                throw new Error("Server communication issue or timeout. Please check your file and try again.");
+            }
 
             if (!response.ok || !data.success) {
                 const errCode = data.code || '';
@@ -429,26 +434,10 @@ document.addEventListener('DOMContentLoaded', () => {
             currentRunId = data.run_id;
             currentFrontUrl = data.front_url;
             currentBackUrl = data.back_url;
+            currentA4Url = data.pdf_url || `/download-pdf/${currentRunId}`;
 
-            setStepState(3, 'completed');
-            setStepState(4, 'active');
-
-            // Wait for A4 layout generation
-            const a4Response = await fetch('/generate-a4', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ run_id: currentRunId, cards_count: 1, mirror_duplex: false })
-            });
-            const a4Data = await a4Response.json();
-
-            if (!a4Response.ok || !a4Data.success) {
-                throw new Error("Unable to create A4 Print layout. " + getFriendlyErrorMsg(a4Data.error));
-            }
-            
-            currentA4Url = a4Data.pdf_url;
             setStepState(4, 'completed');
-            
-            await sleep(400); // final pause before showing results
+            await sleep(300); // smooth transition to results
 
             // SUCCESS STATE
             

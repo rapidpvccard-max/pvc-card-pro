@@ -403,6 +403,13 @@ async def generate_pipeline(
         # High-Speed Persistent Rendering Worker
         front_path, back_path = await run_in_threadpool(render_card, mapped_data, engine_data, output_dir, doc_type)
         
+        # Pre-generate standard A4 print PDF in the same pass
+        pdf_path = os.path.join(output_dir, "a4_print.pdf")
+        try:
+            await run_in_threadpool(create_a4_print_pdf, [front_path], [back_path], pdf_path, False)
+        except Exception as e:
+            print(f"[A4 Pre-generation Warning] {e}")
+
         # Deduct credit on successful generation
         current_user.credits.wallet_balance -= 0.95
         current_user.credits.total_generated += 1
@@ -427,6 +434,7 @@ async def generate_pipeline(
             "mapped_data": mapped_data,
             "front_url": f"/static/renders/{run_id}/front.png",
             "back_url": f"/static/renders/{run_id}/back.png",
+            "pdf_url": f"/download-pdf/{run_id}",
             "extraction_status": engine_data.get("extraction_confidence", "unknown"),
             "photo_available": mapped_data.get("photo", {}).get("available", False),
             "qr_available": mapped_data.get("qr", {}).get("available", False)
