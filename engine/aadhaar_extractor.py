@@ -574,7 +574,8 @@ def _score_address_block(block: list[str]) -> float:
 
 
 def extract_local_language_fields(pdf_path: str, password: Optional[str] = None,
-                                   english_name_hint: str = "") -> dict:
+                                   english_name_hint: str = "",
+                                   text_content: Optional[str] = None) -> dict:
     trace: list = []
     result = {
         "local_full_name": "",
@@ -585,22 +586,26 @@ def extract_local_language_fields(pdf_path: str, password: Optional[str] = None,
         "trace": trace,
     }
 
-    def _get_text():
-        doc = fitz.open(pdf_path)
-        try:
-            if doc.needs_pass:
-                if not password:
-                    raise ValueError("PDF is password protected. Supply the password.")
-                if not doc.authenticate(password):
-                    raise ValueError("Incorrect PDF password.")
-            parts = []
-            for i in range(len(doc)):
-                parts.append(doc[i].get_text("text"))
-            return "\n".join(parts)
-        finally:
-            doc.close()
+    if text_content is not None:
+        text = text_content
+    else:
+        def _get_text():
+            doc = fitz.open(pdf_path)
+            try:
+                if doc.needs_pass:
+                    if not password:
+                        raise ValueError("PDF is password protected. Supply the password.")
+                    if not doc.authenticate(password):
+                        raise ValueError("Incorrect PDF password.")
+                parts = []
+                for i in range(len(doc)):
+                    parts.append(doc[i].get_text("text"))
+                return "\n".join(parts)
+            finally:
+                doc.close()
 
-    text = _safe(_get_text, default=None, label="PyMuPDF get_text", trace=trace)
+        text = _safe(_get_text, default=None, label="PyMuPDF get_text", trace=trace)
+
     if text is None:
         trace.append("Could not read PDF text layer at all -- returning empty result.")
         return result
@@ -788,16 +793,19 @@ def extract_via_text_layer(pdf_path: str, password: Optional[str] = None) -> Aad
 # ---------------------------------------------------------------------------
 
 def extract_aadhaar_data(pdf_path: str, password: Optional[str] = None) -> AadhaarData:
-    """Top-level entry point. Guaranteed to return an AadhaarData object,
-    never raise -- worst case you get back source='failed' with populated
-    `errors` and `trace` explaining exactly what was tried and why it
-    didn't work, which is itself valuable for debugging without ever
-    crashing the calling process."""
+    """Top-level entry point. Ultra-fast single-pass extraction:
+    Opens and decrypts the PDF exactly ONCE, extracting text, QR images,
+    and portrait photos in a single sweep."""
     trace: list = []
     qr_error = "No QR candidates found."
     result: Optional[AadhaarData] = None
 
-    # Step 0: Upfront validation of password protection & correctness
+    qr_candidates: list[bytes] = []
+    best_portrait_bytes: Optional[bytes] = None
+    best_portrait_area = 0
+    full_pdf_text = ""
+
+    # Single-Pass Open and Extract
     try:
         doc = fitz.open(pdf_path)
         try:
@@ -816,6 +824,48 @@ def extract_aadhaar_data(pdf_path: str, password: Optional[str] = None) -> Aadha
                         errors=["Incorrect PDF password. Please enter the correct password."],
                         trace=["PDF authentication failed with provided password."]
                     )
+
+            # Collect text and images in single pass
+            text_parts = []
+            for page_num in range(len(doc)):
+                page = doc[page_num]
+                text_parts.append(page.get_text("text") or "")
+                
+                # Image inspection for pages 0, 1, 2
+                if page_num < 3:
+                    images = _safe(page.get_images, full=True, default=[], label="get_images", trace=trace) or []
+                    for img in (images if isinstance(images, list) else []):
+                        xref = img[0]
+                        base_image = _safe(doc.extract_image, xref, default=None, label="extract_image", trace=trace)
+                        if not base_image or not isinstance(base_image, dict):
+                            continue
+                        img_bytes = base_image.get("image")
+                        if not img_bytes:
+                            continue
+
+                        def _classify_dims():
+                            pil_img = Image.open(io.BytesIO(img_bytes))
+                            w, h = pil_img.size
+                            aspect = w / h if h else 0
+                            return w, h, aspect
+
+                        dims = _safe(_classify_dims, default=None, label="classify_dims", trace=trace)
+                        if dims is None:
+                            continue
+                        w, h, aspect = dims
+                        area = w * h
+
+                        # QR candidate check
+                        if 0.7 <= aspect <= 1.3 and w >= 40:
+                            qr_candidates.append(img_bytes)
+
+                        # Portrait photo check
+                        if (aspect < 0.85 and w >= 60 and h >= 60 and area >= 3600 and w <= 1500 and h <= 1500):
+                            if area > best_portrait_area:
+                                best_portrait_area = area
+                                best_portrait_bytes = img_bytes
+
+            full_pdf_text = "\n".join(text_parts)
         finally:
             doc.close()
     except Exception as e:
@@ -826,9 +876,9 @@ def extract_aadhaar_data(pdf_path: str, password: Optional[str] = None) -> Aadha
             trace=[f"fitz.open failed: {e}"]
         )
 
+    # Step 1: Decode QR candidates
     try:
-        candidates = extract_candidate_qr_images(pdf_path, password=password, trace=trace)
-        for i, img_bytes in enumerate(candidates):
+        for i, img_bytes in enumerate(qr_candidates):
             raw = decode_qr_to_bytes(img_bytes, trace=trace)
             if not raw:
                 continue
@@ -848,11 +898,7 @@ def extract_aadhaar_data(pdf_path: str, password: Optional[str] = None) -> Aadha
                 break
             qr_error = f"QR candidate #{i} decoded but field parsing produced no usable name."
     except Exception as e:
-        # Should be unreachable given _safe() wrapping inside, but this
-        # outer guard exists so a truly unexpected error (e.g. a bug in
-        # this very function) still can't propagate to the caller.
         qr_error = f"Unexpected error during QR extraction: {type(e).__name__}: {e}"
-        logger.exception("Unexpected error during QR extraction")
 
     if result is None:
         trace.append(f"QR path did not produce usable data ({qr_error}); trying text-layer fallback.")
@@ -880,10 +926,10 @@ def extract_aadhaar_data(pdf_path: str, password: Optional[str] = None) -> Aadha
         result.trace = trace
         return result
 
-    # Enrich with local-language name/address -- best-effort, never fatal.
+    # Step 2: Enrich with local-language name/address using already extracted text
     try:
         local = extract_local_language_fields(
-            pdf_path, password=password, english_name_hint=result.full_name
+            pdf_path, password=password, english_name_hint=result.full_name, text_content=full_pdf_text
         )
         result.local_full_name = local["local_full_name"]
         result.local_address = local["local_address"]
@@ -892,17 +938,18 @@ def extract_aadhaar_data(pdf_path: str, password: Optional[str] = None) -> Aadha
         trace.extend(local.get("trace", []))
     except Exception as e:
         result.errors.append(f"Local-language extraction failed: {type(e).__name__}: {e}")
-        logger.exception("Local-language extraction failed")
 
-    # Prefer the high-quality portrait photo embedded directly in the PDF
-    # over the tiny JPEG2000 face crop stored inside the QR code.
-    portrait_png = extract_portrait_photo_from_pdf(pdf_path, password=password, trace=trace)
-    if portrait_png is not None:
-        result.photo_png_bytes = portrait_png
-        result.photo_bytes = None  # clear the low-quality QR photo
-        trace.append("Using portrait photo from PDF (overrides QR-embedded photo).")
-    elif result.photo_png_bytes is None:
-        trace.append("No portrait photo in PDF and no QR-embedded photo decoded.")
+    # Step 3: Attach portrait photo
+    if best_portrait_bytes:
+        try:
+            pil_img = Image.open(io.BytesIO(best_portrait_bytes)).convert("RGB")
+            buf = io.BytesIO()
+            pil_img.save(buf, format="PNG")
+            result.photo_png_bytes = buf.getvalue()
+            result.photo_bytes = None
+            trace.append(f"Using portrait photo from PDF (area={best_portrait_area}px²).")
+        except Exception:
+            pass
 
     result.trace = trace
     return result

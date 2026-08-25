@@ -91,8 +91,7 @@ CHROMIUM_STABLE_ARGS = [
     "--mute-audio",
     "--no-default-browser-check",
     "--no-first-run",
-    "--no-zygote",
-    "--js-flags=--max-old-space-size=256"
+    "--no-zygote"
 ]
 
 class PersistentBrowserWorker:
