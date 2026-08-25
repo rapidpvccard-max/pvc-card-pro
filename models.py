@@ -29,6 +29,7 @@ class UserCredits(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     wallet_balance = Column(Float, default=0.0) # Default starting balance
+    cost_per_card = Column(Float, default=0.95) # ₹2.00 for Trial Pack, ₹0.95 for Starter/Pro/Business
     total_generated = Column(Integer, default=0)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 

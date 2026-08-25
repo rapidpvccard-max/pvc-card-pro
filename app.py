@@ -321,10 +321,11 @@ async def generate_pipeline(
     current_user: models.User = Depends(auth.get_current_user),
     db: Session = Depends(database.get_db)
 ):
-    if current_user.credits.wallet_balance < 0.95:
+    user_rate = float(getattr(current_user.credits, 'cost_per_card', 0.95) or 0.95)
+    if current_user.credits.wallet_balance < user_rate:
         return JSONResponse(
             status_code=402,
-            content={"success": False, "error": "Insufficient wallet balance to generate a card. Required: ₹0.95"}
+            content={"success": False, "error": f"Insufficient wallet balance to generate a card. Required: ₹{user_rate:.2f}"}
         )
 
     if file.content_type != "application/pdf":
@@ -411,14 +412,14 @@ async def generate_pipeline(
             print(f"[A4 Pre-generation Warning] {e}")
 
         # Deduct credit on successful generation
-        current_user.credits.wallet_balance -= 0.95
+        current_user.credits.wallet_balance -= user_rate
         current_user.credits.total_generated += 1
         history.status = "success"
         history.completed_at = datetime.datetime.utcnow()
         
         tx = models.CreditTransaction(
             user_id=current_user.id,
-            amount=-0.95,
+            amount=-user_rate,
             transaction_type="generation_usage",
             reference_id=run_id,
             balance_after=current_user.credits.wallet_balance

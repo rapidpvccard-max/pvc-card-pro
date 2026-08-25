@@ -25,16 +25,44 @@ def recharge_plan(
     current_user: models.User = Depends(auth.get_current_user), 
     db: Session = Depends(database.get_db)
 ):
-    plan = db.query(models.Plan).filter(models.Plan.id == order_data.plan_id, models.Plan.active == True).first()
+    plan = db.query(models.Plan).filter(models.Plan.id == order_data.plan_id).first()
     if not plan:
-        raise HTTPException(status_code=404, detail="Plan not found")
+        # Fallback plan lookup by ID
+        default_plans = {
+            1: {"name": "Trial Pack", "price": 20.0, "credits": 20.0, "cost_per_card": 2.00},
+            2: {"name": "Starter Pack", "price": 100.0, "credits": 100.0, "cost_per_card": 0.95},
+            3: {"name": "Pro Pack", "price": 200.0, "credits": 200.0, "cost_per_card": 0.95},
+            4: {"name": "Business Pack", "price": 300.0, "credits": 300.0, "cost_per_card": 0.95}
+        }
+        if order_data.plan_id in default_plans:
+            pinfo = default_plans[order_data.plan_id]
+            plan = models.Plan(
+                id=order_data.plan_id,
+                name=pinfo["name"],
+                price=pinfo["price"],
+                credits=int(pinfo["credits"]),
+                active=True
+            )
+            db.add(plan)
+            db.commit()
+            db.refresh(plan)
+        else:
+            raise HTTPException(status_code=404, detail="Plan not found")
 
     user_credits = db.query(models.UserCredits).filter(models.UserCredits.user_id == current_user.id).first()
     if not user_credits:
-        user_credits = models.UserCredits(user_id=current_user.id, wallet_balance=0.0, total_generated=0)
+        user_credits = models.UserCredits(user_id=current_user.id, wallet_balance=0.0, total_generated=0, cost_per_card=0.95)
         db.add(user_credits)
         
-    user_credits.wallet_balance += float(plan.credits)
+    # Top up wallet with exact recharge amount
+    recharge_amount = float(plan.price)
+    user_credits.wallet_balance = float(user_credits.wallet_balance or 0.0) + recharge_amount
+    
+    # Set per-card rate: ₹2.00 for Trial Pack, ₹0.95 for all standard packs
+    if plan.id == 1 or "trial" in plan.name.lower():
+        user_credits.cost_per_card = 2.00
+    else:
+        user_credits.cost_per_card = 0.95
     
     order_id = str(uuid.uuid4())
     order = models.Order(
@@ -42,7 +70,7 @@ def recharge_plan(
         user_id=current_user.id,
         provider_order_id=f"rec_{uuid.uuid4().hex[:12]}",
         plan_id=plan.id,
-        amount=plan.price,
+        amount=recharge_amount,
         currency="INR",
         status="paid"
     )
@@ -50,7 +78,7 @@ def recharge_plan(
     
     tx = models.CreditTransaction(
         user_id=current_user.id,
-        amount=float(plan.credits),
+        amount=recharge_amount,
         transaction_type="purchase",
         reference_id=order_id,
         balance_after=user_credits.wallet_balance
@@ -60,9 +88,10 @@ def recharge_plan(
     
     return {
         "success": True,
-        "message": f"Successfully recharged {plan.name} (₹{plan.price:.2f})!",
+        "message": f"Successfully recharged {plan.name} (₹{recharge_amount:.2f})!",
         "plan_name": plan.name,
-        "amount_added": plan.credits,
+        "amount_added": recharge_amount,
+        "cost_per_card": user_credits.cost_per_card,
         "new_balance": user_credits.wallet_balance
     }
 

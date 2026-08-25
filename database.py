@@ -73,7 +73,8 @@ def ensure_database_schema(engine):
                 ('updated_at', 'TIMESTAMP'),
             ],
             'user_credits': [
-                ('wallet_balance', 'FLOAT DEFAULT 5.0'),
+                ('wallet_balance', 'FLOAT DEFAULT 0.0'),
+                ('cost_per_card', 'FLOAT DEFAULT 0.95'),
                 ('total_generated', 'INTEGER DEFAULT 0'),
                 ('updated_at', 'TIMESTAMP'),
             ],
@@ -122,7 +123,20 @@ def ensure_database_schema(engine):
                             conn.execute(text(f"ALTER TABLE {table_name} ADD COLUMN {col_name} {col_type}"))
                         except Exception as err:
                             print(f"[Schema Auto-Migration] Note on {table_name}.{col_name}: {err}")
+
+            # Seed default plans if plans table is empty
+            if inspector.has_table('plans'):
+                count = conn.execute(text("SELECT COUNT(*) FROM plans;")).scalar()
+                if count == 0:
+                    conn.execute(text("""
+                        INSERT INTO plans (id, name, price, credits, validity_days, active) VALUES
+                        (1, 'Trial Pack', 20.0, 20, 365, TRUE),
+                        (2, 'Starter Pack', 100.0, 100, 365, TRUE),
+                        (3, 'Pro Pack', 200.0, 200, 365, TRUE),
+                        (4, 'Business Pack', 300.0, 300, 365, TRUE)
+                    """))
     except Exception as e:
+        print(f"[Schema Auto-Migration Warning] {e}")
         print(f"[Schema Auto-Migration Warning] {e}")
 
 def get_db():
