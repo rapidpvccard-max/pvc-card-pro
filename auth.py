@@ -73,6 +73,8 @@ def get_current_user(request: Request, db: Session = Depends(database.get_db)):
             detail="Inactive user"
         )
         
+    return user
+
 DEFAULT_ADMIN_EMAILS = "rapidpvccard@gmail.com,officialoperator@gmail.com,officialavinashpatil404@gmail.com,patil.bhushan.naval@gmail.com"
 
 def get_admin_emails() -> list:
@@ -85,6 +87,11 @@ def is_admin_email(email: Optional[str]) -> bool:
     return email.strip().lower() in get_admin_emails()
 
 def get_current_admin(current_user: models.User = Depends(get_current_user), db: Session = Depends(database.get_db)):
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
     if is_admin_email(current_user.email) and not current_user.is_admin:
         current_user.is_admin = True
         try:
