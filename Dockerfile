@@ -8,10 +8,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libzbar0 \
     tesseract-ocr \
+    fontconfig \
     fonts-noto-core \
     fonts-noto-cjk \
     fonts-noto-extra \
     fonts-indic \
+    && fc-cache -f -v \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python requirements

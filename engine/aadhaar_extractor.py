@@ -86,6 +86,7 @@ class AadhaarData:
     local_confidence: int = 0        # 0-100, see extract_local_language_fields
     photo_bytes: Optional[bytes] = None      # JPEG2000 raw bytes
     photo_png_bytes: Optional[bytes] = None  # converted to PNG for easy use
+    qr_base64: str = ""                      # Extracted original QR image as Base64 PNG
     extraction_confidence: str = "low"
     errors: list = field(default_factory=list)
     trace: list = field(default_factory=list)  # step-by-step diagnostic log
@@ -835,6 +836,14 @@ def extract_aadhaar_data(pdf_path: str, password: Optional[str] = None) -> Aadha
             parsed = parse_qr_fields(decompressed, trace=trace)
             if parsed.full_name and len(parsed.full_name) > 1 and not looks_like_admin_noise(parsed.full_name):
                 trace.append(f"QR candidate #{i} produced a usable name -- using it.")
+                try:
+                    import base64
+                    pil_qr = Image.open(io.BytesIO(img_bytes)).convert("RGB")
+                    buf = io.BytesIO()
+                    pil_qr.save(buf, format="PNG")
+                    parsed.qr_base64 = base64.b64encode(buf.getvalue()).decode("ascii")
+                except Exception:
+                    pass
                 result = parsed
                 break
             qr_error = f"QR candidate #{i} decoded but field parsing produced no usable name."

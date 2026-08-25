@@ -102,8 +102,8 @@ class PersistentBrowserWorker:
         self._stopped = False
         self.worker_thread = threading.Thread(target=self._worker_loop, daemon=True, name="PVC-RenderWorker")
         self.worker_thread.start()
-        # Wait up to 5 seconds for initial warm-up
-        self.ready_event.wait(timeout=5)
+        # Wait up to 6 seconds for initial warm-up
+        self.ready_event.wait(timeout=6)
 
     def _worker_loop(self):
         while not self._stopped:
@@ -119,6 +119,15 @@ class PersistentBrowserWorker:
                         device_scale_factor=1
                     )
                     page = ctx.new_page()
+
+                    # Pre-warm Chromium layout engine and Indian fonts
+                    try:
+                        warm_html = "<html><head><style>body{font-family:'Noto Sans','Noto Sans Devanagari','Noto Sans Gujarati',sans-serif;}</style></head><body><h1>भारत સરકાર 1234</h1></body></html>"
+                        page.set_content(warm_html, wait_until="domcontentloaded", timeout=5000)
+                        page.screenshot(type="png")
+                    except Exception as we:
+                        print(f"[CardRenderer] Pre-warm notice: {we}")
+
                     self.ready_event.set()
                     print("[CardRenderer] Persistent Chromium rendering engine warm and ready.")
 
@@ -129,19 +138,21 @@ class PersistentBrowserWorker:
                         front_html, back_html, front_path, back_path, res_queue = task
                         try:
                             # Render Front (instant rendering with all assets inline base64)
-                            page.set_content(front_html, wait_until="domcontentloaded", timeout=4000)
+                            page.set_content(front_html, wait_until="domcontentloaded", timeout=10000)
                             page.screenshot(path=front_path, type="png")
 
                             # Render Back
-                            page.set_content(back_html, wait_until="domcontentloaded", timeout=4000)
+                            page.set_content(back_html, wait_until="domcontentloaded", timeout=10000)
                             page.screenshot(path=back_path, type="png")
 
                             res_queue.put((True, None))
                         except Exception as e:
                             print(f"[CardRenderer] Render error in persistent worker: {e}")
                             res_queue.put((False, str(e)))
-                            # Restart clean browser if damaged
-                            break
+                            try:
+                                page.goto("about:blank", timeout=2000)
+                            except Exception:
+                                break  # Break inner loop to restart clean browser if crashed
                         finally:
                             self.req_queue.task_done()
                     
@@ -153,9 +164,9 @@ class PersistentBrowserWorker:
                 print(f"[CardRenderer] Worker thread error ({e}). Restarting worker in 1s...")
                 time.sleep(1)
 
-    def render(self, front_html: str, back_html: str, front_path: str, back_path: str, timeout: int = 8):
+    def render(self, front_html: str, back_html: str, front_path: str, back_path: str, timeout: int = 15):
         if not self.ready_event.is_set():
-            self.ready_event.wait(timeout=3)
+            self.ready_event.wait(timeout=5)
 
         res_queue = queue.Queue()
         self.req_queue.put((front_html, back_html, front_path, back_path, res_queue))
@@ -184,9 +195,9 @@ def _cold_start_render_html(front_html: str, back_html: str, front_path: str, ba
         )
         c = b.new_context(viewport={"width": 1016, "height": 638}, device_scale_factor=1)
         pg = c.new_page()
-        pg.set_content(front_html, wait_until="domcontentloaded", timeout=4000)
+        pg.set_content(front_html, wait_until="domcontentloaded", timeout=10000)
         pg.screenshot(path=front_path, type="png")
-        pg.set_content(back_html, wait_until="domcontentloaded", timeout=4000)
+        pg.set_content(back_html, wait_until="domcontentloaded", timeout=10000)
         pg.screenshot(path=back_path, type="png")
         b.close()
     return front_path, back_path

@@ -389,7 +389,7 @@ async def generate_pipeline(
             engine_data["__pdf_path__"] = filepath
             engine_data["__pdf_password__"] = password
             mapped_data = map_aadhaar_data(engine_data)
-            qr_b64 = recover_qr_from_pdf(filepath, password, engine_data.get("trace", []))
+            qr_b64 = engine_data.get("qr_base64") or recover_qr_from_pdf(filepath, password, engine_data.get("trace", []))
             if qr_b64:
                 mapped_data["qr"]["available"] = True
                 mapped_data["qr"]["base64"] = qr_b64
