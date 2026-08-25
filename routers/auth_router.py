@@ -140,8 +140,8 @@ def google_callback(
         db.commit()
         db.refresh(user)
         
-        # Give starting credits (1000 for admin, 5 for normal user)
-        start_bal = 1000.0 if is_admin_user else 5.0
+        # Give starting credits (1000 for admin, 0 for normal user)
+        start_bal = 1000.0 if is_admin_user else 0.0
         new_credits = models.UserCredits(user_id=user.id, wallet_balance=start_bal, total_generated=0)
         db.add(new_credits)
         db.commit()
@@ -196,7 +196,7 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(database.get_d
     db.refresh(new_user)
     
     # Initialize default credits for new user
-    start_bal = 1000.0 if is_admin else 5.0
+    start_bal = 1000.0 if is_admin else 0.0
     new_credits = models.UserCredits(user_id=new_user.id, wallet_balance=start_bal, total_generated=0)
     db.add(new_credits)
     db.commit()

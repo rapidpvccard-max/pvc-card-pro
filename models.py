@@ -28,7 +28,7 @@ class UserCredits(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
-    wallet_balance = Column(Float, default=5.0) # Default starting balance
+    wallet_balance = Column(Float, default=0.0) # Default starting balance
     total_generated = Column(Integer, default=0)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
