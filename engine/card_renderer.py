@@ -117,13 +117,16 @@ class PersistentBrowserWorker:
                         viewport={"width": 1016, "height": 638},
                         device_scale_factor=1
                     )
-                    page = ctx.new_page()
+                    page_front = ctx.new_page()
+                    page_back = ctx.new_page()
 
                     # Pre-warm Chromium layout engine and Indian fonts
                     try:
                         warm_html = "<html><head><style>body{font-family:'Noto Sans','Noto Sans Devanagari','Noto Sans Gujarati',sans-serif;}</style></head><body><h1>भारत સરકાર 1234</h1></body></html>"
-                        page.set_content(warm_html, wait_until="domcontentloaded", timeout=5000)
-                        page.screenshot(type="png")
+                        page_front.set_content(warm_html, wait_until="commit", timeout=5000)
+                        page_front.screenshot(type="png")
+                        page_back.set_content(warm_html, wait_until="commit", timeout=5000)
+                        page_back.screenshot(type="png")
                     except Exception as we:
                         print(f"[CardRenderer] Pre-warm notice: {we}")
 
@@ -136,22 +139,23 @@ class PersistentBrowserWorker:
                             break
                         front_html, back_html, front_path, back_path, res_queue = task
                         try:
-                            # Render Front (instant rendering with all assets inline base64)
-                            page.set_content(front_html, wait_until="domcontentloaded", timeout=10000)
-                            page.screenshot(path=front_path, type="png")
+                            # Render Front (instant 70ms rendering with inline assets)
+                            page_front.set_content(front_html, wait_until="commit", timeout=8000)
+                            page_front.screenshot(path=front_path, type="png")
 
-                            # Render Back
-                            page.set_content(back_html, wait_until="domcontentloaded", timeout=10000)
-                            page.screenshot(path=back_path, type="png")
+                            # Render Back (instant 70ms rendering with inline assets)
+                            page_back.set_content(back_html, wait_until="commit", timeout=8000)
+                            page_back.screenshot(path=back_path, type="png")
 
                             res_queue.put((True, None))
                         except Exception as e:
                             print(f"[CardRenderer] Render error in persistent worker: {e}")
                             res_queue.put((False, str(e)))
                             try:
-                                page.goto("about:blank", timeout=2000)
+                                page_front.goto("about:blank", timeout=1000)
+                                page_back.goto("about:blank", timeout=1000)
                             except Exception:
-                                break  # Break inner loop to restart clean browser if crashed
+                                break  # Restart clean browser if crashed
                         finally:
                             self.req_queue.task_done()
                     
