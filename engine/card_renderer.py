@@ -71,6 +71,30 @@ def _get_template_b64(images_dir: str, doc_type: str, side: str) -> str:
 # Persistent Dedicated Browser Worker Thread
 # ---------------------------------------------------------------------------
 
+CHROMIUM_STABLE_ARGS = [
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--disable-dev-shm-usage",
+    "--disable-gpu",
+    "--disable-software-rasterizer",
+    "--disable-background-networking",
+    "--disable-background-timer-throttling",
+    "--disable-backgrounding-occluded-windows",
+    "--disable-breakpad",
+    "--disable-component-extensions-with-background-pages",
+    "--disable-extensions",
+    "--disable-features=Translate,BackForwardCache,AcceptCHFrame,MediaRouter,OptimizationHints",
+    "--disable-ipc-flooding-protection",
+    "--disable-renderer-backgrounding",
+    "--enable-features=NetworkService,NetworkServiceInProcess",
+    "--force-color-profile=srgb",
+    "--mute-audio",
+    "--no-default-browser-check",
+    "--no-first-run",
+    "--no-zygote",
+    "--js-flags=--max-old-space-size=256"
+]
+
 class PersistentBrowserWorker:
     def __init__(self):
         self.req_queue = queue.Queue()
@@ -78,8 +102,8 @@ class PersistentBrowserWorker:
         self._stopped = False
         self.worker_thread = threading.Thread(target=self._worker_loop, daemon=True, name="PVC-RenderWorker")
         self.worker_thread.start()
-        # Wait up to 8 seconds for initial warm-up
-        self.ready_event.wait(timeout=8)
+        # Wait up to 5 seconds for initial warm-up
+        self.ready_event.wait(timeout=5)
 
     def _worker_loop(self):
         while not self._stopped:
@@ -88,16 +112,7 @@ class PersistentBrowserWorker:
                 with sync_playwright() as p:
                     browser = p.chromium.launch(
                         headless=True,
-                        args=[
-                            "--no-sandbox",
-                            "--disable-setuid-sandbox",
-                            "--disable-dev-shm-usage",
-                            "--disable-gpu",
-                            "--disable-software-rasterizer",
-                            "--no-first-run",
-                            "--no-zygote",
-                            "--single-process"
-                        ]
+                        args=CHROMIUM_STABLE_ARGS
                     )
                     ctx = browser.new_context(
                         viewport={"width": 1016, "height": 638},
@@ -113,19 +128,19 @@ class PersistentBrowserWorker:
                             break
                         front_html, back_html, front_path, back_path, res_queue = task
                         try:
-                            # Render Front (instant rendering without network block)
-                            page.set_content(front_html, wait_until="domcontentloaded", timeout=10000)
+                            # Render Front (instant rendering with all assets inline base64)
+                            page.set_content(front_html, wait_until="domcontentloaded", timeout=4000)
                             page.screenshot(path=front_path, type="png")
 
                             # Render Back
-                            page.set_content(back_html, wait_until="domcontentloaded", timeout=10000)
+                            page.set_content(back_html, wait_until="domcontentloaded", timeout=4000)
                             page.screenshot(path=back_path, type="png")
 
                             res_queue.put((True, None))
                         except Exception as e:
                             print(f"[CardRenderer] Render error in persistent worker: {e}")
                             res_queue.put((False, str(e)))
-                            # Break inner loop to restart clean browser if damaged
+                            # Restart clean browser if damaged
                             break
                         finally:
                             self.req_queue.task_done()
@@ -138,16 +153,20 @@ class PersistentBrowserWorker:
                 print(f"[CardRenderer] Worker thread error ({e}). Restarting worker in 1s...")
                 time.sleep(1)
 
-    def render(self, front_html: str, back_html: str, front_path: str, back_path: str, timeout: int = 30):
+    def render(self, front_html: str, back_html: str, front_path: str, back_path: str, timeout: int = 8):
         if not self.ready_event.is_set():
-            self.ready_event.wait(timeout=5)
+            self.ready_event.wait(timeout=3)
 
         res_queue = queue.Queue()
         self.req_queue.put((front_html, back_html, front_path, back_path, res_queue))
-        success, err = res_queue.get(timeout=timeout)
+        try:
+            success, err = res_queue.get(timeout=timeout)
+        except queue.Empty:
+            success, err = False, "Worker queue timeout"
+
         if not success:
-            # Fallback to cold render if persistent worker failed
-            print(f"[CardRenderer] Persistent render failed ({err}), falling back to direct render...")
+            # Fallback to direct render if persistent worker had a transient issue
+            print(f"[CardRenderer] Persistent render fallback ({err}), running direct render...")
             return _cold_start_render_html(front_html, back_html, front_path, back_path)
         return front_path, back_path
 
@@ -161,18 +180,13 @@ def _cold_start_render_html(front_html: str, back_html: str, front_path: str, ba
     with sync_playwright() as p:
         b = p.chromium.launch(
             headless=True,
-            args=[
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-gpu"
-            ]
+            args=CHROMIUM_STABLE_ARGS
         )
         c = b.new_context(viewport={"width": 1016, "height": 638}, device_scale_factor=1)
         pg = c.new_page()
-        pg.set_content(front_html, wait_until="domcontentloaded", timeout=10000)
+        pg.set_content(front_html, wait_until="domcontentloaded", timeout=4000)
         pg.screenshot(path=front_path, type="png")
-        pg.set_content(back_html, wait_until="domcontentloaded", timeout=10000)
+        pg.set_content(back_html, wait_until="domcontentloaded", timeout=4000)
         pg.screenshot(path=back_path, type="png")
         b.close()
     return front_path, back_path

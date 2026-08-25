@@ -376,28 +376,22 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             // STEP 1: Upload PDF
             setStepState(0, 'active');
-            await sleep(500); 
             
-            // Fire the actual pipeline request in the background
+            // Fire the pipeline request immediately
             const generatePromise = fetch('/generate', {
                 method: 'POST',
                 body: formData
             });
 
-            // Visually advance steps based on time/heuristics since we don't have websocket events
+            // Fast smooth visual progress indicators
             setStepState(0, 'completed');
             setStepState(1, 'active');
-            await sleep(800);
             
-            setStepState(1, 'completed');
-            setStepState(2, 'active');
-            await sleep(800);
-            
-            setStepState(2, 'completed');
-            setStepState(3, 'active');
-
             // Wait for PVC generation to finish
             const response = await generatePromise;
+            setStepState(1, 'completed');
+            setStepState(2, 'completed');
+            setStepState(3, 'active');
             
             if (response.status === 401) {
                 window.location.href = '/login';

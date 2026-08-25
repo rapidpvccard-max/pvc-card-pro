@@ -114,10 +114,13 @@ def map_aadhaar_data(engine_data: dict) -> dict:
 
     def _scan_pdf_text():
         try:
-            import pdfplumber
-            open_kwargs = {"password": pdf_password} if pdf_password else {}
-            with pdfplumber.open(pdf_path, **open_kwargs) as pdf:
-                return "\n".join(page.extract_text() or "" for page in pdf.pages[:3])
+            import fitz
+            doc = fitz.open(pdf_path)
+            if doc.needs_pass and pdf_password:
+                doc.authenticate(pdf_password)
+            parts = [page.get_text("text") for page in doc[:3]]
+            doc.close()
+            return "\n".join(parts)
         except Exception:
             return ""
 

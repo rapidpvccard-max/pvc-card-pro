@@ -754,19 +754,16 @@ LABEL_PATTERNS = {
 def extract_via_text_layer(pdf_path: str, password: Optional[str] = None) -> AadhaarData:
     data = AadhaarData(source="text_layer", extraction_confidence="fallback")
 
-    if pdfplumber is None:
-        data.errors.append("pdfplumber not installed; text-layer fallback unavailable.")
-        return data
-
     def _get_text() -> str:
-        if password:
-            with pdfplumber.open(pdf_path, password=password) as pdf:
-                return "\n".join(page.extract_text() or "" for page in pdf.pages[:2])
-        else:
-            with pdfplumber.open(pdf_path) as pdf:
-                return "\n".join(page.extract_text() or "" for page in pdf.pages[:2])
+        doc = fitz.open(pdf_path)
+        try:
+            if doc.needs_pass and password:
+                doc.authenticate(password)
+            return "\n".join(page.get_text("text") for page in doc[:2])
+        finally:
+            doc.close()
 
-    full_text_val = _safe(_get_text, default="", label="pdfplumber extract_text", trace=data.errors)
+    full_text_val = _safe(_get_text, default="", label="PyMuPDF extract_text", trace=data.errors)
     full_text: str = str(full_text_val) if full_text_val is not None else ""
 
     for field_name, pattern in LABEL_PATTERNS.items():
