@@ -495,26 +495,61 @@ document.addEventListener('DOMContentLoaded', () => {
         return 'Unable to generate PVC card. Please try again.';
     }
 
-    // Download Helpers
-    function triggerDownload(url, filename) {
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    // Robust Binary Blob Download Helper
+    async function triggerDownload(url, filename, btnElement = null) {
+        let originalText = '';
+        if (btnElement) {
+            originalText = btnElement.innerHTML;
+            btnElement.disabled = true;
+            btnElement.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                Downloading...
+            `;
+        }
+        try {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('File download failed from server.');
+            const blob = await res.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = blobUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+            }, 300);
+            window.showToast(`${filename} downloaded successfully!`, 'success');
+        } catch (err) {
+            console.error('Download error:', err);
+            // Fallback direct open in new window
+            window.open(url, '_blank');
+        } finally {
+            if (btnElement) {
+                btnElement.disabled = false;
+                btnElement.innerHTML = originalText;
+            }
+        }
     }
 
     btnDlFront.addEventListener('click', () => {
-        if (currentFrontUrl) triggerDownload(currentFrontUrl, `Aadhaar_Front_${currentRunId.substring(0,6)}.png`);
+        if (currentFrontUrl && currentRunId) {
+            triggerDownload(currentFrontUrl, `PVC_Front_${currentRunId.substring(0, 8)}.png`, btnDlFront);
+        }
     });
 
     btnDlBack.addEventListener('click', () => {
-        if (currentBackUrl) triggerDownload(currentBackUrl, `Aadhaar_Back_${currentRunId.substring(0,6)}.png`);
+        if (currentBackUrl && currentRunId) {
+            triggerDownload(currentBackUrl, `PVC_Back_${currentRunId.substring(0, 8)}.png`, btnDlBack);
+        }
     });
 
     btnDlA4.addEventListener('click', () => {
-        if (currentA4Url) triggerDownload(currentA4Url, `PVC_Print_${currentRunId.substring(0,8)}.pdf`);
+        if (currentA4Url && currentRunId) {
+            triggerDownload(currentA4Url, `PVC_Card_Print_${currentRunId.substring(0, 8)}.pdf`, btnDlA4);
+        }
     });
 
     // Start Over

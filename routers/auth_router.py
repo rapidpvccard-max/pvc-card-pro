@@ -27,13 +27,14 @@ def get_google_config() -> tuple[str, str, str]:
     return client_id, client_secret, redirect_uri
 
 def get_google_redirect_uri(request: Request) -> str:
-    # Dynamically match the exact host the user is browsing on (e.g. 127.0.0.1:8000 or localhost:8000)
-    base = str(request.base_url).rstrip("/")
     env_uri = os.environ.get("GOOGLE_REDIRECT_URI", "").strip()
-    # If production custom domain is explicitly configured, use it
     if env_uri and "127.0.0.1" not in env_uri and "localhost" not in env_uri:
         return env_uri
-    return f"{base}/auth/google/callback"
+    
+    # Check forwarded headers for reverse proxy/tunnel like Cloudflare
+    scheme = request.headers.get("x-forwarded-proto", request.url.scheme).lower()
+    host = request.headers.get("x-forwarded-host", request.headers.get("host", request.url.netloc))
+    return f"{scheme}://{host}/auth/google/callback"
 
 @router.get("/google/login")
 def google_login(request: Request):

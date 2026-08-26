@@ -340,15 +340,15 @@ body {
 
 .footer-tagline {
     position: absolute;
-    bottom: 11px;
+    bottom: 13px;
     left: 0;
     width: 1016px;
     text-align: center;
-    font-size: 44px;
-    font-weight: bold;
+    font-size: 36px;
+    font-weight: 700;
     color: #000000;
-    letter-spacing: 1px;
-    line-height: 1;
+    letter-spacing: 2px;
+    line-height: 1.1;
     z-index: 100;
     white-space: nowrap;
     overflow: hidden;

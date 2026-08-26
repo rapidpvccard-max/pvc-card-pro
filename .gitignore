@@ -27,6 +27,8 @@ output/*
 static/renders/*
 !static/renders/.gitkeep
 tests_output/
-*.pdf
-!tests/*.pdf
+# Local tunnel binaries & temporary deployment archives
+cloudflared.exe
+LIVE_LINK.txt
+*.zip
 

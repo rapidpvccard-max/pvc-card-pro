@@ -138,31 +138,28 @@ class PersistentBrowserWorker:
                         if task is None:
                             break
                         front_html, back_html, front_path, back_path, res_queue = task
+                        page = None
                         try:
-                            # Render Front (instant 70ms rendering with inline assets)
-                            page_front.set_content(front_html, wait_until="commit", timeout=8000)
-                            page_front.screenshot(path=front_path, type="png")
+                            page = ctx.new_page()
+                            # Render Front
+                            page.set_content(front_html, wait_until="domcontentloaded", timeout=10000)
+                            page.screenshot(path=front_path, type="png")
 
-                            # Render Back (instant 70ms rendering with inline assets)
-                            page_back.set_content(back_html, wait_until="commit", timeout=8000)
-                            page_back.screenshot(path=back_path, type="png")
+                            # Render Back
+                            page.set_content(back_html, wait_until="domcontentloaded", timeout=10000)
+                            page.screenshot(path=back_path, type="png")
 
                             res_queue.put((True, None))
                         except Exception as e:
                             print(f"[CardRenderer] Render error in persistent worker: {e}")
                             res_queue.put((False, str(e)))
-                            try:
-                                page_front.goto("about:blank", timeout=1000)
-                                page_back.goto("about:blank", timeout=1000)
-                            except Exception:
-                                break  # Restart clean browser if crashed
                         finally:
+                            if page:
+                                try:
+                                    page.close()
+                                except Exception:
+                                    pass
                             self.req_queue.task_done()
-                    
-                    try:
-                        browser.close()
-                    except Exception:
-                        pass
             except Exception as e:
                 print(f"[CardRenderer] Worker thread error ({e}). Restarting worker in 1s...")
                 time.sleep(1)

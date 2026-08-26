@@ -496,7 +496,6 @@ from fastapi import BackgroundTasks
 @app.get("/download-pdf/{run_id}")
 async def download_pdf(
     run_id: str,
-    background_tasks: BackgroundTasks,
     current_user: models.User = Depends(auth.get_current_user),
     db: Session = Depends(database.get_db)
 ):
@@ -512,19 +511,10 @@ async def download_pdf(
     pdf_path = os.path.join("static", "renders", run_id, "a4_print.pdf")
     
     if not os.path.exists(pdf_path):
-        return JSONResponse(status_code=404, content={"success": False, "error": "File not found or already deleted."})
-        
-    def cleanup_run(r_id: str):
-        render_dir = os.path.join("static", "renders", r_id)
-        if os.path.exists(render_dir):
-            shutil.rmtree(render_dir, ignore_errors=True)
-            print(f"[Auto-Cleanup] Deleted generated files for run: {r_id}")
-            
-    background_tasks.add_task(cleanup_run, run_id)
+        return JSONResponse(status_code=404, content={"success": False, "error": "File not found or expired."})
     
     return FileResponse(
         path=pdf_path,
         filename=f"PVC_Card_{run_id[:8]}.pdf",
-        media_type="application/pdf",
-        background=background_tasks
+        media_type="application/pdf"
     )
