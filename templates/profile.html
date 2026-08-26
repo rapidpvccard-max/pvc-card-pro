@@ -4,6 +4,28 @@
 
 {% set active_page = "profile" %}
 
+{% block extra_head %}
+<style>
+    .profile-grid-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+
+    @media (max-width: 768px) {
+        .profile-grid-layout {
+            grid-template-columns: 1fr !important;
+            gap: 16px !important;
+        }
+        .card {
+            padding: 20px 16px !important;
+            border-radius: 16px !important;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="mb-6 flex justify-between items-center" style="margin-bottom: 24px;">
     <div>
@@ -12,7 +34,7 @@
     </div>
 </div>
 
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start;">
+<div class="profile-grid-layout">
     
     <!-- Left Column: User Summary & Wallet Info -->
     <div style="display: flex; flex-direction: column; gap: 24px;">

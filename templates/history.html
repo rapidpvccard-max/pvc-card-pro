@@ -4,8 +4,60 @@
 
 {% set active_page = "history" %}
 
+{% block extra_head %}
+<style>
+    @media (max-width: 640px) {
+        .history-header-flex {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 14px !important;
+            margin-bottom: 18px !important;
+        }
+        .history-header-flex h2 {
+            font-size: 1.35rem !important;
+        }
+        .history-header-flex a {
+            width: 100%;
+            justify-content: center;
+        }
+        .stats-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 10px !important;
+            margin-bottom: 18px !important;
+        }
+        .stat-card {
+            padding: 12px 10px !important;
+        }
+        .stat-value {
+            font-size: 1.35rem !important;
+        }
+        .history-card-wrap {
+            padding: 16px 12px !important;
+            border-radius: 16px !important;
+        }
+        .history-tab-bar {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 10px !important;
+        }
+        .history-tab-buttons {
+            width: 100%;
+            display: flex;
+            gap: 8px;
+        }
+        .history-tab-buttons button {
+            flex: 1;
+            padding: 8px 10px !important;
+            font-size: 0.78rem !important;
+            text-align: center;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="mb-6 flex justify-between items-center" style="margin-bottom: 24px;">
+<div class="mb-6 flex justify-between items-center history-header-flex" style="margin-bottom: 24px;">
     <div>
         <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--text-main);">Generation & Activity History</h2>
         <p class="text-muted" style="font-size: 0.9rem;">View all your generated PVC cards and wallet transaction records.</p>
@@ -39,9 +91,9 @@
 </div>
 
 <!-- History Tabs & Container -->
-<div class="card" style="padding: 24px;">
-    <div class="flex justify-between items-center" style="margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
-        <div style="display: flex; gap: 10px;">
+<div class="card history-card-wrap" style="padding: 24px;">
+    <div class="flex justify-between items-center history-tab-bar" style="margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
+        <div class="history-tab-buttons" style="display: flex; gap: 10px;">
             <button id="tab-btn-generations" class="btn-primary" onclick="showTab('generations')" style="padding: 8px 18px; font-size: 0.85rem;">
                 Card Generations
             </button>

@@ -2,30 +2,44 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>{% block title %}Dashboard{% endblock %} - Rapid PVC</title>
-    <link rel="stylesheet" href="/static/css/rapid_theme.css?v=12">
+    <link rel="stylesheet" href="/static/css/rapid_theme.css?v=15">
     <style>
-        /* Bulletproof Modern Sidebar Styling (Bypasses Browser Cache) */
+        /* =========================================================
+           RESPONSIVE DASHBOARD LAYOUT & LUXURY SIDEBAR
+           ========================================================= */
+        
+        .dashboard-layout {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f8fafc;
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        /* Desktop Sidebar Default */
         .sidebar {
-            width: 260px !important;
-            background: #ffffff !important;
-            border-right: 1px solid #e2e8f0 !important;
-            display: flex !important;
-            flex-direction: column !important;
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            bottom: 0 !important;
-            height: 100vh !important;
-            z-index: 50 !important;
-            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.03) !important;
+            width: 260px;
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            height: 100vh;
+            z-index: 900;
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.03);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .sidebar-header {
             height: 72px;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             padding: 0 20px;
             border-bottom: 1px solid #f1f5f9;
             flex-shrink: 0;
@@ -72,6 +86,19 @@
             vertical-align: middle;
         }
 
+        .sidebar-close-btn {
+            display: none;
+            background: #f1f5f9;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            color: #64748b;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
         /* Operator Profile Hub Card */
         .user-profile-widget {
             margin: 14px 14px 8px 14px;
@@ -85,10 +112,6 @@
             display: block;
             flex-shrink: 0;
             transition: transform 0.2s ease;
-        }
-
-        .user-profile-widget:hover {
-            transform: translateY(-2px);
         }
 
         .user-avatar-ring {
@@ -324,18 +347,201 @@
             transform: translateY(-1px);
         }
 
+        /* Main Content Layout */
         .main-content {
-            margin-left: 260px !important;
+            margin-left: 260px;
             flex: 1;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            width: calc(100% - 260px);
+            min-width: 0;
+        }
+
+        /* Top Header */
+        .top-header {
+            height: 70px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+
+        .mobile-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            width: 40px;
+            height: 40px;
+            align-items: center;
+            justify-content: center;
+            color: #0f172a;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .mobile-menu-toggle:hover {
+            background: #eff6ff;
+            color: #2563eb;
+            border-color: #bfdbfe;
+        }
+
+        .mobile-brand-title {
+            display: none;
+            font-weight: 800;
+            font-size: 1.1rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #0f172a;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .ai-core-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fdf4ff;
+            color: #c026d3;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            border: 1px solid #fbcfe8;
+        }
+
+        .credit-badge {
+            background-color: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #047857;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #ffffff;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+        }
+
+        /* Page Container */
+        .page-container {
+            padding: 28px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            min-width: 0;
+        }
+
+        /* Sidebar Backdrop Overlay on Mobile */
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(4px);
+            z-index: 850;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-backdrop.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* =========================================================
+           MOBILE RESPONSIVE BREAKPOINT (<= 768px)
+           ========================================================= */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+                z-index: 1000;
+            }
+
+            .sidebar.open {
+                transform: translateX(0) !important;
+                box-shadow: 10px 0 30px rgba(0, 0, 0, 0.25) !important;
+            }
+
+            .sidebar-close-btn {
+                display: flex;
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                width: 100% !important;
+                max-width: 100vw !important;
+                overflow-x: hidden !important;
+            }
+
+            .top-header {
+                padding: 0 16px;
+                height: 62px;
+            }
+
+            .mobile-menu-toggle {
+                display: flex;
+            }
+
+            .mobile-brand-title {
+                display: flex;
+            }
+
+            .ai-core-pill {
+                display: none; /* Save header space on mobile */
+            }
+
+            .page-container {
+                padding: 16px 12px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                overflow-x: hidden !important;
+            }
+
+            .credit-badge {
+                padding: 5px 10px;
+                font-size: 0.78rem;
+            }
         }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
 <body class="dashboard-layout">
     
+    <!-- Mobile Sidebar Dark Backdrop -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
+
     <!-- Modern Luxury Sidebar -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="main-sidebar">
         <!-- Brand Header -->
         <div class="sidebar-header">
             <a href="/dashboard" class="brand-logo">
@@ -347,6 +553,10 @@
                     <span class="brand-badge-tag">PRO</span>
                 </div>
             </a>
+            
+            <button class="sidebar-close-btn" onclick="closeSidebar()" title="Close Menu">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
         </div>
         
         <!-- Operator Mini Hub Profile Card -->
@@ -435,35 +645,66 @@
         </div>
     </aside>
 
-    <!-- Main Content -->
+    <!-- Main Content Area -->
     <main class="main-content">
-        <!-- Top Header -->
+        <!-- Top Header Navigation Bar -->
         <header class="top-header">
+            <div class="mobile-header-left">
+                <button class="mobile-menu-toggle" onclick="toggleSidebar()" title="Open Navigation Menu">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                </button>
+                <div class="mobile-brand-title">Rapid PVC</div>
+            </div>
+
             <div class="header-actions">
-                <div style="display: flex; align-items: center; gap: 8px; background: #fdf4ff; color: #c026d3; padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 0.8rem;">
+                <div class="ai-core-pill">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                     AI Neural Core Active
                 </div>
                 
                 <div class="credit-badge" title="Wallet Balance">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                     <span id="header-wallet-balance" style="font-weight: 800;">₹0.00</span>
-                    <a href="/subscription" style="background: #059669; color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; margin-left: 6px; text-decoration: none; transition: background 0.2s;">Topup</a>
+                    <a href="/subscription" style="background: #059669; color: white; padding: 3px 8px; border-radius: 10px; font-size: 0.68rem; font-weight: 700; margin-left: 4px; text-decoration: none;">Topup</a>
                 </div>
                 
                 <a href="/profile" title="View Profile" style="text-decoration: none;">
-                    <div class="avatar" id="header-user-initial" style="cursor: pointer; transition: transform 0.2s;">U</div>
+                    <div class="avatar" id="header-user-initial" style="cursor: pointer;">U</div>
                 </a>
             </div>
         </header>
 
-        <!-- Page Content -->
+        <!-- Page Dynamic Content -->
         <div class="page-container">
             {% block content %}{% endblock %}
         </div>
     </main>
 
     <script>
+        // Mobile Sidebar Controls
+        function toggleSidebar() {
+            const sidebar = document.getElementById('main-sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            if (sidebar) sidebar.classList.toggle('open');
+            if (backdrop) backdrop.classList.toggle('active');
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('main-sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            if (sidebar) sidebar.classList.remove('open');
+            if (backdrop) backdrop.classList.remove('active');
+        }
+
+        // Close sidebar on menu item click on mobile
+        document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    closeSidebar();
+                }
+            });
+        });
+
         // Fetch credits and user profile on load
         fetch('/api/user/me')
             .then(res => res.json())

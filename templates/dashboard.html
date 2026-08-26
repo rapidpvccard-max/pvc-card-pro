@@ -503,7 +503,7 @@
         gap: 4px;
     }
 
-    /* Responsive */
+    /* Responsive Mobile CSS */
     @media (max-width: 1024px) {
         .metrics-stats-grid {
             grid-template-columns: repeat(2, 1fr);
@@ -513,15 +513,70 @@
         }
     }
 
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
         .hero-command-card {
-            padding: 24px 20px;
+            padding: 22px 16px;
+            border-radius: 18px;
+            margin-bottom: 20px;
         }
         .hero-title {
-            font-size: 1.6rem;
+            font-size: 1.4rem;
+            line-height: 1.25;
+        }
+        .hero-desc {
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        .hero-feature-tags {
+            flex-wrap: wrap;
+            gap: 8px;
         }
         .metrics-stats-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            padding: 14px 12px;
+            border-radius: 14px;
+        }
+        .stat-value {
+            font-size: 1.4rem;
+        }
+        .stat-label {
+            font-size: 0.72rem;
+        }
+        .services-showcase-grid {
             grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .service-showcase-card {
+            padding: 20px 16px;
+            border-radius: 18px;
+        }
+        .service-price-pill {
+            top: 16px;
+            right: 16px;
+            font-size: 0.75rem;
+            padding: 4px 10px;
+        }
+        .service-icon-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+        }
+        .service-name {
+            font-size: 1.18rem;
+        }
+        .recent-activity-card {
+            padding: 18px 14px;
+            border-radius: 18px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .recent-table {
+            min-width: 520px;
         }
     }
 </style>

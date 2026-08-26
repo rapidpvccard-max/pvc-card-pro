@@ -500,12 +500,32 @@
         }
 
         @media (max-width: 768px) {
-            .landing-nav { padding: 16px 20px; }
+            .landing-nav { padding: 14px 16px; }
             .landing-nav-links { display: none; }
-            .hero-main-title { font-size: 2.4rem; }
-            .workflow-steps-3 { grid-template-columns: 1fr; }
-            .pricing-plans-grid { grid-template-columns: 1fr; }
-            .metrics-grid-4 { grid-template-columns: 1fr; }
+            .hero-section { padding: 40px 16px 36px 16px; }
+            .hero-main-title { 
+                font-size: clamp(1.65rem, 6.5vw, 2.2rem) !important; 
+                line-height: 1.25 !important;
+                letter-spacing: -0.5px !important;
+            }
+            .hero-subtext {
+                font-size: 0.92rem !important;
+                line-height: 1.5 !important;
+            }
+            .hero-cta-group {
+                flex-direction: column !important;
+                gap: 12px !important;
+            }
+            .hero-cta-group a {
+                width: 100% !important;
+                justify-content: center !important;
+            }
+            .section-wrapper { margin: 48px auto; padding: 0 16px; }
+            .section-headline { font-size: 1.6rem !important; }
+            .workflow-steps-3 { grid-template-columns: 1fr; gap: 16px; }
+            .pricing-plans-grid { grid-template-columns: 1fr; gap: 16px; }
+            .metrics-grid-4 { grid-template-columns: 1fr 1fr; gap: 12px; }
+            .master-cta-box { padding: 36px 20px; border-radius: 20px; margin: 40px 16px; }
         }
     </style>
 </head>
