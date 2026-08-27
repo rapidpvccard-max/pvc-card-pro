@@ -97,7 +97,7 @@
             {% if address.local %}
             <div class="address-local">{{ address.local }}</div>
             {% endif %}
-            <div class="address-eng">{{ address.full }}</div>
+            <div class="address-eng">{{ address.full_html | safe }}</div>
         </div>
         
         <div class="qr-area">

@@ -40,13 +40,48 @@ def map_aadhaar_data(engine_data: dict) -> dict:
     dob = get_str("dob")
     gender = get_str("gender")
     
-    # Address assembly
-    address_parts = []
-    for part in ["care_of", "house", "landmark", "location", "vtc", "post_office", "sub_district", "district", "state", "pincode"]:
+    # Address assembly — matches original Aadhaar PDF line-break pattern exactly:
+    #
+    #   Line 1: care_of, house, landmark, vtc, location, post_office, sub_district, district
+    #   Line 2: state - pincode
+    #
+    # This is the SAME two-line structure used by UIDAI on the physical Aadhaar card.
+
+    # Line 1: all locality/area details
+    line1_parts = []
+    for part in ["care_of", "house", "landmark", "vtc", "location", "post_office", "sub_district", "district"]:
         val = get_str(part)
         if val:
-            address_parts.append(val)
-    full_address = ", ".join(address_parts)
+            line1_parts.append(val)
+
+    # Line 2: state - pincode (exactly like original PDF: "Gujarat - 394210")
+    line2_parts = []
+    state_val = get_str("state")
+    pin_val = get_str("pincode")
+    if state_val and pin_val:
+        line2_parts.append(f"{state_val} - {pin_val}")
+    elif state_val:
+        line2_parts.append(state_val)
+    elif pin_val:
+        line2_parts.append(pin_val)
+
+    line1 = ", ".join(line1_parts)
+    line2 = ", ".join(line2_parts)
+
+    # full_html: HTML version with <br> for exact 2-line format matching original Aadhaar PDF.
+    # Works for ALL states and ALL languages — UIDAI QR fields are nationally standardized.
+    # Empty fields are gracefully skipped, so cards with fewer fields still render correctly.
+    if line1 and line2:
+        full_address_html = f"{line1},<br>{line2}"
+    elif line1:
+        full_address_html = line1
+    elif line2:
+        full_address_html = line2
+    else:
+        full_address_html = ""
+
+    # full_plain: plain text version (for fallback/logging)
+    full_address = ", ".join(filter(None, [line1, line2]))
     
     # Local language fields
     local_name = get_str("local_full_name")
@@ -187,7 +222,8 @@ def map_aadhaar_data(engine_data: dict) -> dict:
             "enrolment_number": vid_number
         },
         "address": {
-            "full": full_address,
+            "full": full_address,           # plain text (comma separated, no HTML)
+            "full_html": full_address_html,  # HTML with <br> for exact line breaks matching original Aadhaar PDF
             "local": local_address
         },
         "photo": {
