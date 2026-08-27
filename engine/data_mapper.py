@@ -42,17 +42,24 @@ def map_aadhaar_data(engine_data: dict) -> dict:
     
     # Address assembly — matches original Aadhaar PDF line-break pattern exactly:
     #
-    #   Line 1: care_of, house, landmark, vtc, location, post_office, sub_district, district
+    #   Line 1: care_of, house, street, landmark, location, vtc, sub_district, post_office, district
     #   Line 2: state - pincode
     #
-    # This is the SAME two-line structure used by UIDAI on the physical Aadhaar card.
+    # This is the SAME standard structure used by UIDAI on physical e-Aadhaar cards.
 
-    # Line 1: all locality/area details
+    # Line 1: all locality/area details in strict UIDAI order
+    address_keys = ["care_of", "house", "street", "landmark", "location", "vtc", "sub_district", "post_office", "district"]
     line1_parts = []
-    for part in ["care_of", "house", "landmark", "vtc", "location", "post_office", "sub_district", "district"]:
+    seen = set()
+    for part in address_keys:
         val = get_str(part)
         if val:
-            line1_parts.append(val)
+            val_clean = val.strip()
+            val_lower = val_clean.lower()
+            # Prevent duplicate repeated words (e.g. when location == vtc == "Dindoli")
+            if val_lower not in seen:
+                seen.add(val_lower)
+                line1_parts.append(val_clean)
 
     # Line 2: state - pincode (exactly like original PDF: "Gujarat - 394210")
     line2_parts = []

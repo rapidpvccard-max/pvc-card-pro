@@ -76,6 +76,7 @@ class AadhaarData:
     pincode: str = ""
     post_office: str = ""
     state: str = ""
+    street: str = ""
     sub_district: str = ""
     vtc: str = ""
     masked_number: str = ""
@@ -682,7 +683,7 @@ def extract_local_language_fields(pdf_path: str, password: Optional[str] = None,
 # Step 4: parse QR fields (validated against real Aadhaar samples)
 # ---------------------------------------------------------------------------
 
-FIELD_MAPPING = {
+FIELD_MAPPING_V2 = {
     0: "version",
     2: "reference_id",
     3: "full_name",
@@ -696,26 +697,51 @@ FIELD_MAPPING = {
     11: "pincode",
     12: "post_office",
     13: "state",
-    14: "sub_district",
-    15: "vtc",
+    14: "street",
+    15: "sub_district",
+    16: "vtc",
     17: "masked_number",
 }
 
-TEXT_FIELD_COUNT = 19
+FIELD_MAPPING_V1 = {
+    1: "reference_id",
+    2: "full_name",
+    3: "dob",
+    4: "gender",
+    5: "care_of",
+    6: "district",
+    7: "landmark",
+    8: "house",
+    9: "location",
+    10: "pincode",
+    11: "post_office",
+    12: "state",
+    13: "street",
+    14: "sub_district",
+    15: "vtc",
+}
+
+# Legacy fallback alias
+FIELD_MAPPING = FIELD_MAPPING_V2
 
 
 def parse_qr_fields(decompressed: bytes, trace: Optional[list] = None) -> AadhaarData:
     data = AadhaarData(source="qr", extraction_confidence="high")
     parts = decompressed.split(b"\xff")
 
-    if len(parts) <= TEXT_FIELD_COUNT:
+    # Detect version marker: if parts[0] starts with V (e.g. V2, V3)
+    is_v2_plus = bool(parts and parts[0].startswith(b"V"))
+    mapping = FIELD_MAPPING_V2 if is_v2_plus else FIELD_MAPPING_V1
+    text_field_count = 18 if is_v2_plus else 16
+
+    if len(parts) <= text_field_count:
         data.errors.append(
-            f"Expected more than {TEXT_FIELD_COUNT} delimited parts, got {len(parts)}. "
+            f"Expected more than {text_field_count} delimited parts, got {len(parts)}. "
             "This QR may use a different field layout."
         )
         data.extraction_confidence = "low"
 
-    for idx, attr in FIELD_MAPPING.items():
+    for idx, attr in mapping.items():
         if idx < len(parts):
             def _decode_field():
                 return parts[idx].decode("utf-8", errors="strict")
@@ -725,8 +751,8 @@ def parse_qr_fields(decompressed: bytes, trace: Optional[list] = None) -> Aadhaa
                 data.errors.append(f"field[{idx}] ({attr}) had a decode issue, used lossy fallback.")
             setattr(data, attr, val)
 
-    if len(parts) > TEXT_FIELD_COUNT:
-        photo_bytes = b"\xff" + b"\xff".join(parts[TEXT_FIELD_COUNT:])
+    if len(parts) > text_field_count:
+        photo_bytes = b"\xff" + b"\xff".join(parts[text_field_count:])
         data.photo_bytes = photo_bytes
 
         def _decode_photo():
