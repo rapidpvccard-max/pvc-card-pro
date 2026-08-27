@@ -82,6 +82,11 @@ def map_aadhaar_data(engine_data: dict) -> dict:
 
     # full_plain: plain text version (for fallback/logging)
     full_address = ", ".join(filter(None, [line1, line2]))
+
+    # --- TEXT LAYER FALLBACK ---
+    # If QR fields are all empty (QR decode failed), _text_layer_address will be
+    # populated later (in the pdf_text scan block below). We apply it after that scan.
+    # Marker: will be replaced after _scan_pdf_text() runs.
     
     # Local language fields
     local_name = get_str("local_full_name")
@@ -143,6 +148,7 @@ def map_aadhaar_data(engine_data: dict) -> dict:
     aadhaar_number = get_str("masked_number")  # may be "XXXX XXXX 4112" — partial
     vid_number = get_str("reference_id")
     mobile_number = ""
+    _text_layer_address = ""  # fallback address from PDF text layer (original order preserved)
 
     pdf_path = engine_data.get("__pdf_path__", "")
     pdf_password = engine_data.get("__pdf_password__", None)
@@ -193,6 +199,41 @@ def map_aadhaar_data(engine_data: dict) -> dict:
             if m:
                 mobile_number = m.group(1)
 
+            # --- English Address from PDF text layer ---
+            # Used as fallback when QR fields are empty (QR decode failed).
+            # We read the address DIRECTLY from the PDF text — preserving original order exactly.
+            # Pattern: "Address:" or "Address :" followed by multi-line address text until Aadhaar number
+            addr_match = re.search(
+                r'(?:Address|पत्ता|पता|સરનામું|ठिकाणा)\s*[:\-]?\s*\n?([\s\S]+?)(?=\n\s*\d{4}\s\d{4}\s\d{4}|\n\s*VID\s*:|\n\s*1947\b|$)',
+                pdf_text, re.IGNORECASE
+            )
+            if addr_match:
+                raw_addr = addr_match.group(1).strip()
+                # Clean up: remove extra newlines, collapse whitespace
+                raw_addr = re.sub(r'\s*\n\s*', ' ', raw_addr)
+                raw_addr = re.sub(r'\s{2,}', ' ', raw_addr).strip()
+                # Remove trailing punctuation
+                raw_addr = raw_addr.rstrip(',.;')
+                if raw_addr and len(raw_addr) > 5:
+                    _text_layer_address = raw_addr
+
+
+    # --- Apply text-layer address fallback if QR fields were empty ---
+    # When QR decode fails, house/vtc/location etc. are all empty, so full_address_html is "".
+    # In that case, use the address extracted directly from the PDF text layer.
+    # This preserves the EXACT original order as printed in the Aadhaar PDF.
+    if not full_address_html and _text_layer_address:
+        # Split state-pincode to last part for consistent 2-line format
+        state_pin_match = re.search(r',?\s*([A-Za-z\s]+)\s*[-–]\s*(\d{6})\s*$', _text_layer_address)
+        if state_pin_match:
+            body = _text_layer_address[:state_pin_match.start()].rstrip(', ')
+            state_part = state_pin_match.group(1).strip()
+            pin_part = state_pin_match.group(2).strip()
+            full_address_html = f"{body},<br>{state_part} - {pin_part}"
+            full_address = f"{body}, {state_part} - {pin_part}"
+        else:
+            full_address_html = _text_layer_address
+            full_address = _text_layer_address
 
     # --- Baal Aadhaar detection ---
     age = _calculate_age_from_dob(dob)
