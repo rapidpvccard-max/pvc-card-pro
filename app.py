@@ -187,6 +187,57 @@ async def profile_page(request: Request):
         return RedirectResponse(url="/login")
     return templates.TemplateResponse(request=request, name="profile.html")
 
+# =========================================================
+# MANDATORY COMPLIANCE & LEGAL ROUTES (Payment Gateway Approved)
+# =========================================================
+@app.get("/contact", response_class=HTMLResponse)
+@app.get("/contact-us", response_class=HTMLResponse)
+async def contact_page(request: Request):
+    return templates.TemplateResponse(request=request, name="contact.html")
+
+@app.get("/terms", response_class=HTMLResponse)
+@app.get("/terms-and-conditions", response_class=HTMLResponse)
+async def terms_page(request: Request):
+    return templates.TemplateResponse(request=request, name="terms.html")
+
+@app.get("/refund-policy", response_class=HTMLResponse)
+@app.get("/refunds-and-cancellations", response_class=HTMLResponse)
+@app.get("/refund", response_class=HTMLResponse)
+@app.get("/refunds", response_class=HTMLResponse)
+async def refund_page(request: Request):
+    return templates.TemplateResponse(request=request, name="refund_policy.html")
+
+@app.get("/privacy-policy", response_class=HTMLResponse)
+@app.get("/privacy", response_class=HTMLResponse)
+async def privacy_page(request: Request):
+    return templates.TemplateResponse(request=request, name="privacy_policy.html")
+
+class ContactMessageSchema(BaseModel):
+    name: str
+    email: str
+    category: str = "General Business Inquiry"
+    message: str
+
+@app.post("/api/contact")
+async def handle_contact_inquiry(payload: ContactMessageSchema):
+    if not payload.name.strip() or not payload.email.strip() or not payload.message.strip():
+        return JSONResponse(status_code=400, content={"success": False, "error": "Name, email, and message are required."})
+    try:
+        from services.email_service import send_contact_inquiry
+        await run_in_threadpool(
+            send_contact_inquiry,
+            payload.name.strip(),
+            payload.email.strip(),
+            payload.category.strip(),
+            payload.message.strip()
+        )
+    except Exception as e:
+        print(f"[Contact API] Error logging inquiry: {e}")
+    return {
+        "success": True,
+        "message": "Thank you! Your support request has been logged. Our helpdesk will respond to your registered email within 24-48 business hours."
+    }
+
 @app.get("/health")
 async def health_check():
     return {

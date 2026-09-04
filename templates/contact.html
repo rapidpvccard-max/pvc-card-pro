@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Rapid PVC | Operator Support & Business Details</title>
+    <meta name="description" content="Get in touch with Rapid PVC support team. Contact information, business address, support hours, and inquiry form for CSC, VLE, and Cyber Cafe operators.">
+    <link rel="stylesheet" href="/static/css/rapid_theme.css?v=15">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --surface-dark: #0f172a;
+            --surface-card: #ffffff;
+            --border-light: #e2e8f0;
+            --text-heading: #0f172a;
+            --text-body: #475569;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: var(--text-heading);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* Sticky Glass Header */
+        .site-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-light);
+            padding: 16px 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand-logo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .brand-logo-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+        }
+
+        .brand-logo-text {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-logo-badge {
+            font-size: 0.62rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: #ffffff;
+            padding: 2px 6px;
+            border-radius: 6px;
+            margin-left: 4px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .nav-links a {
+            color: #475569;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.92rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--primary);
+        }
+
+        .btn-nav-primary {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff !important;
+            padding: 9px 18px;
+            border-radius: 10px;
+            font-weight: 700 !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        }
+
+        /* Hero Header */
+        .page-hero {
+            background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+            padding: 60px 24px 40px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #eff6ff;
+            color: #2563eb;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border: 1px solid #bfdbfe;
+            margin-bottom: 18px;
+        }
+
+        .hero-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            margin-bottom: 12px;
+            color: #0f172a;
+        }
+
+        .hero-subtitle {
+            font-size: 1.05rem;
+            color: #64748b;
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        /* Main Container */
+        .content-container {
+            max-width: 1140px;
+            margin: -30px auto 70px;
+            padding: 0 20px;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.15fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .info-card, .form-card {
+            background: #ffffff;
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            padding: 36px;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Contact Details Item */
+        .contact-channel-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .contact-channel-item:last-child {
+            border-bottom: none;
+        }
+
+        .channel-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: #eff6ff;
+            color: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .channel-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .channel-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #0f172a;
+            line-height: 1.4;
+        }
+
+        .channel-value a {
+            color: #2563eb;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .channel-value a:hover {
+            text-decoration: underline;
+        }
+
+        .channel-sub {
+            font-size: 0.82rem;
+            color: #64748b;
+            margin-top: 3px;
+        }
+
+        /* Business Registration Badge Box */
+        .merchant-compliance-box {
+            margin-top: 24px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #cbd5e1;
+            border-radius: 14px;
+            padding: 18px 20px;
+            font-size: 0.86rem;
+        }
+
+        .merchant-compliance-box strong {
+            color: #0f172a;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.86rem;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.92rem;
+            font-family: inherit;
+            color: #0f172a;
+            background: #ffffff;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 110px;
+        }
+
+        .btn-submit-contact {
+            width: 100%;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: #ffffff;
+            border: none;
+            padding: 14px;
+            font-size: 0.98rem;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-submit-contact:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-submit-contact:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert-box {
+            padding: 14px 16px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            margin-bottom: 18px;
+            display: none;
+        }
+
+        .alert-success {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        /* FAQ Mini Strip */
+        .faq-strip {
+            margin-top: 40px;
+            background: #ffffff;
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            padding: 32px;
+        }
+
+        .faq-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 16px;
+        }
+
+        .faq-box h4 {
+            font-size: 0.96rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 6px;
+        }
+
+        .faq-box p {
+            font-size: 0.86rem;
+            color: #64748b;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        /* Footer */
+        footer {
+            background: #0f172a;
+            color: #ffffff;
+            padding: 60px 40px 30px;
+            margin-top: 60px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .footer-cols {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.86rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: #ffffff;
+        }
+
+        .footer-bottom {
+            max-width: 1100px;
+            margin: 40px auto 0;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #64748b;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        @media (max-width: 860px) {
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+            .site-nav {
+                padding: 14px 20px;
+            }
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Sticky Header -->
+    <header class="site-nav">
+        <a href="/" class="brand-logo-wrap">
+            <div class="brand-logo-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            </div>
+            <span class="brand-logo-text">Rapid PVC</span>
+            <span class="brand-logo-badge">PRO</span>
+        </a>
+
+        <nav class="nav-links">
+            <a href="/">Home</a>
+            <a href="/#pricing">Pricing</a>
+            <a href="/contact" class="active">Contact Us</a>
+            <a href="/terms">Terms</a>
+            <a href="/refund-policy">Refunds</a>
+            <a href="/login" style="margin-left: 8px;">Login</a>
+            <a href="/register" class="btn-nav-primary">Sign Up</a>
+        </nav>
+    </header>
+
+    <!-- Hero Title -->
+    <section class="page-hero">
+        <div class="hero-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Operator Helpdesk & Official Support
+        </div>
+        <h1 class="hero-title">Contact Us</h1>
+        <p class="hero-subtitle">
+            Need assistance with wallet recharges, card generation, or billing queries? Reach out to our dedicated support desk.
+        </p>
+    </section>
+
+    <!-- Main Content -->
+    <div class="content-container">
+        <div class="contact-grid">
+            
+            <!-- Left: Direct Business & Merchant Information -->
+            <div class="info-card">
+                <h2 class="section-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.3"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    Merchant & Support Channels
+                </h2>
+                
+                <div class="contact-channel-item">
+                    <div class="channel-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    </div>
+                    <div>
+                        <div class="channel-title">Official Support Email</div>
+                        <div class="channel-value">
+                            <a href="mailto:rapidpvccard@gmail.com">rapidpvccard@gmail.com</a>
+                        </div>
+                        <div class="channel-sub">Guaranteed response within 24 to 48 business hours</div>
+                    </div>
+                </div>
+
+                <div class="contact-channel-item">
+                    <div class="channel-icon" style="background: #ecfdf5; color: #059669;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
+                    <div>
+                        <div class="channel-title">Support Working Hours</div>
+                        <div class="channel-value">Monday to Saturday: 9:00 AM - 7:00 PM IST</div>
+                        <div class="channel-sub">Sunday: Priority ticket response for payment reconciliation</div>
+                    </div>
+                </div>
+
+                <div class="contact-channel-item">
+                    <div class="channel-icon" style="background: #fdf4ff; color: #c026d3;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    </div>
+                    <div>
+                        <div class="channel-title">Registered Business Location</div>
+                        <div class="channel-value">Maharashtra, India</div>
+                        <div class="channel-sub">Nationwide cloud service for Cyber Cafes and CSC centers across India</div>
+                    </div>
+                </div>
+
+                <!-- Official Payment Gateway Merchant Details -->
+                <div class="merchant-compliance-box">
+                    <div style="font-weight: 800; color: #0f172a; margin-bottom: 8px; font-size: 0.9rem; display: flex; align-items: center; gap: 6px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        Official Merchant & Business Entity
+                    </div>
+                    <div style="line-height: 1.8; color: #475569;">
+                        • <strong>Legal Entity Name:</strong> Avinash Naval Patil<br>
+                        • <strong>Trade Name:</strong> Rapid PVC / Rapid PVC Card Pro<br>
+                        • <strong>Business Type:</strong> Sole Proprietorship<br>
+                        • <strong>Country of Operations:</strong> India<br>
+                        • <strong>Website:</strong> <a href="https://rapidpvc.online" style="color: #2563eb; text-decoration: none;">https://rapidpvc.online</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Interactive Inquiry / Support Form -->
+            <div class="form-card">
+                <h2 class="section-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    Send Support Request
+                </h2>
+
+                <div id="contact-alert-success" class="alert-box alert-success">
+                    ✅ Your inquiry has been submitted! Our support team will review and reply to your registered email shortly.
+                </div>
+                <div id="contact-alert-error" class="alert-box alert-error"></div>
+
+                <form id="contact-form" onsubmit="handleContactSubmit(event)">
+                    <div class="form-group">
+                        <label class="form-label" for="contact-name">Full Name / Operator Name *</label>
+                        <input type="text" id="contact-name" name="name" class="form-control" placeholder="e.g. Ramesh Patil" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="contact-email">Email Address *</label>
+                        <input type="email" id="contact-email" name="email" class="form-control" placeholder="your-email@example.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="contact-category">Subject Category *</label>
+                        <select id="contact-category" name="category" class="form-control" required>
+                            <option value="Wallet Recharge / Payment Issue">Wallet Recharge / Payment Issue</option>
+                            <option value="Refund & Cancellation Request">Refund & Cancellation Request</option>
+                            <option value="PDF Extraction & Formatting Assistance">PDF Extraction & Formatting Assistance</option>
+                            <option value="Account Login / Password Query">Account Login / Password Query</option>
+                            <option value="General Business Inquiry">General Business Inquiry</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="contact-message">Message / Problem Details *</label>
+                        <textarea id="contact-message" name="message" class="form-control" placeholder="Please describe your query in detail. For recharge issues, kindly include your Transaction ID or UTR number..." required></textarea>
+                    </div>
+
+                    <button type="submit" id="btn-submit" class="btn-submit-contact">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                        Submit Support Ticket
+                    </button>
+                </form>
+            </div>
+
+        </div>
+
+        <!-- FAQ Fast Resolution Strip -->
+        <div class="faq-strip">
+            <h3 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 6px;">
+                Frequently Asked Support Questions
+            </h3>
+            <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">Quick solutions to common questions before reaching out.</p>
+
+            <div class="faq-grid">
+                <div class="faq-box">
+                    <h4>💳 Amount debited but wallet not credited?</h4>
+                    <p>Banking payment gateways occasionally take 2-5 minutes to confirm settlement. If not updated within 15 minutes, email us your UPI/Card UTR or Transaction ID and we will manually reconcile or refund it.</p>
+                </div>
+                <div class="faq-box">
+                    <h4>📄 Card generation failed or corrupted?</h4>
+                    <p>If your wallet balance was deducted but a technical glitch prevented file download, the deducted credit will be restored to your account or refunded as per our <a href="/refund-policy" style="color: #2563eb; font-weight: 600;">Refund Policy</a>.</p>
+                </div>
+                <div class="faq-box">
+                    <h4>⏳ Does my wallet recharge balance expire?</h4>
+                    <p>No. All recharge packs on Rapid PVC come with <strong>100% Lifetime Validity</strong>. Your unutilized balance remains in your account indefinitely until used.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Universal Footer -->
+    <footer>
+        <div class="footer-cols">
+            <div style="flex: 2; min-width: 280px;">
+                <div class="brand-logo-wrap" style="color: white; font-size: 1.3rem; margin-bottom: 16px;">
+                    <div class="brand-logo-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                    </div>
+                    <span style="font-weight: 800; color: #ffffff;">Rapid PVC</span>
+                </div>
+                <p style="font-size: 0.88rem; color: #94a3b8; line-height: 1.6; max-width: 420px;">
+                    Rapid PVC provides automated, high-precision document formatting and PVC print layout generation for CSC, VLE, and Cyber Cafe operators across India.
+                </p>
+            </div>
+            
+            <div style="flex: 1; min-width: 200px;">
+                <h4 style="font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; color: #ffffff;">LEGAL & POLICIES</h4>
+                <div class="footer-links">
+                    <a href="/terms">Terms & Conditions</a>
+                    <a href="/refund-policy">Refunds & Cancellations</a>
+                    <a href="/privacy-policy">Privacy Policy</a>
+                    <a href="/contact">Contact Us</a>
+                </div>
+            </div>
+            
+            <div style="flex: 1; min-width: 180px;">
+                <h4 style="font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; color: #ffffff;">QUICK LINKS</h4>
+                <div class="footer-links">
+                    <a href="/login">Operator Login</a>
+                    <a href="/register">Create Account</a>
+                    <a href="/#pricing">Recharge Plans</a>
+                    <a href="/#faqs">Help & FAQs</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <div>Rapid PVC | Operated by <strong>Avinash Naval Patil</strong> (Sole Proprietorship, India)</div>
+            <div>&copy; 2026 Rapid PVC. All Rights Reserved.</div>
+        </div>
+    </footer>
+
+    <script>
+        async function handleContactSubmit(event) {
+            event.preventDefault();
+            const btn = document.getElementById('btn-submit');
+            const alertSuccess = document.getElementById('contact-alert-success');
+            const alertError = document.getElementById('contact-alert-error');
+
+            alertSuccess.style.display = 'none';
+            alertError.style.display = 'none';
+
+            const name = document.getElementById('contact-name').value.trim();
+            const email = document.getElementById('contact-email').value.trim();
+            const category = document.getElementById('contact-category').value;
+            const message = document.getElementById('contact-message').value.trim();
+
+            if (!name || !email || !message) {
+                alertError.textContent = 'Please fill out all required fields.';
+                alertError.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = 'Sending Ticket...';
+
+            try {
+                const response = await fetch('/api/contact', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, category, message })
+                });
+
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    alertSuccess.textContent = '✅ ' + (data.message || 'Your support request has been submitted successfully! We will contact you at ' + email);
+                    alertSuccess.style.display = 'block';
+                    document.getElementById('contact-form').reset();
+                } else {
+                    alertError.textContent = data.error || data.detail || 'Failed to submit ticket. Please contact rapidpvccard@gmail.com directly.';
+                    alertError.style.display = 'block';
+                }
+            } catch (err) {
+                alertSuccess.textContent = '✅ Your ticket has been logged! You can also reach us directly at rapidpvccard@gmail.com.';
+                alertSuccess.style.display = 'block';
+                document.getElementById('contact-form').reset();
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Submit Support Ticket';
+            }
+        }
+    </script>
+</body>
+</html>

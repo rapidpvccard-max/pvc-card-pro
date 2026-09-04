@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Rapid PVC | Zero-Retention Privacy Architecture</title>
+    <meta name="description" content="Official Privacy Policy of Rapid PVC. Learn about our 5-minute zero retention privacy architecture, payment security, and data handling practices.">
+    <link rel="stylesheet" href="/static/css/rapid_theme.css?v=15">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --surface-dark: #0f172a;
+            --border-light: #e2e8f0;
+            --text-heading: #0f172a;
+            --text-body: #334155;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: var(--text-body);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.7;
+        }
+
+        /* Sticky Glass Header */
+        .site-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-light);
+            padding: 16px 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand-logo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .brand-logo-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+        }
+
+        .brand-logo-text {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-logo-badge {
+            font-size: 0.62rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: #ffffff;
+            padding: 2px 6px;
+            border-radius: 6px;
+            margin-left: 4px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .nav-links a {
+            color: #475569;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.92rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--primary);
+        }
+
+        .btn-nav-primary {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff !important;
+            padding: 9px 18px;
+            border-radius: 10px;
+            font-weight: 700 !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        }
+
+        /* Hero Header */
+        .page-hero {
+            background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+            padding: 60px 24px 36px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #eff6ff;
+            color: #2563eb;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border: 1px solid #bfdbfe;
+            margin-bottom: 18px;
+        }
+
+        .hero-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            margin-bottom: 12px;
+            color: #0f172a;
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+            color: #64748b;
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        /* Document Container */
+        .doc-container {
+            max-width: 960px;
+            margin: -25px auto 70px;
+            padding: 0 20px;
+        }
+
+        .doc-card {
+            background: #ffffff;
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            padding: 44px;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+        }
+
+        .meta-strip {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding-bottom: 24px;
+            margin-bottom: 28px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.88rem;
+            color: #64748b;
+        }
+
+        .meta-strip strong {
+            color: #0f172a;
+        }
+
+        /* Policy Sections */
+        .policy-section {
+            margin-bottom: 36px;
+            scroll-margin-top: 100px;
+        }
+
+        .policy-section h2 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .policy-section p {
+            margin-bottom: 14px;
+            color: #334155;
+            font-size: 0.95rem;
+        }
+
+        .policy-section ul {
+            margin: 12px 0 16px 22px;
+            color: #334155;
+            font-size: 0.95rem;
+        }
+
+        .policy-section li {
+            margin-bottom: 8px;
+        }
+
+        .highlight-notice {
+            background: #eff6ff;
+            border-left: 4px solid #2563eb;
+            padding: 16px 20px;
+            border-radius: 0 12px 12px 0;
+            margin: 18px 0;
+            font-size: 0.92rem;
+            color: #1e3a8a;
+        }
+
+        /* Footer */
+        footer {
+            background: #0f172a;
+            color: #ffffff;
+            padding: 60px 40px 30px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .footer-cols {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.86rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: #ffffff;
+        }
+
+        .footer-bottom {
+            max-width: 1100px;
+            margin: 40px auto 0;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #64748b;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        @media (max-width: 860px) {
+            .doc-card {
+                padding: 24px 20px;
+            }
+            .site-nav {
+                padding: 14px 20px;
+            }
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sticky Glass Header -->
+    <header class="site-nav">
+        <a href="/" class="brand-logo-wrap">
+            <div class="brand-logo-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            </div>
+            <span class="brand-logo-text">Rapid PVC</span>
+            <span class="brand-logo-badge">PRO</span>
+        </a>
+
+        <nav class="nav-links">
+            <a href="/">Home</a>
+            <a href="/#pricing">Pricing</a>
+            <a href="/contact">Contact Us</a>
+            <a href="/terms">Terms</a>
+            <a href="/refund-policy">Refunds</a>
+            <a href="/login" style="margin-left: 8px;">Login</a>
+            <a href="/register" class="btn-nav-primary">Sign Up</a>
+        </nav>
+    </header>
+
+    <!-- Hero Header -->
+    <section class="page-hero">
+        <div class="hero-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Privacy & Data Security Standards
+        </div>
+        <h1 class="hero-title">Privacy Policy</h1>
+        <p class="hero-subtitle">
+            How Rapid PVC safeguards operator details and implements zero-retention privacy for all uploaded documents.
+        </p>
+    </section>
+
+    <!-- Main Content Container -->
+    <div class="doc-container">
+        <div class="doc-card">
+            
+            <div class="meta-strip">
+                <div>Operated by: <strong>Avinash Naval Patil</strong> (Rapid PVC)</div>
+                <div>Compliance: <strong>IT Act, 2000 & Digital Personal Data Protection Standards</strong></div>
+                <div>Last Updated: <strong>September 2026</strong></div>
+            </div>
+
+            <!-- Section 1 -->
+            <div class="policy-section">
+                <h2>1. Commitment to Privacy & Trust</h2>
+                <p>
+                    <strong>Rapid PVC</strong>, operated by <strong>Avinash Naval Patil</strong> (Sole Proprietorship, Maharashtra, India, "we", "us", or "our"), is dedicated to safeguarding the privacy of our users, operators, and the citizens whose documents are formatted on our platform.
+                </p>
+                <p>
+                    This Privacy Policy outlines what information we collect, how it is processed, and our strict architectural commitments to zero permanent retention of sensitive identity files.
+                </p>
+            </div>
+
+            <!-- Section 2 -->
+            <div class="policy-section">
+                <h2>2. Zero-Retention Document Architecture</h2>
+                <p>
+                    Unlike ordinary cloud platforms, Rapid PVC is engineered with a strict <strong>Zero-Retention Privacy Sweeper</strong>:
+                </p>
+                <ul>
+                    <li><strong>Temporary Ephemeral Processing:</strong> When an operator uploads a PDF (such as e-Aadhaar, Voter ID, PAN, or Ayushman card) for PVC formatting, the file is temporarily loaded in isolated sandbox storage solely for vector rendering and image extraction.</li>
+                    <li><strong>Automated 5-Minute Sweeper:</strong> Once the CR-80 card print file is rendered and downloaded, both the original uploaded PDF and the resulting print files are automatically scheduled for permanent deletion within <strong>5 to 15 minutes</strong>.</li>
+                    <li><strong>Zero Archiving:</strong> We do NOT archive, index, catalog, or create databases of citizen biometric information, Aadhaar numbers, PAN numbers, or residential addresses. Once purged, files cannot be recovered.</li>
+                </ul>
+                <div class="highlight-notice">
+                    <strong>Zero-Retention Guarantee:</strong> Your customer's identity files never stay on our servers permanently. We act purely as a fast, in-memory layout engine.
+                </div>
+            </div>
+
+            <!-- Section 3 -->
+            <div class="policy-section">
+                <h2>3. Information We Collect from Operators</h2>
+                <p>
+                    To provide and maintain our services, we collect limited account details:
+                </p>
+                <ul>
+                    <li><strong>Account Information:</strong> Full Name, Email Address, and strong bcrypt-hashed passwords.</li>
+                    <li><strong>Recharge & Billing History:</strong> Payment Gateway Transaction IDs, timestamp, plan purchased (₹20, ₹100, ₹200, ₹300), and wallet credit balance for accounting and dispute resolution.</li>
+                    <li><strong>Technical Logs:</strong> IP address, browser type, and operating system for security auditing, fraud prevention, and session management.</li>
+                </ul>
+            </div>
+
+            <!-- Section 4 -->
+            <div class="policy-section">
+                <h2>4. Payment Security & Financial Data</h2>
+                <p>
+                    All financial transactions and wallet top-ups on Rapid PVC are handled with bank-grade security:
+                </p>
+                <ul>
+                    <li><strong>PCI-DSS Compliant Gateways:</strong> We process all payments through certified payment aggregators (such as Razorpay, Cashfree, UPI, or Stripe).</li>
+                    <li><strong>No Storage of Card / PIN Data:</strong> Rapid PVC NEVER stores or has access to your credit/debit card numbers, CVV codes, net banking passwords, or UPI MPINs. All payment credentials are encrypted directly through the payment gateway's secure iframe/redirect.</li>
+                    <li><strong>SSL Encryption:</strong> The entire website is secured with 256-bit Transport Layer Security (TLS/SSL) encryption.</li>
+                </ul>
+            </div>
+
+            <!-- Section 5 -->
+            <div class="policy-section">
+                <h2>5. Cookies & Local Storage</h2>
+                <p>
+                    We use standard secure session cookies strictly for:
+                </p>
+                <ul>
+                    <li>Keeping operators securely logged into their dashboard session.</li>
+                    <li>Preventing Cross-Site Request Forgery (CSRF) attacks.</li>
+                </ul>
+                <p>We do not use invasive third-party tracking cookies or sell user browsing data to advertisers.</p>
+            </div>
+
+            <!-- Section 6 -->
+            <div class="policy-section">
+                <h2>6. Information Sharing & Disclosure</h2>
+                <p>
+                    We strictly maintain a zero-sale policy:
+                </p>
+                <ul>
+                    <li>We <strong>NEVER sell, rent, trade, or monetize</strong> operator information or document data with third-party marketing firms or data brokers.</li>
+                    <li>Information is disclosed only when strictly mandated by Indian law, valid court subpoenas, or authorized law enforcement agencies under the Information Technology Act, 2000.</li>
+                </ul>
+            </div>
+
+            <!-- Section 7 -->
+            <div class="policy-section">
+                <h2>7. Privacy Contact & Grievance Redressal</h2>
+                <p>
+                    If you have questions regarding this Privacy Policy or wish to request complete deletion of your operator account:
+                </p>
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-top: 14px;">
+                    <strong>Privacy & Grievance Officer:</strong> Avinash Naval Patil<br>
+                    <strong>Entity Name:</strong> Rapid PVC (Sole Proprietorship)<br>
+                    <strong>Email Address:</strong> <a href="mailto:rapidpvccard@gmail.com" style="color: #2563eb;">rapidpvccard@gmail.com</a><br>
+                    <strong>Location:</strong> Maharashtra, India<br>
+                    <strong>Response Timeline:</strong> Within 48 business hours
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Universal Footer -->
+    <footer>
+        <div class="footer-cols">
+            <div style="flex: 2; min-width: 280px;">
+                <div class="brand-logo-wrap" style="color: white; font-size: 1.3rem; margin-bottom: 16px;">
+                    <div class="brand-logo-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                    </div>
+                    <span style="font-weight: 800; color: #ffffff;">Rapid PVC</span>
+                </div>
+                <p style="font-size: 0.88rem; color: #94a3b8; line-height: 1.6; max-width: 420px;">
+                    Rapid PVC provides automated, high-precision document formatting and PVC print layout generation for CSC, VLE, and Cyber Cafe operators across India.
+                </p>
+            </div>
+            
+            <div style="flex: 1; min-width: 200px;">
+                <h4 style="font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; color: #ffffff;">LEGAL & POLICIES</h4>
+                <div class="footer-links">
+                    <a href="/terms">Terms & Conditions</a>
+                    <a href="/refund-policy">Refunds & Cancellations</a>
+                    <a href="/privacy-policy">Privacy Policy</a>
+                    <a href="/contact">Contact Us</a>
+                </div>
+            </div>
+            
+            <div style="flex: 1; min-width: 180px;">
+                <h4 style="font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; color: #ffffff;">QUICK LINKS</h4>
+                <div class="footer-links">
+                    <a href="/login">Operator Login</a>
+                    <a href="/register">Create Account</a>
+                    <a href="/#pricing">Recharge Plans</a>
+                    <a href="/#faqs">Help & FAQs</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <div>Rapid PVC | Operated by <strong>Avinash Naval Patil</strong> (Sole Proprietorship, India)</div>
+            <div>&copy; 2026 Rapid PVC. All Rights Reserved.</div>
+        </div>
+    </footer>
+
+</body>
+</html>

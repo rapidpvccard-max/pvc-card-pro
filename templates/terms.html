@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms & Conditions - Rapid PVC</title>
+    <meta name="description" content="Terms and Conditions governing the use of Rapid PVC platform, services, wallet recharges, and digital card formatting tools.">
+    <link rel="stylesheet" href="/static/css/rapid_theme.css?v=15">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --surface-dark: #0f172a;
+            --border-light: #e2e8f0;
+            --text-heading: #0f172a;
+            --text-body: #334155;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: var(--text-body);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.7;
+        }
+
+        /* Sticky Glass Header */
+        .site-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-light);
+            padding: 16px 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand-logo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .brand-logo-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+        }
+
+        .brand-logo-text {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-logo-badge {
+            font-size: 0.62rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: #ffffff;
+            padding: 2px 6px;
+            border-radius: 6px;
+            margin-left: 4px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .nav-links a {
+            color: #475569;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.92rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--primary);
+        }
+
+        .btn-nav-primary {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff !important;
+            padding: 9px 18px;
+            border-radius: 10px;
+            font-weight: 700 !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        }
+
+        /* Hero Header */
+        .page-hero {
+            background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+            padding: 60px 24px 36px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #eff6ff;
+            color: #2563eb;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border: 1px solid #bfdbfe;
+            margin-bottom: 18px;
+        }
+
+        .hero-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            margin-bottom: 12px;
+            color: #0f172a;
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+            color: #64748b;
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        /* Document Container */
+        .doc-container {
+            max-width: 960px;
+            margin: -25px auto 70px;
+            padding: 0 20px;
+        }
+
+        .doc-card {
+            background: #ffffff;
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            padding: 44px;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+        }
+
+        .meta-strip {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding-bottom: 24px;
+            margin-bottom: 28px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.88rem;
+            color: #64748b;
+        }
+
+        .meta-strip strong {
+            color: #0f172a;
+        }
+
+        .toc-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-bottom: 36px;
+        }
+
+        .toc-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 800;
+            font-size: 1rem;
+            color: #0f172a;
+            margin-bottom: 12px;
+        }
+
+        .toc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 8px 16px;
+        }
+
+        .toc-link {
+            color: #2563eb;
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .toc-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Policy Sections */
+        .policy-section {
+            margin-bottom: 36px;
+            scroll-margin-top: 100px;
+        }
+
+        .policy-section h2 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .policy-section p {
+            margin-bottom: 14px;
+            color: #334155;
+            font-size: 0.95rem;
+        }
+
+        .policy-section ul {
+            margin: 12px 0 16px 22px;
+            color: #334155;
+            font-size: 0.95rem;
+        }
+
+        .policy-section li {
+            margin-bottom: 8px;
+        }
+
+        .highlight-notice {
+            background: #eff6ff;
+            border-left: 4px solid #2563eb;
+            padding: 14px 18px;
+            border-radius: 0 10px 10px 0;
+            margin: 16px 0;
+            font-size: 0.92rem;
+            color: #1e3a8a;
+        }
+
+        /* Footer */
+        footer {
+            background: #0f172a;
+            color: #ffffff;
+            padding: 60px 40px 30px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .footer-cols {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.86rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: #ffffff;
+        }
+
+        .footer-bottom {
+            max-width: 1100px;
+            margin: 40px auto 0;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #64748b;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        @media (max-width: 860px) {
+            .doc-card {
+                padding: 24px 20px;
+            }
+            .site-nav {
+                padding: 14px 20px;
+            }
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sticky Glass Header -->
+    <header class="site-nav">
+        <a href="/" class="brand-logo-wrap">
+            <div class="brand-logo-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            </div>
+            <span class="brand-logo-text">Rapid PVC</span>
+            <span class="brand-logo-badge">PRO</span>
+        </a>
+
+        <nav class="nav-links">
+            <a href="/">Home</a>
+            <a href="/#pricing">Pricing</a>
+            <a href="/contact">Contact Us</a>
+            <a href="/terms" class="active">Terms</a>
+            <a href="/refund-policy">Refunds</a>
+            <a href="/login" style="margin-left: 8px;">Login</a>
+            <a href="/register" class="btn-nav-primary">Sign Up</a>
+        </nav>
+    </header>
+
+    <!-- Hero Header -->
+    <section class="page-hero">
+        <div class="hero-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Official User Agreement & Legal Terms
+        </div>
+        <h1 class="hero-title">Terms & Conditions</h1>
+        <p class="hero-subtitle">
+            Please read these terms carefully before accessing or using Rapid PVC services and wallet top-ups.
+        </p>
+    </section>
+
+    <!-- Main Content Container -->
+    <div class="doc-container">
+        <div class="doc-card">
+            
+            <div class="meta-strip">
+                <div>Operated by: <strong>Avinash Naval Patil</strong> (Sole Proprietorship, India)</div>
+                <div>Last Updated: <strong>September 2026</strong></div>
+                <div>Domain: <strong>rapidpvc.online</strong></div>
+            </div>
+
+            <!-- Table of Contents -->
+            <div class="toc-box">
+                <div class="toc-title">Quick Navigation Index</div>
+                <div class="toc-grid">
+                    <a href="#sec-1" class="toc-link">1. Acceptance of Terms</a>
+                    <a href="#sec-2" class="toc-link">2. Service Description & Scope</a>
+                    <a href="#sec-3" class="toc-link">3. Operator Responsibilities</a>
+                    <a href="#sec-4" class="toc-link">4. Wallet & Pricing Terms</a>
+                    <a href="#sec-5" class="toc-link">5. Zero-Retention Privacy</a>
+                    <a href="#sec-6" class="toc-link">6. Intellectual Property</a>
+                    <a href="#sec-7" class="toc-link">7. Limitation of Liability</a>
+                    <a href="#sec-8" class="toc-link">8. Account Termination</a>
+                    <a href="#sec-9" class="toc-link">9. Governing Law & Jurisdiction</a>
+                    <a href="#sec-10" class="toc-link">10. Grievance Redressal</a>
+                </div>
+            </div>
+
+            <!-- Section 1 -->
+            <div class="policy-section" id="sec-1">
+                <h2>1. Acceptance of Terms</h2>
+                <p>
+                    These Terms and Conditions ("Terms") constitute a legally binding agreement between you ("Operator", "User", "You") and <strong>Rapid PVC</strong>, owned and operated by <strong>Avinash Naval Patil</strong> (Sole Proprietorship, India, hereinafter referred to as "Rapid PVC", "we", "us", or "our").
+                </p>
+                <p>
+                    By accessing <a href="https://rapidpvc.online" style="color: #2563eb;">https://rapidpvc.online</a>, registering an operator account, topping up your wallet, or using our PDF extraction and PVC layout generation tools, you acknowledge that you have read, understood, and agreed to be bound by these Terms and our related policies, including our <a href="/refund-policy" style="color: #2563eb;">Refunds & Cancellations Policy</a> and <a href="/privacy-policy" style="color: #2563eb;">Privacy Policy</a>.
+                </p>
+            </div>
+
+            <!-- Section 2 -->
+            <div class="policy-section" id="sec-2">
+                <h2>2. Service Description & Digital Nature of Platform</h2>
+                <p>
+                    Rapid PVC is a cloud-based software utility designed specifically for Common Service Centres (CSC), Village Level Entrepreneurs (VLE), Cyber Cafe operators, and digital printing businesses across India.
+                </p>
+                <ul>
+                    <li><strong>Layout Automation:</strong> The platform processes user-uploaded official PDF documents (such as e-Aadhaar, Voter ID, PAN, and Ayushman cards) and reformats them into CR-80 standard PVC card dimensions (85.6mm &times; 53.98mm) at 300 DPI high-resolution for instant printing on thermal, inkjet, and laser card printers.</li>
+                    <li><strong>Formatting Utility Only:</strong> Rapid PVC does NOT issue, modify, fabricate, verify, or register government identification credentials. The software functions strictly as a document layout and alignment formatter.</li>
+                    <li><strong>Instant Delivery:</strong> Services are rendered automatically and instantaneously upon operator request. Once a print layout is generated, the digital output is immediately ready for download.</li>
+                </ul>
+            </div>
+
+            <!-- Section 3 -->
+            <div class="policy-section" id="sec-3">
+                <h2>3. Operator Eligibility & Legal Responsibilities</h2>
+                <p>
+                    By registering on Rapid PVC, you represent, warrant, and agree to the following mandatory compliance requirements:
+                </p>
+                <ul>
+                    <li><strong>Legal Age:</strong> You are at least 18 years of age and legally competent to enter into contracts under the Indian Contract Act, 1872.</li>
+                    <li><strong>Lawful Consent:</strong> You possess valid, explicit consent and authorization from the citizen or document owner whose identification document is uploaded for PVC print preparation.</li>
+                    <li><strong>Strict Prohibition on Forgery:</strong> You shall NEVER upload counterfeit, forged, manipulated, or fraudulently obtained documents. Any attempt to manufacture fraudulent identification is strictly prohibited and constitutes an offence under the Indian Penal Code (IPC) and the Information Technology Act, 2000.</li>
+                    <li><strong>Account Security:</strong> You are solely responsible for maintaining the confidentiality of your login credentials and for all activities carried out under your account.</li>
+                </ul>
+                <div class="highlight-notice">
+                    <strong>Notice under Information Technology Act, 2000:</strong> Rapid PVC acts strictly as an automated technical intermediary. We actively cooperate with lawful law enforcement authorities upon receipt of official legal process regarding any misuse or violation.
+                </div>
+            </div>
+
+            <!-- Section 4 -->
+            <div class="policy-section" id="sec-4">
+                <h2>4. Wallet, Recharges & Pricing Terms</h2>
+                <p>
+                    Rapid PVC operates on a transparent prepaid wallet recharge model:
+                </p>
+                <ul>
+                    <li><strong>Recharge Packs:</strong> Users purchase prepaid wallet credits through available recharge tiers (e.g. ₹20 Trial Pack, ₹100, ₹200, or ₹300 Value Packs).</li>
+                    <li><strong>Per-Card Deduction:</strong> Each card generated deducts the prescribed nominal fee (₹0.95 per card on standard packs, ₹2.00 on trial pack) from your available wallet balance.</li>
+                    <li><strong>Lifetime Validity:</strong> All wallet balances feature <strong>100% Lifetime Validity</strong> and never expire until consumed by card generations.</li>
+                    <li><strong>Currency & Taxes:</strong> All rates displayed on the platform are in Indian Rupees (INR) and are inclusive of applicable taxes unless specified otherwise.</li>
+                    <li><strong>Secure Payment Gateways:</strong> Recharges are processed through RBI-authorized payment aggregators and payment gateways (including UPI, Net Banking, and Cards). We do not store sensitive bank login credentials or card CVV numbers.</li>
+                </ul>
+            </div>
+
+            <!-- Section 5 -->
+            <div class="policy-section" id="sec-5">
+                <h2>5. Zero-Retention Data Policy & Privacy</h2>
+                <p>
+                    We hold citizen privacy and data security to the highest standard:
+                </p>
+                <ul>
+                    <li><strong>Ephemeral Processing:</strong> Uploaded source PDFs and generated print-ready files are retained on our servers only for the duration required to render the layout (maximum 5 to 15 minutes).</li>
+                    <li><strong>Automated Purging:</strong> An automated server sweeper permanently deletes temporary PDF uploads and rasterized print outputs. No permanent database archives of citizen photos, demographic data, or biometric information are maintained.</li>
+                    <li><strong>Full Policy:</strong> Please consult our <a href="/privacy-policy" style="color: #2563eb; font-weight: 600;">Privacy Policy</a> for full details on encryption, session tokens, and security architecture.</li>
+                </ul>
+            </div>
+
+            <!-- Section 6 -->
+            <div class="policy-section" id="sec-6">
+                <h2>6. Intellectual Property Rights</h2>
+                <p>
+                    All software code, graphics, user interface designs, trademarks, and documentation comprising the Rapid PVC platform are the exclusive intellectual property of Avinash Naval Patil / Rapid PVC.
+                </p>
+                <p>
+                    Users are granted a limited, non-exclusive, non-transferable, revocable license to access and use the platform for legitimate commercial card printing operations. Reverse engineering, decompiling, automated web scraping, or unauthorized distribution of platform assets is strictly prohibited.
+                </p>
+            </div>
+
+            <!-- Section 7 -->
+            <div class="policy-section" id="sec-7">
+                <h2>7. Disclaimer of Warranties & Limitation of Liability</h2>
+                <p>
+                    Rapid PVC is provided on an "as is" and "as available" basis without warranties of any kind, whether express or implied.
+                </p>
+                <ul>
+                    <li>We do not guarantee uninterrupted, error-free server availability due to internet connectivity anomalies, government portal downtime, or third-party cloud infrastructure failures.</li>
+                    <li>Rapid PVC shall not be held liable for printer hardware defects, misalignment due to improper printer driver settings, or damaged physical PVC cards.</li>
+                    <li>In any event, our total cumulative liability to you for any dispute arising out of or related to these Terms or the service shall not exceed the amount paid by you in the immediately preceding 30 days.</li>
+                </ul>
+            </div>
+
+            <!-- Section 8 -->
+            <div class="policy-section" id="sec-8">
+                <h2>8. Account Suspension & Termination</h2>
+                <p>
+                    Rapid PVC reserves the right to immediately suspend or terminate any user account without prior notice if:
+                </p>
+                <ul>
+                    <li>The account is found uploading suspicious, fraudulent, or non-authentic documentation.</li>
+                    <li>The operator initiates unauthorized chargebacks or payment fraud.</li>
+                    <li>The operator attempts to bypass wallet deduction mechanisms or launch DDoS attacks against our servers.</li>
+                </ul>
+            </div>
+
+            <!-- Section 9 -->
+            <div class="policy-section" id="sec-9">
+                <h2>9. Governing Law & Dispute Resolution</h2>
+                <p>
+                    These Terms & Conditions shall be governed by and construed in accordance with the laws of the <strong>Republic of India</strong>.
+                </p>
+                <p>
+                    Any disputes, controversies, or claims arising out of or in connection with these Terms or the use of Rapid PVC shall be subject to the exclusive jurisdiction of the competent courts in <strong>Maharashtra, India</strong>.
+                </p>
+            </div>
+
+            <!-- Section 10 -->
+            <div class="policy-section" id="sec-10">
+                <h2>10. Grievance Redressal & Official Contact</h2>
+                <p>
+                    In accordance with Information Technology Act, 2000 and the Consumer Protection (E-Commerce) Rules, 2020, if you have any questions, legal notices, or grievances concerning these Terms:
+                </p>
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-top: 14px;">
+                    <strong>Grievance & Legal Officer:</strong> Avinash Naval Patil<br>
+                    <strong>Entity:</strong> Rapid PVC (Sole Proprietorship)<br>
+                    <strong>Official Email:</strong> <a href="mailto:rapidpvccard@gmail.com" style="color: #2563eb;">rapidpvccard@gmail.com</a><br>
+                    <strong>Operational Jurisdiction:</strong> Maharashtra, India<br>
+                    <strong>Response Timeline:</strong> Within 48 business hours
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Universal Footer -->
+    <footer>
+        <div class="footer-cols">
+            <div style="flex: 2; min-width: 280px;">
+                <div class="brand-logo-wrap" style="color: white; font-size: 1.3rem; margin-bottom: 16px;">
+                    <div class="brand-logo-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                    </div>
+                    <span style="font-weight: 800; color: #ffffff;">Rapid PVC</span>
+                </div>
+                <p style="font-size: 0.88rem; color: #94a3b8; line-height: 1.6; max-width: 420px;">
+                    Rapid PVC provides automated, high-precision document formatting and PVC print layout generation for CSC, VLE, and Cyber Cafe operators across India.
+                </p>
+            </div>
+            
+            <div style="flex: 1; min-width: 200px;">
+                <h4 style="font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; color: #ffffff;">LEGAL & POLICIES</h4>
+                <div class="footer-links">
+                    <a href="/terms">Terms & Conditions</a>
+                    <a href="/refund-policy">Refunds & Cancellations</a>
+                    <a href="/privacy-policy">Privacy Policy</a>
+                    <a href="/contact">Contact Us</a>
+                </div>
+            </div>
+            
+            <div style="flex: 1; min-width: 180px;">
+                <h4 style="font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; color: #ffffff;">QUICK LINKS</h4>
+                <div class="footer-links">
+                    <a href="/login">Operator Login</a>
+                    <a href="/register">Create Account</a>
+                    <a href="/#pricing">Recharge Plans</a>
+                    <a href="/#faqs">Help & FAQs</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <div>Rapid PVC | Operated by <strong>Avinash Naval Patil</strong> (Sole Proprietorship, India)</div>
+            <div>&copy; 2026 Rapid PVC. All Rights Reserved.</div>
+        </div>
+    </footer>
+
+</body>
+</html>

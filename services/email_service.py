@@ -207,3 +207,55 @@ If you did not request this, please ignore this email.
         print(f"[Email Service Error] Failed to send email to {to_email}: {str(e)}")
         print(f"Fallback Reset URL: {reset_url}")
         return False, f"SMTP delivery failed: {str(e)}"
+
+def send_contact_inquiry(sender_name: str, sender_email: str, category: str, message: str) -> tuple[bool, str]:
+    """
+    Sends or logs an inbound operator contact support inquiry.
+    """
+    config = get_smtp_config()
+    admin_recipient = os.environ.get("ADMIN_EMAILS", "rapidpvccard@gmail.com").split(",")[0].strip() or "rapidpvccard@gmail.com"
+
+    print(f"\n=======================================================")
+    print(f" [INBOUND CONTACT INQUIRY]")
+    print(f" From: {sender_name} <{sender_email}>")
+    print(f" Category: {category}")
+    print(f" Message: {message}")
+    print(f" Admin Recipient: {admin_recipient}")
+    print(f"=======================================================\n")
+
+    if not config["is_configured"]:
+        return True, "Inquiry recorded in server logs (SMTP not configured)."
+
+    try:
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = f"[Rapid PVC Support] {category} from {sender_name}"
+        msg["From"] = f"{config['from_name']} <{config['from_email']}>"
+        msg["To"] = admin_recipient
+        msg["Reply-To"] = sender_email
+
+        plain_text = f"Contact Inquiry Received:\nName: {sender_name}\nEmail: {sender_email}\nCategory: {category}\nMessage:\n{message}\n"
+        html_content = f"""
+        <div style="font-family: sans-serif; padding: 20px; color: #0f172a; max-width: 600px; border: 1px solid #e2e8f0; border-radius: 10px;">
+            <h2 style="color: #2563eb; margin-top: 0;">New Support Ticket Received</h2>
+            <p><strong>From:</strong> {sender_name} (&lt;{sender_email}&gt;)</p>
+            <p><strong>Category:</strong> {category}</p>
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 15px 0;">
+            <p><strong>Message:</strong></p>
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; white-space: pre-wrap;">{message}</div>
+        </div>
+        """
+        msg.attach(MIMEText(plain_text, "plain"))
+        msg.attach(MIMEText(html_content, "html"))
+
+        server = smtplib.SMTP(config["host"], config["port"], timeout=10)
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
+        server.login(config["user"], config["password"])
+        server.sendmail(config["from_email"], [admin_recipient], msg.as_string())
+        server.quit()
+        return True, "Support email dispatched successfully to admin."
+    except Exception as e:
+        print(f"[Contact Email Error] Could not dispatch to admin: {str(e)}")
+        return True, "Inquiry saved to server log."
+

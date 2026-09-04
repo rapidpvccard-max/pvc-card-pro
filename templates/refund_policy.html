@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refunds & Cancellations Policy - Rapid PVC</title>
+    <meta name="description" content="Official Refunds & Cancellations Policy of Rapid PVC. Clear terms for wallet recharges, refund timelines (5-7 days), and failed transaction procedures.">
+    <link rel="stylesheet" href="/static/css/rapid_theme.css?v=15">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --surface-dark: #0f172a;
+            --border-light: #e2e8f0;
+            --text-heading: #0f172a;
+            --text-body: #334155;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: var(--text-body);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.7;
+        }
+
+        /* Sticky Glass Header */
+        .site-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-light);
+            padding: 16px 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand-logo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .brand-logo-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+        }
+
+        .brand-logo-text {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-logo-badge {
+            font-size: 0.62rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: #ffffff;
+            padding: 2px 6px;
+            border-radius: 6px;
+            margin-left: 4px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .nav-links a {
+            color: #475569;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.92rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--primary);
+        }
+
+        .btn-nav-primary {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff !important;
+            padding: 9px 18px;
+            border-radius: 10px;
+            font-weight: 700 !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        }
+
+        /* Hero Header */
+        .page-hero {
+            background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+            padding: 60px 24px 36px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #ecfdf5;
+            color: #059669;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border: 1px solid #a7f3d0;
+            margin-bottom: 18px;
+        }
+
+        .hero-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            margin-bottom: 12px;
+            color: #0f172a;
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+            color: #64748b;
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        /* Document Container */
+        .doc-container {
+            max-width: 960px;
+            margin: -25px auto 70px;
+            padding: 0 20px;
+        }
+
+        .doc-card {
+            background: #ffffff;
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            padding: 44px;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+        }
+
+        .meta-strip {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding-bottom: 24px;
+            margin-bottom: 28px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.88rem;
+            color: #64748b;
+        }
+
+        .meta-strip strong {
+            color: #0f172a;
+        }
+
+        /* Highlight Cards Grid */
+        .highlight-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 18px;
+            margin-bottom: 36px;
+        }
+
+        .summary-pill-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 18px 20px;
+        }
+
+        .summary-pill-title {
+            font-size: 0.76rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .summary-pill-val {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #0f172a;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .summary-pill-desc {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        /* Policy Sections */
+        .policy-section {
+            margin-bottom: 36px;
+            scroll-margin-top: 100px;
+        }
+
+        .policy-section h2 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .policy-section p {
+            margin-bottom: 14px;
+            color: #334155;
+            font-size: 0.95rem;
+        }
+
+        .policy-section ul {
+            margin: 12px 0 16px 22px;
+            color: #334155;
+            font-size: 0.95rem;
+        }
+
+        .policy-section li {
+            margin-bottom: 8px;
+        }
+
+        .highlight-notice {
+            background: #ecfdf5;
+            border-left: 4px solid #10b981;
+            padding: 16px 20px;
+            border-radius: 0 12px 12px 0;
+            margin: 18px 0;
+            font-size: 0.92rem;
+            color: #065f46;
+        }
+
+        .steps-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 22px 24px;
+            margin: 18px 0;
+        }
+
+        .steps-box ol {
+            margin: 10px 0 0 20px;
+            padding: 0;
+        }
+
+        .steps-box li {
+            margin-bottom: 10px;
+            font-size: 0.94rem;
+            color: #334155;
+        }
+
+        /* Footer */
+        footer {
+            background: #0f172a;
+            color: #ffffff;
+            padding: 60px 40px 30px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .footer-cols {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.86rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: #ffffff;
+        }
+
+        .footer-bottom {
+            max-width: 1100px;
+            margin: 40px auto 0;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #64748b;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        @media (max-width: 860px) {
+            .doc-card {
+                padding: 24px 20px;
+            }
+            .site-nav {
+                padding: 14px 20px;
+            }
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sticky Glass Header -->
+    <header class="site-nav">
+        <a href="/" class="brand-logo-wrap">
+            <div class="brand-logo-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            </div>
+            <span class="brand-logo-text">Rapid PVC</span>
+            <span class="brand-logo-badge">PRO</span>
+        </a>
+
+        <nav class="nav-links">
+            <a href="/">Home</a>
+            <a href="/#pricing">Pricing</a>
+            <a href="/contact">Contact Us</a>
+            <a href="/terms">Terms</a>
+            <a href="/refund-policy" class="active">Refunds</a>
+            <a href="/login" style="margin-left: 8px;">Login</a>
+            <a href="/register" class="btn-nav-primary">Sign Up</a>
+        </nav>
+    </header>
+
+    <!-- Hero Header -->
+    <section class="page-hero">
+        <div class="hero-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M16 12l-4-4-4 4"/><path d="M12 16V8"/></svg>
+            Transparent Billing & Customer Protection
+        </div>
+        <h1 class="hero-title">Refunds & Cancellations</h1>
+        <p class="hero-subtitle">
+            Our comprehensive policy detailing refund eligibility, turnaround timelines, and cancellation procedures.
+        </p>
+    </section>
+
+    <!-- Main Content Container -->
+    <div class="doc-container">
+        <div class="doc-card">
+            
+            <div class="meta-strip">
+                <div>Merchant: <strong>Avinash Naval Patil</strong> (Rapid PVC)</div>
+                <div>Standard Refund SLA: <strong>5 - 7 Business Days</strong></div>
+                <div>Support Contact: <strong>rapidpvccard@gmail.com</strong></div>
+            </div>
+
+            <!-- Fast Metrics / Summary Cards -->
+            <div class="highlight-cards-grid">
+                <div class="summary-pill-box">
+                    <div class="summary-pill-title">Refund Turnaround</div>
+                    <div class="summary-pill-val" style="color: #059669;">5 - 7 Working Days</div>
+                    <div class="summary-pill-desc">Direct to original bank / UPI account</div>
+                </div>
+                <div class="summary-pill-box">
+                    <div class="summary-pill-title">Cancellation Window</div>
+                    <div class="summary-pill-val" style="color: #2563eb;">Within 48 Hours</div>
+                    <div class="summary-pill-desc">For 100% unutilized wallet recharges</div>
+                </div>
+                <div class="summary-pill-box">
+                    <div class="summary-pill-title">Failed Card Generation</div>
+                    <div class="summary-pill-val" style="color: #7c3aed;">100% Credit Restore</div>
+                    <div class="summary-pill-desc">Immediate auto-credit back to wallet</div>
+                </div>
+            </div>
+
+            <!-- Section 1 -->
+            <div class="policy-section">
+                <h2>1. Nature of Digital SaaS Services</h2>
+                <p>
+                    <strong>Rapid PVC</strong>, operated by <strong>Avinash Naval Patil</strong> (Sole Proprietorship, India), operates as a software-as-a-service (SaaS) utility providing automated document layout formatting and print preparation for PVC card printers.
+                </p>
+                <p>
+                    Because our platform renders high-resolution digital print files instantaneously upon user submission, service consumption occurs at the exact moment the PDF file is generated and delivered to the operator. We have formulated this Refunds and Cancellations Policy to ensure fairness, transparency, and complete adherence to Reserve Bank of India (RBI) and Payment Gateway regulations.
+                </p>
+            </div>
+
+            <!-- Section 2 -->
+            <div class="policy-section">
+                <h2>2. Cancellation Policy</h2>
+                <p>
+                    Our cancellation guidelines differ depending on whether services have been consumed:
+                </p>
+                <ul>
+                    <li><strong>Unused Wallet Recharges:</strong> If an operator inadvertently purchases a wallet recharge pack (₹20, ₹100, ₹200, ₹300) and wishes to cancel the purchase, they may submit a cancellation request within <strong>48 hours</strong> of the transaction, provided that <strong>zero card generations</strong> have been processed from the recharge amount. Upon verification, the entire recharge amount will be refunded to the original payment source.</li>
+                    <li><strong>Post-Generation Irrevocability:</strong> Once a PDF card extraction and layout generation has been triggered and rendered by our system, that specific transaction cannot be cancelled as digital processing has been fully delivered.</li>
+                    <li><strong>Account Deactivation:</strong> Operators may close or discontinue their Rapid PVC account at any time by contacting our support desk.</li>
+                </ul>
+            </div>
+
+            <!-- Section 3 -->
+            <div class="policy-section">
+                <h2>3. Refund Eligibility & Scenarios</h2>
+                <p>
+                    You are entitled to a full or partial refund under the following valid scenarios:
+                </p>
+
+                <div style="margin-left: 8px;">
+                    <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-top: 14px; margin-bottom: 6px;">A. Technical Failure & System Errors</h3>
+                    <p>
+                        If your wallet credits or payment gateway amount was deducted, but our server crashed, malfunctioned, or failed to provide a valid downloadable print file due to a technical error on our side, we will immediately restore the deducted credit to your wallet. If you prefer a monetary refund, we will process it back to your bank account.
+                    </p>
+
+                    <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-top: 14px; margin-bottom: 6px;">B. Duplicate or Multiple Debits</h3>
+                    <p>
+                        In the event of a network glitch, gateway timeout, or accidental multiple clicks where your bank account or UPI was charged more than once for a single wallet top-up, the duplicate amount(s) will be refunded in full (100%) without any cancellation deductions.
+                    </p>
+
+                    <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-top: 14px; margin-bottom: 6px;">C. Payment Debited but Wallet Not Credited</h3>
+                    <p>
+                        If money has been deducted from your bank account but does not reflect in your Rapid PVC wallet balance within 24 hours (due to banking settlement delays or dropped webhooks), we will either immediately credit your wallet balance or issue a direct refund to your source account upon receiving your Transaction Reference / UTR.
+                    </p>
+                </div>
+
+                <div class="highlight-notice">
+                    <strong>Lifetime Validity Guarantee:</strong> Because your wallet balance never expires on Rapid PVC, any balance you maintain can be safely utilized at any time in the future.
+                </div>
+            </div>
+
+            <!-- Section 4 -->
+            <div class="policy-section">
+                <h2>4. Non-Refundable Scenarios</h2>
+                <p>
+                    Refunds shall NOT be issued under the following circumstances:
+                </p>
+                <ul>
+                    <li>The card layout was generated accurately and delivered successfully, but the operator uploaded the wrong document or provided an incorrect citizen password.</li>
+                    <li>Defects caused by the operator's physical card printer, such as depleted ribbon, mismatched paper tray settings, or incorrect printer scaling (e.g. failing to select "Actual Size / 100%").</li>
+                    <li>Wallet balances that have already been utilized for completed card print jobs.</li>
+                    <li>Account bans resulting from violations of our Terms & Conditions (such as fraudulent document tampering).</li>
+                </ul>
+            </div>
+
+            <!-- Section 5 -->
+            <div class="policy-section">
+                <h2>5. How to Request a Refund</h2>
+                <p>
+                    To claim a refund or payment correction, please follow these simple steps:
+                </p>
+
+                <div class="steps-box">
+                    <ol>
+                        <li>Send an email to our official billing desk at <a href="mailto:rapidpvccard@gmail.com" style="color: #2563eb; font-weight: 700;">rapidpvccard@gmail.com</a> with the subject line: <strong>"Refund Request - [Your Transaction ID / Order ID]"</strong>.</li>
+                        <li>Include the following details in your message:
+                            <ul style="margin: 8px 0 8px 20px;">
+                                <li>Registered Rapid PVC Operator Email Address</li>
+                                <li>Payment Gateway Order ID / UTR Number / UPI Ref Number</li>
+                                <li>Date, Time, and Exact Amount Debited (in INR)</li>
+                                <li>Screenshot of bank debit SMS or payment success screen</li>
+                                <li>Clear description of the issue encountered</li>
+                            </ul>
+                        </li>
+                        <li>Our billing desk will acknowledge your ticket within <strong>24 business hours</strong> and verify the transaction with our payment gateway logs.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Section 6 -->
+            <div class="policy-section">
+                <h2>6. Refund Timelines & Settlement Method</h2>
+                <p>
+                    Once your refund request has been verified and approved:
+                </p>
+                <ul>
+                    <li><strong>Processing Timeline:</strong> Refunds are initiated within <strong>24 to 48 business hours</strong> of approval.</li>
+                    <li><strong>Bank Credit Timeline:</strong> The funds will reflect in your bank account, card, or UPI statement within <strong>5 to 7 business days</strong>, strictly subject to your issuing bank's clearing cycle.</li>
+                    <li><strong>Settlement Method:</strong> In compliance with Indian banking regulations, refunds are always credited back to the <strong>original source of payment</strong> used during the recharge (e.g. the same UPI ID, net-banking account, or debit/credit card).</li>
+                </ul>
+            </div>
+
+            <!-- Section 7 -->
+            <div class="policy-section">
+                <h2>7. Grievance Redressal & Merchant Contact</h2>
+                <p>
+                    For any unresolved escalations regarding refunds, please contact our designated merchant representative:
+                </p>
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-top: 14px;">
+                    <strong>Business Entity:</strong> Rapid PVC<br>
+                    <strong>Legal Proprietor:</strong> Avinash Naval Patil<br>
+                    <strong>Billing & Support Email:</strong> <a href="mailto:rapidpvccard@gmail.com" style="color: #2563eb;">rapidpvccard@gmail.com</a><br>
+                    <strong>Operating Jurisdiction:</strong> Maharashtra, India<br>
+                    <strong>Support Hours:</strong> Monday – Saturday (9:00 AM to 7:00 PM IST)
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Universal Footer -->
+    <footer>
+        <div class="footer-cols">
+            <div style="flex: 2; min-width: 280px;">
+                <div class="brand-logo-wrap" style="color: white; font-size: 1.3rem; margin-bottom: 16px;">
+                    <div class="brand-logo-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                    </div>
+                    <span style="font-weight: 800; color: #ffffff;">Rapid PVC</span>
+                </div>
+                <p style="font-size: 0.88rem; color: #94a3b8; line-height: 1.6; max-width: 420px;">
+                    Rapid PVC provides automated, high-precision document formatting and PVC print layout generation for CSC, VLE, and Cyber Cafe operators across India.
+                </p>
+            </div>
+            
+            <div style="flex: 1; min-width: 200px;">
+                <h4 style="font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; color: #ffffff;">LEGAL & POLICIES</h4>
+                <div class="footer-links">
+                    <a href="/terms">Terms & Conditions</a>
+                    <a href="/refund-policy">Refunds & Cancellations</a>
+                    <a href="/privacy-policy">Privacy Policy</a>
+                    <a href="/contact">Contact Us</a>
+                </div>
+            </div>
+            
+            <div style="flex: 1; min-width: 180px;">
+                <h4 style="font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; color: #ffffff;">QUICK LINKS</h4>
+                <div class="footer-links">
+                    <a href="/login">Operator Login</a>
+                    <a href="/register">Create Account</a>
+                    <a href="/#pricing">Recharge Plans</a>
+                    <a href="/#faqs">Help & FAQs</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <div>Rapid PVC | Operated by <strong>Avinash Naval Patil</strong> (Sole Proprietorship, India)</div>
+            <div>&copy; 2026 Rapid PVC. All Rights Reserved.</div>
+        </div>
+    </footer>
+
+</body>
+</html>
