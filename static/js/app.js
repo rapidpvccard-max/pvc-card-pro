@@ -461,6 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if(processingSection) processingSection.style.display = 'none';
             resultSection.style.display = 'block';
+            startExpiryCountdown(300); // 5 Minutes Zero-Retention Privacy Timer
             
         } catch (error) {
             console.error('Generation Error:', error);
@@ -476,6 +477,86 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+
+    // Zero-Retention Expiry Countdown Manager
+    let expiryInterval = null;
+    function startExpiryCountdown(durationSeconds = 300) {
+        if (expiryInterval) clearInterval(expiryInterval);
+        let remaining = durationSeconds;
+        const timerEl = document.getElementById('expiry-timer-text');
+        const badgeEl = document.getElementById('expiry-badge');
+        
+        function updateDisplay() {
+            const mins = Math.floor(remaining / 60);
+            const secs = remaining % 60;
+            const formatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            if (timerEl) timerEl.textContent = formatted;
+
+            if (badgeEl) {
+                if (remaining <= 60) {
+                    badgeEl.style.background = '#fef2f2';
+                    badgeEl.style.borderColor = '#fecaca';
+                    badgeEl.style.color = '#dc2626';
+                } else if (remaining <= 120) {
+                    badgeEl.style.background = '#fffbeb';
+                    badgeEl.style.borderColor = '#fde68a';
+                    badgeEl.style.color = '#d97706';
+                } else {
+                    badgeEl.style.background = '#eff6ff';
+                    badgeEl.style.borderColor = '#bfdbfe';
+                    badgeEl.style.color = '#1e40af';
+                }
+            }
+        }
+
+        updateDisplay();
+        expiryInterval = setInterval(() => {
+            remaining--;
+            if (remaining <= 0) {
+                clearInterval(expiryInterval);
+                if (timerEl) timerEl.textContent = '00:00 (Expired)';
+                if (badgeEl) {
+                    badgeEl.style.background = '#fef2f2';
+                    badgeEl.style.borderColor = '#fecaca';
+                    badgeEl.style.color = '#dc2626';
+                }
+            } else {
+                updateDisplay();
+            }
+        }, 1000);
+    }
+
+    // Expired Modal Helpers
+    const expiredModal = document.getElementById('expired-modal');
+    const btnModalReupload = document.getElementById('btn-modal-reupload');
+    const btnModalClose = document.getElementById('btn-modal-close');
+
+    function showExpiredModal() {
+        if (expiredModal) expiredModal.style.display = 'flex';
+    }
+
+    function hideExpiredModal() {
+        if (expiredModal) expiredModal.style.display = 'none';
+    }
+
+    if (btnModalReupload) {
+        btnModalReupload.addEventListener('click', () => {
+            hideExpiredModal();
+            btnStartOver.click();
+        });
+    }
+
+    if (btnModalClose) {
+        btnModalClose.addEventListener('click', () => {
+            hideExpiredModal();
+        });
+    }
+
+    if (expiredModal) {
+        expiredModal.addEventListener('click', (e) => {
+            if (e.target === expiredModal) hideExpiredModal();
+        });
+    }
 
     function getFriendlyErrorMsg(rawError) {
         if (!rawError) return 'Unable to generate PVC card. Please try again.';
@@ -495,7 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return 'Unable to generate PVC card. Please try again.';
     }
 
-    // Robust Binary Blob Download Helper
+    // Robust Binary Blob Download Helper with Expired Session Interception
     async function triggerDownload(url, filename, btnElement = null) {
         let originalText = '';
         if (btnElement) {
@@ -508,7 +589,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         try {
             const res = await fetch(url);
-            if (!res.ok) throw new Error('File download failed from server.');
+            
+            // Check if file was purged / 404 / expired
+            if (res.status === 404 || res.status === 410) {
+                showExpiredModal();
+                return;
+            }
+
+            if (!res.ok) {
+                throw new Error('File download failed from server.');
+            }
+
             const blob = await res.blob();
             const blobUrl = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -524,8 +615,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.showToast(`${filename} downloaded successfully!`, 'success');
         } catch (err) {
             console.error('Download error:', err);
-            // Fallback direct open in new window
-            window.open(url, '_blank');
+            window.showToast('Unable to download file. Please generate a new card.', 'error');
         } finally {
             if (btnElement) {
                 btnElement.disabled = false;
@@ -554,6 +644,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Start Over
     btnStartOver.addEventListener('click', () => {
+        if (expiryInterval) clearInterval(expiryInterval);
         uploadForm.reset();
         fileInput.value = '';
         currentRunId = null;

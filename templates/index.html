@@ -712,12 +712,19 @@
 
         <!-- Result Section -->
         <div id="result-section" style="display: none; padding-top: 10px;">
-            <div style="text-align: center; margin-bottom: 28px;">
+            <div style="text-align: center; margin-bottom: 24px;">
                 <div style="display: inline-flex; align-items: center; justify-content: center; width: 68px; height: 68px; background: #ecfdf5; color: #059669; border-radius: 50%; margin-bottom: 14px; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25);">
                     <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
                 <h2 style="font-size: 1.85rem; font-weight: 800; color: #0f172a; font-family: 'Plus Jakarta Sans', sans-serif; margin-bottom: 4px;">PVC Card Ready to Print!</h2>
-                <p style="color: #64748b; font-size: 0.95rem;">High-fidelity 300 DPI layout generated successfully with zero formatting errors.</p>
+                <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 12px;">High-fidelity 300 DPI layout generated successfully with zero formatting errors.</p>
+                
+                <!-- Live Expiry Badge -->
+                <div id="expiry-badge" style="display: inline-flex; align-items: center; gap: 8px; background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 6px 16px; border-radius: 20px; font-size: 0.84rem; font-weight: 700; transition: all 0.3s ease;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>Auto-delete in: <strong id="expiry-timer-text" style="font-variant-numeric: tabular-nums;">05:00</strong></span>
+                    <span style="background: #dbeafe; color: #1d4ed8; padding: 2px 8px; border-radius: 10px; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;">Privacy Shield</span>
+                </div>
             </div>
 
             <!-- Dual Card Preview Grid -->
@@ -765,6 +772,40 @@
                 </button>
             </div>
         </div>
+
+        <!-- Session Expired Modal (Zero-Retention Privacy Protection) -->
+        <div id="expired-modal" style="display: none; position: fixed; inset: 0; z-index: 10000; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px;">
+            <div style="background: #ffffff; border-radius: 24px; max-width: 460px; width: 100%; padding: 32px 28px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35); border: 1px solid #f1f5f9; position: relative; animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);">
+                <div style="width: 68px; height: 68px; margin: 0 auto 18px; background: #fff1f2; color: #e11d48; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #ffe4e6; box-shadow: 0 10px 25px -5px rgba(225, 29, 72, 0.25);">
+                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+                <h3 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin-bottom: 8px; font-family: 'Plus Jakarta Sans', sans-serif;">File Session Expired</h3>
+                <div style="background: #fef2f2; border: 1px solid #fee2e2; border-radius: 12px; padding: 12px; margin-bottom: 16px; text-align: left;">
+                    <p style="font-size: 0.88rem; color: #991b1b; line-height: 1.5; margin: 0; font-weight: 600;">
+                        🛡️ <strong>डेटा प्राइवेसी सुरक्षा:</strong> यूजर डेटा प्राइवेसी के लिए तैयार कार्ड फाइल 5 मिनट बाद सर्वर से ऑटोमैटिक डिलीट कर दी जाती है।
+                    </p>
+                </div>
+                <p style="font-size: 0.86rem; color: #64748b; line-height: 1.5; margin-bottom: 24px;">
+                    For zero-retention privacy, temporary files are permanently purged after 5 minutes. Please re-upload your PDF to generate a fresh card.
+                </p>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button id="btn-modal-reupload" class="btn-primary" style="width: 100%; justify-content: center; padding: 13px; font-size: 0.98rem; font-weight: 700; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); border: none; border-radius: 12px; color: #fff; cursor: pointer; box-shadow: 0 8px 18px rgba(37, 99, 235, 0.3);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+                        नया कार्ड बनाएं (Upload Again)
+                    </button>
+                    <button id="btn-modal-close" style="background: transparent; border: none; color: #94a3b8; font-size: 0.88rem; font-weight: 600; cursor: pointer; padding: 8px;">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            @keyframes modalPop {
+                from { transform: scale(0.92); opacity: 0; }
+                to { transform: scale(1); opacity: 1; }
+            }
+        </style>
 
     </div>
 </div>

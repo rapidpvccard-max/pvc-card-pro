@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shipping & Delivery Policy - Rapid PVC</title>
+    <meta name="description" content="Official Shipping and Delivery Policy for Rapid PVC. 100% digital SaaS delivery, instant software credit fulfillment, and zero shipping charges.">
+    <link rel="stylesheet" href="/static/css/rapid_theme.css?v=15">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --surface-dark: #0f172a;
+            --border-light: #e2e8f0;
+            --text-heading: #0f172a;
+            --text-body: #334155;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: var(--text-body);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.7;
+        }
+
+        /* Sticky Glass Header */
+        .site-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-light);
+            padding: 16px 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand-logo-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .brand-logo-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+        }
+
+        .brand-logo-text {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-logo-badge {
+            font-size: 0.62rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: #ffffff;
+            padding: 2px 6px;
+            border-radius: 6px;
+            margin-left: 4px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .nav-links a {
+            color: #475569;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.92rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--primary);
+        }
+
+        .btn-nav-primary {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff !important;
+            padding: 8px 18px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        }
+
+        /* Hero */
+        .page-hero {
+            background: linear-gradient(180deg, #eff6ff 0%, #f8fafc 100%);
+            border-bottom: 1px solid var(--border-light);
+            padding: 60px 24px 40px;
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .hero-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 2.3rem;
+            font-weight: 800;
+            color: var(--text-heading);
+            margin: 0 0 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.05rem;
+            color: #64748b;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        /* Content Container */
+        .content-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 48px 24px 80px;
+        }
+
+        .policy-card {
+            background: #ffffff;
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            padding: 44px 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        }
+
+        .policy-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 32px;
+            font-size: 0.85rem;
+            color: #64748b;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .policy-meta strong {
+            color: #0f172a;
+        }
+
+        .policy-section {
+            margin-bottom: 32px;
+        }
+
+        .policy-section h2 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-heading);
+            margin-top: 0;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .policy-section p {
+            margin: 0 0 14px;
+            font-size: 0.95rem;
+            color: #334155;
+        }
+
+        .policy-section ul, .policy-section ol {
+            margin: 0 0 14px 20px;
+            padding: 0;
+            font-size: 0.95rem;
+            color: #334155;
+        }
+
+        .policy-section li {
+            margin-bottom: 8px;
+        }
+
+        .highlight-notice {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 16px 20px;
+            border-radius: 0 12px 12px 0;
+            margin: 20px 0;
+            font-size: 0.92rem;
+            color: #1e3a8a;
+        }
+
+        .delivery-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 18px 0;
+            font-size: 0.9rem;
+        }
+
+        .delivery-table th, .delivery-table td {
+            border: 1px solid var(--border-light);
+            padding: 12px 16px;
+            text-align: left;
+        }
+
+        .delivery-table th {
+            background-color: #f1f5f9;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--surface-dark);
+            color: white;
+            padding: 60px 40px 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .footer-grid {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            gap: 36px;
+            flex-wrap: wrap;
+        }
+
+        .footer-col-brand {
+            flex: 2;
+            min-width: 260px;
+        }
+
+        .footer-col {
+            flex: 1.2;
+            min-width: 200px;
+        }
+
+        .footer-heading {
+            font-size: 0.82rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            color: #ffffff;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 0.84rem;
+        }
+
+        .footer-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: #ffffff;
+        }
+
+        .footer-bottom {
+            max-width: 1100px;
+            margin: 40px auto 0;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            color: #64748b;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .site-nav { padding: 14px 20px; }
+            .nav-links { display: none; }
+            .policy-card { padding: 28px 20px; }
+            .hero-title { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation -->
+    <header class="site-nav">
+        <a href="/" class="brand-logo-wrap">
+            <div class="brand-logo-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            </div>
+            <span class="brand-logo-text">Rapid PVC</span>
+            <span class="brand-logo-badge">PRO</span>
+        </a>
+
+        <nav class="nav-links">
+            <a href="/">Home</a>
+            <a href="/subscription">Pricing</a>
+            <a href="/terms">Terms</a>
+            <a href="/refund-policy">Refunds</a>
+            <a href="/shipping-policy" class="active">Shipping & Delivery</a>
+            <a href="/privacy-policy">Privacy</a>
+            <a href="/contact">Contact</a>
+            <a href="/login" style="margin-left: 8px;">Login</a>
+            <a href="/register" class="btn-nav-primary">Sign Up</a>
+        </nav>
+    </header>
+
+    <!-- Hero Title -->
+    <section class="page-hero">
+        <div class="hero-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            Digital Fulfillment & Service Terms
+        </div>
+        <h1 class="hero-title">Shipping & Delivery Policy</h1>
+        <p class="hero-subtitle">
+            Information on instant electronic delivery, digital software fulfillment, and turnaround times for Rapid PVC services.
+        </p>
+    </section>
+
+    <!-- Main Policy Content -->
+    <div class="content-container">
+        <div class="policy-card">
+            
+            <div class="policy-meta">
+                <div>Last Updated: <strong>September 2026</strong></div>
+                <div>Fulfillment Type: <strong>100% Digital SaaS Delivery</strong></div>
+                <div>Merchant: <strong>Avinash Naval Patil</strong> (Rapid PVC)</div>
+            </div>
+
+            <!-- Section 1 -->
+            <div class="policy-section">
+                <h2>1. Nature of Services (Digital Software Utility)</h2>
+                <p>
+                    <strong>Rapid PVC</strong>, operated by <strong>Avinash Naval Patil</strong> (Sole Proprietorship, Maharashtra, India), provides automated cloud-based document formatting and print layout generation software for CSC, VLE, and Cyber Cafe operators.
+                </p>
+                <div class="highlight-notice">
+                    <strong>Important Note on Tangible Goods:</strong> Rapid PVC does <strong>NOT</strong> manufacture, store, ship, or physically deliver any tangible goods (such as blank PVC plastic cards, thermal printer ribbons, or physical printing hardware). All services provided by Rapid PVC are purely <strong>electronic and software-driven</strong>.
+                </div>
+            </div>
+
+            <!-- Section 2 -->
+            <div class="policy-section">
+                <h2>2. Mode of Delivery (Instant Electronic Delivery)</h2>
+                <p>
+                    Since our service operates entirely via cloud infrastructure, all order fulfillment and deliverable outputs are provided electronically:
+                </p>
+                <ul>
+                    <li><strong>Wallet Recharge Credits:</strong> Upon successful transaction confirmation via our payment gateway partners (PayU / UPI / NetBanking), recharge credits are automatically and instantaneously added to the user's account wallet.</li>
+                    <li><strong>Formatted PVC Print Files:</strong> When an operator generates a card layout, the resulting high-definition 300 DPI layout (Front/Back PNGs and print-ready A4 PDF) is rendered and delivered directly through the web browser for immediate digital download.</li>
+                </ul>
+            </div>
+
+            <!-- Section 3 -->
+            <div class="policy-section">
+                <h2>3. Delivery Timelines & Execution Speed</h2>
+                <p>
+                    We take pride in providing zero-wait, real-time service delivery across India:
+                </p>
+                <table class="delivery-table">
+                    <thead>
+                        <tr>
+                            <th>Service / Deliverable</th>
+                            <th>Mode of Delivery</th>
+                            <th>Standard Delivery Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Wallet Balance Top-Up</strong></td>
+                            <td>Electronic Server Webhook / Instant Credit</td>
+                            <td><strong>Instant (0 to 60 Seconds)</strong></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Single PVC Card Layout Generation</strong></td>
+                            <td>Direct In-Browser Download (PNG / PDF)</td>
+                            <td><strong>3 to 10 Seconds</strong></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Multi-Card A4 Print Sheet Assembly</strong></td>
+                            <td>Automated In-Browser Duplex PDF</td>
+                            <td><strong>5 to 15 Seconds</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>
+                    In rare cases of severe banking server delays or telecom gateway timeouts, wallet credit reflections may take up to a maximum of 24 hours. If your account is not credited within 1 hour, our billing support desk resolves the transaction immediately upon receipt of the bank UTR reference.
+                </p>
+            </div>
+
+            <!-- Section 4 -->
+            <div class="policy-section">
+                <h2>4. Shipping Costs & Charges</h2>
+                <p>
+                    Because all services and files are delivered digitally via the internet:
+                </p>
+                <ul>
+                    <li><strong>Shipping Fee:</strong> <strong>₹0.00 (Zero / Free)</strong>. There are absolutely no shipping fees, postal charges, courier fees, or hidden handling costs associated with any recharge plan on Rapid PVC.</li>
+                </ul>
+            </div>
+
+            <!-- Section 5 -->
+            <div class="policy-section">
+                <h2>5. Delivery Confirmation & Access</h2>
+                <p>
+                    Delivery is considered legally completed when:
+                </p>
+                <ol>
+                    <li>The payment aggregator transmits a successful transaction notification and the operator's wallet balance increases.</li>
+                    <li>An official transaction entry is logged in the user's secure account dashboard.</li>
+                    <li>The downloadable print-ready output file is rendered available on the operator's screen.</li>
+                </ol>
+            </div>
+
+            <!-- Section 6 -->
+            <div class="policy-section">
+                <h2>6. Customer Support & Delivery Inquiries</h2>
+                <p>
+                    If you experience any delay in credit top-up or have queries regarding digital service delivery, please contact our merchant support desk:
+                </p>
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-top: 14px; line-height: 1.8;">
+                    <strong>Business Entity:</strong> Rapid PVC<br>
+                    <strong>Legal Proprietor:</strong> Avinash Naval Patil<br>
+                    <strong>Customer Support Phone:</strong> <a href="tel:+917698390510" style="color: #2563eb; font-weight: 700;">+91 7698390510</a><br>
+                    <strong>Official Billing Email:</strong> <a href="mailto:rapidpvccard@gmail.com" style="color: #2563eb; font-weight: 700;">rapidpvccard@gmail.com</a><br>
+                    <strong>Operating Jurisdiction:</strong> Maharashtra, India<br>
+                    <strong>Support Hours:</strong> Monday – Saturday (9:00 AM to 7:00 PM IST)
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Universal Compliance Footer -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col-brand">
+                <div class="brand-logo-wrap" style="color: white; font-size: 1.3rem; margin-bottom: 16px;">
+                    <div class="brand-logo-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                    </div>
+                    <span style="font-weight: 800; color: #ffffff;">Rapid PVC</span>
+                    <span class="brand-logo-badge">PRO</span>
+                </div>
+                <p style="font-size: 0.88rem; color: #94a3b8; line-height: 1.6; max-width: 380px;">
+                    Rapid PVC is India's premier online PVC card generation utility for CSC, VLE, and Cyber Cafe operators. High-resolution print-ready layouts in seconds with zero-retention privacy.
+                </p>
+            </div>
+            
+            <div class="footer-col">
+                <div class="footer-heading">BUSINESS DETAILS</div>
+                <div style="font-size: 0.84rem; color: #94a3b8; line-height: 1.8;">
+                    <strong>Rapid PVC</strong><br>
+                    Legal Name: <strong>Avinash Naval Patil</strong><br>
+                    Entity: <strong>Sole Proprietorship</strong><br>
+                    Location: <strong>Maharashtra, India</strong><br>
+                    Email: <a href="mailto:rapidpvccard@gmail.com" style="color: #60a5fa; text-decoration: none;">rapidpvccard@gmail.com</a><br>
+                    Phone: <a href="tel:+917698390510" style="color: #60a5fa; text-decoration: none;">+91 7698390510</a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <div class="footer-heading">LEGAL & POLICIES</div>
+                <div class="footer-links">
+                    <a href="/terms">Terms & Conditions</a>
+                    <a href="/refund-policy">Refunds & Cancellations</a>
+                    <a href="/shipping-policy">Shipping & Delivery</a>
+                    <a href="/privacy-policy">Privacy Policy</a>
+                    <a href="/contact">Contact Us</a>
+                </div>
+            </div>
+            
+            <div class="footer-col">
+                <div class="footer-heading">QUICK LINKS</div>
+                <div class="footer-links">
+                    <a href="/login">Operator Login</a>
+                    <a href="/register">Create Account</a>
+                    <a href="/subscription">Recharge Plans</a>
+                    <a href="/#faqs">Help & FAQs</a>
+                </div>
+            </div>
+        </div>
+
+        <div style="max-width: 1100px; margin: 30px auto 0; padding: 14px 18px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; font-size: 0.74rem; color: #94a3b8; line-height: 1.6;">
+            <strong>Regulatory Disclaimer:</strong> Rapid PVC is an independent software-as-a-service (SaaS) utility designed for authorized CSC, VLE, and Cyber Cafe operators to format lawfully obtained identity card PDF files into standard 300 DPI print-ready layouts for card printers. Rapid PVC is NOT affiliated with, sponsored by, or associated with UIDAI (Aadhaar), the National Health Authority (Ayushman PMJAY), the Election Commission of India, or any Government department. We do not generate government documents or alter official citizen records.
+        </div>
+        
+        <div class="footer-bottom">
+            <div>Rapid PVC | Operated by <strong>Avinash Naval Patil</strong> (Sole Proprietorship, India)</div>
+            <div>&copy; 2026 Rapid PVC. All Rights Reserved.</div>
+        </div>
+    </footer>
+
+</body>
+</html>

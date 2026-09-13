@@ -212,6 +212,17 @@ async def refund_page(request: Request):
 async def privacy_page(request: Request):
     return templates.TemplateResponse(request=request, name="privacy_policy.html")
 
+@app.get("/shipping-policy", response_class=HTMLResponse)
+@app.get("/shipping-and-delivery", response_class=HTMLResponse)
+@app.get("/delivery-policy", response_class=HTMLResponse)
+@app.get("/shipping", response_class=HTMLResponse)
+async def shipping_page(request: Request):
+    return templates.TemplateResponse(request=request, name="shipping_policy.html")
+
+@app.get("/pricing", response_class=HTMLResponse)
+async def pricing_page(request: Request):
+    return templates.TemplateResponse(request=request, name="subscription.html")
+
 class ContactMessageSchema(BaseModel):
     name: str
     email: str
