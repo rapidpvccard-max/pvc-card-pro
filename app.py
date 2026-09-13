@@ -1,4 +1,5 @@
 import os
+import shutil
 import uuid
 import datetime
 from dotenv import load_dotenv
@@ -22,9 +23,9 @@ from routers import auth_router, user_router, payment_router, admin_router
 
 database.ensure_database_schema(database.engine)
 
-# Background cleanup task (Zero-Retention Privacy Sweeper)
+# Background cleanup task (Strict Zero-Retention Privacy Sweeper - 5 Minutes)
 async def cleanup_temporary_files():
-    retention_minutes = int(os.environ.get("FILE_RETENTION_MINUTES", "10"))
+    retention_seconds = int(os.environ.get("FILE_RETENTION_SECONDS", "300")) # Strictly 5 minutes (300s)
     while True:
         try:
             now = time.time()
@@ -35,22 +36,29 @@ async def cleanup_temporary_files():
                         if filename == '.gitkeep':
                             continue
                         filepath = os.path.join(directory, filename)
-                        if os.path.isfile(filepath) and os.stat(filepath).st_mtime < now - (retention_minutes * 60):
-                            try: os.remove(filepath)
-                            except: pass
-                            print(f"[Cleanup] Removed stale file: {filepath}")
+                        try:
+                            if os.path.isfile(filepath) and os.stat(filepath).st_mtime < now - retention_seconds:
+                                os.remove(filepath)
+                                print(f"[Zero-Retention] Purged stale file: {filepath}")
+                        except Exception:
+                            pass
 
             # 2. Clean static/renders temporary preview directories
             renders_dir = os.path.join("static", "renders")
             if os.path.exists(renders_dir):
                 for dirname in os.listdir(renders_dir):
+                    if dirname == '.gitkeep':
+                        continue
                     dirpath = os.path.join(renders_dir, dirname)
-                    if os.path.isdir(dirpath) and os.stat(dirpath).st_mtime < now - (retention_minutes * 60):
-                        shutil.rmtree(dirpath, ignore_errors=True)
-                        print(f"[Cleanup] Purged stale render directory: {dirpath}")
+                    try:
+                        if os.path.isdir(dirpath) and os.stat(dirpath).st_mtime < now - retention_seconds:
+                            shutil.rmtree(dirpath, ignore_errors=True)
+                            print(f"[Zero-Retention] Purged expired render session: {dirname}")
+                    except Exception as err:
+                        print(f"[Cleanup Error on {dirname}] {err}")
         except Exception as e:
-            print(f"[Cleanup Error] {e}")
-        await asyncio.sleep(60 * 3) # Check every 3 minutes
+            print(f"[Cleanup Loop Error] {e}")
+        await asyncio.sleep(20) # Check frequently every 20 seconds
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -495,8 +503,8 @@ async def generate_pipeline(
             "run_id": run_id,
             "document_type": doc_type,
             "mapped_data": mapped_data,
-            "front_url": f"/static/renders/{run_id}/front.png",
-            "back_url": f"/static/renders/{run_id}/back.png",
+            "front_url": f"/download-card/{run_id}/front",
+            "back_url": f"/download-card/{run_id}/back",
             "pdf_url": f"/download-pdf/{run_id}",
             "extraction_status": engine_data.get("extraction_confidence", "unknown"),
             "photo_available": mapped_data.get("photo", {}).get("available", False),
@@ -551,9 +559,7 @@ async def generate_a4(
     except Exception as e:
         return JSONResponse(status_code=500, content={"success": False, "error": f"A4 Generation failure: {str(e)}"})
 
-import shutil
 from fastapi.responses import FileResponse
-from fastapi import BackgroundTasks
 
 @app.get("/download-pdf/{run_id}")
 async def download_pdf(
@@ -570,13 +576,93 @@ async def download_pdf(
     if not history:
         return JSONResponse(status_code=403, content={"success": False, "error": "Access denied or run_id not found"})
 
-    pdf_path = os.path.join("static", "renders", run_id, "a4_print.pdf")
-    
-    if not os.path.exists(pdf_path):
-        return JSONResponse(status_code=404, content={"success": False, "error": "File not found or expired."})
+    run_dir = os.path.join("static", "renders", run_id)
+    pdf_path = os.path.join(run_dir, "a4_print.pdf")
+
+    # Strict 5-minute (300 seconds) Zero-Retention Expiry Check
+    is_expired = False
+    if history.created_at:
+        elapsed = (datetime.datetime.utcnow() - history.created_at).total_seconds()
+        if elapsed > 300: # 5 minutes
+            is_expired = True
+    elif os.path.exists(pdf_path) and (time.time() - os.path.getmtime(pdf_path) > 300):
+        is_expired = True
+
+    if is_expired or not os.path.exists(pdf_path):
+        if os.path.exists(run_dir):
+            shutil.rmtree(run_dir, ignore_errors=True)
+            print(f"[Zero-Retention] Purged expired download session: {run_id}")
+        return JSONResponse(
+            status_code=410,
+            content={"success": False, "error": "File session expired. For zero-retention privacy, temporary files are permanently purged after 5 minutes."}
+        )
     
     return FileResponse(
         path=pdf_path,
         filename=f"PVC_Card_{run_id[:8]}.pdf",
         media_type="application/pdf"
     )
+
+@app.get("/download-card/{run_id}/{side}")
+async def download_card(
+    run_id: str,
+    side: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    if side not in ["front", "back"]:
+        return JSONResponse(status_code=400, content={"success": False, "error": "Invalid card side requested."})
+
+    history = db.query(models.GenerationHistory).filter(
+        models.GenerationHistory.run_id == run_id,
+        models.GenerationHistory.user_id == current_user.id
+    ).first()
+    
+    if not history:
+        return JSONResponse(status_code=403, content={"success": False, "error": "Access denied or run_id not found"})
+
+    run_dir = os.path.join("static", "renders", run_id)
+    file_path = os.path.join(run_dir, f"{side}.png")
+
+    # Strict 5-minute (300 seconds) Zero-Retention Expiry Check
+    is_expired = False
+    if history.created_at:
+        elapsed = (datetime.datetime.utcnow() - history.created_at).total_seconds()
+        if elapsed > 300: # 5 minutes
+            is_expired = True
+    elif os.path.exists(file_path) and (time.time() - os.path.getmtime(file_path) > 300):
+        is_expired = True
+
+    if is_expired or not os.path.exists(file_path):
+        if os.path.exists(run_dir):
+            shutil.rmtree(run_dir, ignore_errors=True)
+            print(f"[Zero-Retention] Purged expired card download session: {run_id}")
+        return JSONResponse(
+            status_code=410,
+            content={"success": False, "error": "File session expired. For zero-retention privacy, temporary files are permanently purged after 5 minutes."}
+        )
+
+    return FileResponse(
+        path=file_path,
+        filename=f"PVC_{side.capitalize()}_{run_id[:8]}.png",
+        media_type="image/png"
+    )
+
+@app.post("/api/purge-run/{run_id}")
+async def purge_run(
+    run_id: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    history = db.query(models.GenerationHistory).filter(
+        models.GenerationHistory.run_id == run_id,
+        models.GenerationHistory.user_id == current_user.id
+    ).first()
+    
+    if history:
+        run_dir = os.path.join("static", "renders", run_id)
+        if os.path.exists(run_dir):
+            shutil.rmtree(run_dir, ignore_errors=True)
+            print(f"[Zero-Retention] Instant user/timer purge triggered for run: {run_id}")
+        return {"success": True, "purged": True}
+    return JSONResponse(status_code=404, content={"success": False, "error": "Run not found"})

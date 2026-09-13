@@ -480,8 +480,76 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Zero-Retention Expiry Countdown Manager
     let expiryInterval = null;
+    let isSessionExpired = false;
+
+    function resetDownloadButtons() {
+        isSessionExpired = false;
+        if (frontPreview) {
+            frontPreview.style.filter = 'none';
+        }
+        if (backPreview) {
+            backPreview.style.filter = 'none';
+        }
+        [btnDlFront, btnDlBack, btnDlA4].forEach(btn => {
+            if (btn) {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+                btn.style.pointerEvents = 'auto';
+            }
+        });
+        if (btnDlFront) {
+            btnDlFront.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download Front (PNG)`;
+        }
+        if (btnDlBack) {
+            btnDlBack.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download Back (PNG)`;
+        }
+        if (btnDlA4) {
+            btnDlA4.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download A4 Print File (PDF)`;
+        }
+    }
+
+    function lockSessionAsExpired() {
+        isSessionExpired = true;
+        const timerEl = document.getElementById('expiry-timer-text');
+        const badgeEl = document.getElementById('expiry-badge');
+
+        if (timerEl) timerEl.textContent = '00:00 (Expired)';
+        if (badgeEl) {
+            badgeEl.style.background = '#fef2f2';
+            badgeEl.style.borderColor = '#fecaca';
+            badgeEl.style.color = '#dc2626';
+        }
+
+        // 1. Permanently disable and lock download buttons
+        [btnDlFront, btnDlBack, btnDlA4].forEach(btn => {
+            if (btn) {
+                btn.disabled = true;
+                btn.style.opacity = '0.45';
+                btn.style.cursor = 'not-allowed';
+                btn.style.pointerEvents = 'none';
+            }
+        });
+        if (btnDlFront) btnDlFront.innerHTML = '🔒 Expired';
+        if (btnDlBack) btnDlBack.innerHTML = '🔒 Expired';
+        if (btnDlA4) btnDlA4.innerHTML = '🔒 Session Expired - Files Purged';
+
+        // 2. Blur / shield previews to guarantee citizen data privacy
+        if (frontPreview) frontPreview.style.filter = 'blur(14px) grayscale(80%)';
+        if (backPreview) backPreview.style.filter = 'blur(14px) grayscale(80%)';
+
+        // 3. Immediately trigger backend purge
+        if (currentRunId) {
+            fetch(`/api/purge-run/${currentRunId}`, { method: 'POST' }).catch(() => {});
+        }
+
+        // 4. Pop up zero-retention privacy modal
+        showExpiredModal();
+    }
+
     function startExpiryCountdown(durationSeconds = 300) {
         if (expiryInterval) clearInterval(expiryInterval);
+        resetDownloadButtons();
         let remaining = durationSeconds;
         const timerEl = document.getElementById('expiry-timer-text');
         const badgeEl = document.getElementById('expiry-badge');
@@ -514,12 +582,7 @@ document.addEventListener('DOMContentLoaded', () => {
             remaining--;
             if (remaining <= 0) {
                 clearInterval(expiryInterval);
-                if (timerEl) timerEl.textContent = '00:00 (Expired)';
-                if (badgeEl) {
-                    badgeEl.style.background = '#fef2f2';
-                    badgeEl.style.borderColor = '#fecaca';
-                    badgeEl.style.color = '#dc2626';
-                }
+                lockSessionAsExpired();
             } else {
                 updateDisplay();
             }
@@ -578,6 +641,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Robust Binary Blob Download Helper with Expired Session Interception
     async function triggerDownload(url, filename, btnElement = null) {
+        if (isSessionExpired) {
+            lockSessionAsExpired();
+            return;
+        }
+
         let originalText = '';
         if (btnElement) {
             originalText = btnElement.innerHTML;
@@ -590,9 +658,9 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(url);
             
-            // Check if file was purged / 404 / expired
+            // Check if file was purged / 404 / 410 / expired
             if (res.status === 404 || res.status === 410) {
-                showExpiredModal();
+                lockSessionAsExpired();
                 return;
             }
 
@@ -617,7 +685,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Download error:', err);
             window.showToast('Unable to download file. Please generate a new card.', 'error');
         } finally {
-            if (btnElement) {
+            if (btnElement && !isSessionExpired) {
                 btnElement.disabled = false;
                 btnElement.innerHTML = originalText;
             }
@@ -625,18 +693,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     btnDlFront.addEventListener('click', () => {
+        if (isSessionExpired) { lockSessionAsExpired(); return; }
         if (currentFrontUrl && currentRunId) {
             triggerDownload(currentFrontUrl, `PVC_Front_${currentRunId.substring(0, 8)}.png`, btnDlFront);
         }
     });
 
     btnDlBack.addEventListener('click', () => {
+        if (isSessionExpired) { lockSessionAsExpired(); return; }
         if (currentBackUrl && currentRunId) {
             triggerDownload(currentBackUrl, `PVC_Back_${currentRunId.substring(0, 8)}.png`, btnDlBack);
         }
     });
 
     btnDlA4.addEventListener('click', () => {
+        if (isSessionExpired) { lockSessionAsExpired(); return; }
         if (currentA4Url && currentRunId) {
             triggerDownload(currentA4Url, `PVC_Card_Print_${currentRunId.substring(0, 8)}.pdf`, btnDlA4);
         }
@@ -645,12 +716,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Start Over
     btnStartOver.addEventListener('click', () => {
         if (expiryInterval) clearInterval(expiryInterval);
+        resetDownloadButtons();
         uploadForm.reset();
         fileInput.value = '';
         currentRunId = null;
         currentFrontUrl = null;
         currentBackUrl = null;
         currentA4Url = null;
+        if (frontPreview) frontPreview.src = '';
+        if (backPreview) backPreview.src = '';
         window.clearPasswordError();
         updateFileInfo();
         resultSection.style.display = 'none';
