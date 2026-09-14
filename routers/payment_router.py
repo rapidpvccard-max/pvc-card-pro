@@ -1,7 +1,10 @@
 import os
 import uuid
+import hashlib
+import hmac
 import stripe
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 import database
 import models
@@ -233,3 +236,309 @@ async def stripe_webhook(request: Request, db: Session = Depends(database.get_db
         db.commit()
 
     return {"status": "success"}
+
+
+# ==========================================
+# PayU Hosted Checkout Integration (Live)
+# ==========================================
+
+PAYU_MERCHANT_KEY = os.environ.get("PAYU_MERCHANT_KEY", "HbMDKB")
+PAYU_MERCHANT_SALT = os.environ.get("PAYU_MERCHANT_SALT", "5zmZRvGOsrXkLcajkaIRWzdDGfZ0WYEB")
+PAYU_PAYMENT_URL = os.environ.get("PAYU_PAYMENT_URL", "https://secure.payu.in/_payment")
+
+def generate_payu_hash(
+    key: str,
+    txnid: str,
+    amount: str,
+    productinfo: str,
+    firstname: str,
+    email: str,
+    udf1: str = "",
+    udf2: str = "",
+    udf3: str = "",
+    udf4: str = "",
+    udf5: str = "",
+    salt: str = ""
+) -> str:
+    """
+    Generate SHA-512 request hash according to PayU formula:
+    sha512(key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5||||||SALT)
+    """
+    hash_sequence = f"{key}|{txnid}|{amount}|{productinfo}|{firstname}|{email}|{udf1}|{udf2}|{udf3}|{udf4}|{udf5}||||||{salt}"
+    return hashlib.sha512(hash_sequence.encode("utf-8")).hexdigest().lower()
+
+
+def verify_payu_hash(data: dict, salt: str) -> bool:
+    """
+    Verify reverse hash returned by PayU upon payment completion.
+    Formula with additionalCharges:
+      sha512(additionalCharges|SALT|status||||||udf5|udf4|udf3|udf2|udf1|email|firstname|productinfo|amount|txnid|key)
+    Formula without additionalCharges:
+      sha512(SALT|status||||||udf5|udf4|udf3|udf2|udf1|email|firstname|productinfo|amount|txnid|key)
+    """
+    received_hash = str(data.get("hash", "")).strip().lower()
+    if not received_hash:
+        return False
+
+    status = str(data.get("status", ""))
+    txnid = str(data.get("txnid", ""))
+    amount = str(data.get("amount", ""))
+    productinfo = str(data.get("productinfo", ""))
+    firstname = str(data.get("firstname", ""))
+    email = str(data.get("email", ""))
+    udf1 = str(data.get("udf1", "") or "")
+    udf2 = str(data.get("udf2", "") or "")
+    udf3 = str(data.get("udf3", "") or "")
+    udf4 = str(data.get("udf4", "") or "")
+    udf5 = str(data.get("udf5", "") or "")
+    key = str(data.get("key", ""))
+    additional_charges = data.get("additionalCharges")
+
+    if additional_charges:
+        hash_sequence = f"{additional_charges}|{salt}|{status}||||||{udf5}|{udf4}|{udf3}|{udf2}|{udf1}|{email}|{firstname}|{productinfo}|{amount}|{txnid}|{key}"
+    else:
+        hash_sequence = f"{salt}|{status}||||||{udf5}|{udf4}|{udf3}|{udf2}|{udf1}|{email}|{firstname}|{productinfo}|{amount}|{txnid}|{key}"
+
+    calculated_hash = hashlib.sha512(hash_sequence.encode("utf-8")).hexdigest().lower()
+    return hmac.compare_digest(received_hash, calculated_hash)
+
+
+@router.post("/payu/initiate")
+def initiate_payu_payment(
+    order_data: schemas.OrderCreate,
+    request: Request,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    plan = db.query(models.Plan).filter(models.Plan.id == order_data.plan_id).first()
+    if not plan:
+        default_plans = {
+            1: {"name": "Trial Pack", "price": 20.0, "credits": 20.0, "cost_per_card": 2.00},
+            2: {"name": "Starter Pack", "price": 100.0, "credits": 100.0, "cost_per_card": 0.95},
+            3: {"name": "Pro Pack", "price": 200.0, "credits": 200.0, "cost_per_card": 0.95},
+            4: {"name": "Business Pack", "price": 300.0, "credits": 300.0, "cost_per_card": 0.95}
+        }
+        if order_data.plan_id in default_plans:
+            pinfo = default_plans[order_data.plan_id]
+            plan = models.Plan(
+                id=order_data.plan_id,
+                name=pinfo["name"],
+                price=pinfo["price"],
+                credits=int(pinfo["credits"]),
+                active=True
+            )
+            db.add(plan)
+            db.commit()
+            db.refresh(plan)
+        else:
+            raise HTTPException(status_code=404, detail="Plan not found")
+
+    key = os.environ.get("PAYU_MERCHANT_KEY", PAYU_MERCHANT_KEY)
+    salt = os.environ.get("PAYU_MERCHANT_SALT", PAYU_MERCHANT_SALT)
+    action_url = os.environ.get("PAYU_PAYMENT_URL", PAYU_PAYMENT_URL)
+
+    env_base_url = os.environ.get("BASE_URL", "").rstrip("/")
+    req_base_url = str(request.base_url).rstrip("/")
+    if "localhost" in req_base_url or "127.0.0.1" in req_base_url:
+        base_url = req_base_url
+    elif env_base_url:
+        base_url = env_base_url
+    else:
+        base_url = req_base_url
+
+    txnid = f"pvc_{uuid.uuid4().hex[:14]}"
+    amount_str = f"{float(plan.price):.2f}"
+    productinfo = f"Recharge {plan.name}".replace("-", " ")
+    productinfo = "".join(c for c in productinfo if c.isalnum() or c.isspace())[:50]
+
+    raw_name = current_user.name or "Customer"
+    firstname = "".join(c for c in raw_name if c.isalnum() or c.isspace()).strip() or "Customer"
+    email = current_user.email or "rapidpvccard@gmail.com"
+    phone = "7698390510"
+
+    udf1 = str(current_user.id)
+    udf2 = str(plan.id)
+
+    surl = f"{base_url}/api/payment/payu/success"
+    furl = f"{base_url}/api/payment/payu/failure"
+
+    hash_val = generate_payu_hash(
+        key=key,
+        txnid=txnid,
+        amount=amount_str,
+        productinfo=productinfo,
+        firstname=firstname,
+        email=email,
+        udf1=udf1,
+        udf2=udf2,
+        salt=salt
+    )
+
+    # Record order in pending state
+    order_id = str(uuid.uuid4())
+    new_order = models.Order(
+        id=order_id,
+        user_id=current_user.id,
+        provider_order_id=txnid,
+        plan_id=plan.id,
+        amount=float(plan.price),
+        currency="INR",
+        status="pending"
+    )
+    db.add(new_order)
+    db.commit()
+
+    return {
+        "action": action_url,
+        "params": {
+            "key": key,
+            "txnid": txnid,
+            "amount": amount_str,
+            "productinfo": productinfo,
+            "firstname": firstname,
+            "email": email,
+            "phone": phone,
+            "surl": surl,
+            "furl": furl,
+            "hash": hash_val,
+            "udf1": udf1,
+            "udf2": udf2
+        }
+    }
+
+
+def _process_payu_payment_success(data: dict, db: Session) -> tuple[bool, str, float]:
+    """
+    Internal helper to atomically mark order as paid and credit user's wallet.
+    Returns (success, txnid, recharge_amount).
+    """
+    txnid = data.get("txnid", "")
+    status = data.get("status", "")
+    mihpayid = data.get("mihpayid", "")
+    amount = float(data.get("amount", 0.0) or 0.0)
+
+    order = db.query(models.Order).filter(models.Order.provider_order_id == txnid).first()
+    if not order:
+        user_id = data.get("udf1")
+        plan_id = data.get("udf2")
+        if user_id and plan_id:
+            order = models.Order(
+                id=str(uuid.uuid4()),
+                user_id=int(user_id),
+                provider_order_id=txnid,
+                plan_id=int(plan_id),
+                amount=amount,
+                currency="INR",
+                status="pending"
+            )
+            db.add(order)
+            db.commit()
+            db.refresh(order)
+
+    if not order:
+        return False, txnid, 0.0
+
+    # Idempotency check: Already credited
+    if order.status == "paid":
+        return True, txnid, float(order.amount)
+
+    if str(status).lower() == "success":
+        order.status = "paid"
+        order.provider_payment_id = str(mihpayid)
+
+        user_credits = db.query(models.UserCredits).filter(models.UserCredits.user_id == order.user_id).first()
+        if not user_credits:
+            user_credits = models.UserCredits(user_id=order.user_id, wallet_balance=0.0, total_generated=0, cost_per_card=0.95)
+            db.add(user_credits)
+
+        recharge_amount = float(order.amount)
+        user_credits.wallet_balance = float(user_credits.wallet_balance or 0.0) + recharge_amount
+
+        # Update per-card rate
+        plan = db.query(models.Plan).filter(models.Plan.id == order.plan_id).first()
+        if plan and (plan.id == 1 or "trial" in plan.name.lower()):
+            user_credits.cost_per_card = 2.00
+        else:
+            user_credits.cost_per_card = 0.95
+
+        tx = models.CreditTransaction(
+            user_id=order.user_id,
+            amount=recharge_amount,
+            transaction_type="purchase",
+            reference_id=txnid,
+            balance_after=user_credits.wallet_balance
+        )
+        db.add(tx)
+        db.commit()
+        return True, txnid, recharge_amount
+    else:
+        order.status = "failed"
+        db.commit()
+        return False, txnid, 0.0
+
+
+@router.api_route("/payu/success", methods=["GET", "POST"])
+async def payu_success(request: Request, db: Session = Depends(database.get_db)):
+    if request.method == "POST":
+        form_data = await request.form()
+        data = dict(form_data)
+    else:
+        data = dict(request.query_params)
+
+    salt = os.environ.get("PAYU_MERCHANT_SALT", PAYU_MERCHANT_SALT)
+    
+    # Verify hash integrity
+    if not verify_payu_hash(data, salt):
+        return RedirectResponse(
+            url="/subscription?payment=error&message=Payment+signature+verification+failed",
+            status_code=303
+        )
+
+    success, txnid, amount = _process_payu_payment_success(data, db)
+    if success:
+        return RedirectResponse(
+            url=f"/subscription?payment=success&txnid={txnid}&amount={amount:.2f}",
+            status_code=303
+        )
+    else:
+        error_msg = data.get("error_Message") or data.get("unmappedstatus") or "Payment not successful"
+        return RedirectResponse(
+            url=f"/subscription?payment=failed&message={error_msg}",
+            status_code=303
+        )
+
+
+@router.api_route("/payu/failure", methods=["GET", "POST"])
+async def payu_failure(request: Request, db: Session = Depends(database.get_db)):
+    if request.method == "POST":
+        form_data = await request.form()
+        data = dict(form_data)
+    else:
+        data = dict(request.query_params)
+
+    txnid = data.get("txnid", "")
+    error_msg = data.get("error_Message") or data.get("unmappedstatus") or "Payment cancelled or failed"
+
+    if txnid:
+        order = db.query(models.Order).filter(models.Order.provider_order_id == txnid).first()
+        if order and order.status != "paid":
+            order.status = "failed"
+            db.commit()
+
+    return RedirectResponse(
+        url=f"/subscription?payment=failed&message={error_msg}",
+        status_code=303
+    )
+
+
+@router.post("/payu/webhook")
+async def payu_webhook(request: Request, db: Session = Depends(database.get_db)):
+    form_data = await request.form()
+    data = dict(form_data)
+    salt = os.environ.get("PAYU_MERCHANT_SALT", PAYU_MERCHANT_SALT)
+
+    if not verify_payu_hash(data, salt):
+        raise HTTPException(status_code=400, detail="Invalid hash signature")
+
+    success, txnid, amount = _process_payu_payment_success(data, db)
+    return {"status": "success" if success else "failed", "txnid": txnid, "amount": amount}
