@@ -432,3 +432,71 @@ async def admin_upload_banner_image(
     update_banner_config({"image_url": image_url, "banner_type": "image"})
     return {"status": "success", "image_url": image_url}
 
+
+@router.get("/payments")
+def get_admin_payments(
+    status: str = None,
+    search: str = None,
+    limit: int = 150,
+    current_admin: models.User = Depends(auth.get_current_admin),
+    db: Session = Depends(database.get_db)
+):
+    """
+    Returns real-time payment transactions across all users with full PayU details,
+    plans, amounts, statuses, and live search/filtering for the Admin Ledger.
+    """
+    try:
+        query = db.query(models.Order).order_by(models.Order.created_at.desc())
+        
+        if status and status.lower() != "all":
+            query = query.filter(models.Order.status == status.lower())
+            
+        orders = query.limit(limit).all()
+        
+        user_ids = {o.user_id for o in orders if o.user_id}
+        plan_ids = {o.plan_id for o in orders if o.plan_id}
+        users = {u.id: u for u in db.query(models.User).filter(models.User.id.in_(user_ids)).all()} if user_ids else {}
+        plans = {p.id: p for p in db.query(models.Plan).filter(models.Plan.id.in_(plan_ids)).all()} if plan_ids else {}
+        
+        results = []
+        for o in orders:
+            u = users.get(o.user_id)
+            p = plans.get(o.plan_id)
+            u_name = u.name if u and u.name else "Operator"
+            u_email = u.email if u and u.email else "N/A"
+            p_name = p.name if p and p.name else f"Pack #{o.plan_id}"
+            
+            item = {
+                "id": o.id,
+                "txnid": o.provider_order_id or "N/A",
+                "mihpayid": o.provider_payment_id or "N/A",
+                "user_id": o.user_id,
+                "user_name": u_name,
+                "user_email": u_email,
+                "plan_id": o.plan_id,
+                "plan_name": p_name,
+                "amount": float(o.amount or 0.0),
+                "currency": o.currency or "INR",
+                "status": o.status or "pending",
+                "created_at": o.created_at.isoformat() if o.created_at else None,
+                "updated_at": o.updated_at.isoformat() if o.updated_at else None
+            }
+            
+            if search:
+                s_lower = search.lower().strip()
+                if (
+                    s_lower not in u_name.lower()
+                    and s_lower not in u_email.lower()
+                    and s_lower not in str(item["txnid"]).lower()
+                    and s_lower not in str(item["mihpayid"]).lower()
+                    and s_lower not in p_name.lower()
+                ):
+                    continue
+                    
+            results.append(item)
+            
+        return results
+    except Exception as e:
+        print(f"[Admin Payments Error] {e}")
+        return []
+

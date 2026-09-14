@@ -1706,6 +1706,15 @@
                 <span class="nav-counter" id="sidebar-user-count">0</span>
             </button>
 
+            <button class="nav-btn" onclick="switchNavTab('payments')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                    <line x1="1" y1="10" x2="23" y2="10"/>
+                </svg>
+                <span>Payments & Orders</span>
+                <span class="nav-counter" id="sidebar-payment-count" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">0</span>
+            </button>
+
             <button class="nav-btn" onclick="switchNavTab('audit')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -1993,6 +2002,73 @@
                 </div>
             </div>
 
+            <!-- 2.5 PAYMENTS & ORDERS TAB -->
+            <div id="tab-payments" class="tab-panel">
+                <div class="glass-panel" style="padding: 24px;">
+                    <!-- Metric Cards Row for Payments -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                        <div class="glass-panel" style="padding: 16px 20px; background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.25);">
+                            <div style="font-size: 0.75rem; font-weight: 800; color: #10b981; text-transform: uppercase; letter-spacing: 0.5px;">Total Paid Revenue</div>
+                            <div id="payment-metric-revenue" style="font-size: 1.6rem; font-weight: 800; color: #10b981; margin-top: 4px;">₹0.00</div>
+                            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">Collected via PayU</div>
+                        </div>
+                        <div class="glass-panel" style="padding: 16px 20px; background: rgba(99, 102, 241, 0.05); border-color: rgba(99, 102, 241, 0.25);">
+                            <div style="font-size: 0.75rem; font-weight: 800; color: #818cf8; text-transform: uppercase; letter-spacing: 0.5px;">Successful Top-ups</div>
+                            <div id="payment-metric-successful" style="font-size: 1.6rem; font-weight: 800; color: #818cf8; margin-top: 4px;">0</div>
+                            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">Wallet credited</div>
+                        </div>
+                        <div class="glass-panel" style="padding: 16px 20px; background: rgba(245, 158, 11, 0.05); border-color: rgba(245, 158, 11, 0.25);">
+                            <div style="font-size: 0.75rem; font-weight: 800; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.5px;">Pending Checkouts</div>
+                            <div id="payment-metric-pending" style="font-size: 1.6rem; font-weight: 800; color: #fbbf24; margin-top: 4px;">0</div>
+                            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">Awaiting gateway</div>
+                        </div>
+                        <div class="glass-panel" style="padding: 16px 20px; background: rgba(239, 68, 68, 0.05); border-color: rgba(239, 68, 68, 0.25);">
+                            <div style="font-size: 0.75rem; font-weight: 800; color: #f87171; text-transform: uppercase; letter-spacing: 0.5px;">Failed / Cancelled</div>
+                            <div id="payment-metric-failed" style="font-size: 1.6rem; font-weight: 800; color: #f87171; margin-top: 4px;">0</div>
+                            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">Incomplete payments</div>
+                        </div>
+                    </div>
+
+                    <!-- Toolbar with Search & Filter -->
+                    <div class="toolbar-box">
+                        <div class="search-input-group">
+                            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input type="text" id="payments-search-input" class="search-input" placeholder="Search by customer email, name, Txn ID, or PayU Ref..." oninput="filterPaymentsList()">
+                        </div>
+
+                        <div class="filter-group">
+                            <span class="filter-chip active" data-payment-filter="all" onclick="setPaymentFilter('all')">All</span>
+                            <span class="filter-chip" data-payment-filter="paid" onclick="setPaymentFilter('paid')">✓ Paid</span>
+                            <span class="filter-chip" data-payment-filter="pending" onclick="setPaymentFilter('pending')">⏳ Pending</span>
+                            <span class="filter-chip" data-payment-filter="failed" onclick="setPaymentFilter('failed')">✕ Failed</span>
+                            <button class="table-btn primary" onclick="exportPaymentsCSV()" title="Export CSV" style="margin-left: 8px;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                <span>Export CSV</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Payments Table -->
+                    <div class="table-container">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Customer / Operator</th>
+                                    <th>Plan / Pack</th>
+                                    <th>Amount Paid</th>
+                                    <th>Gateway & Txn Reference</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payments-table-body">
+                                <tr><td colspan="6" class="empty-state"><div class="skeleton" style="height: 40px; margin: 10px 0;"></div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- 3. AUDIT LOGS TAB -->
             <div id="tab-audit" class="tab-panel">
                 <div class="glass-panel" style="padding: 24px;">
@@ -2264,6 +2340,7 @@
             await Promise.all([
                 loadDashboard(),
                 loadUsers(),
+                loadPayments(),
                 loadAuditLogs()
             ]);
             setRefreshSpinning(false);
@@ -2303,6 +2380,7 @@
             // 3. Load tab specific data
             if (tabName === 'dashboard') loadDashboard();
             else if (tabName === 'users') loadUsers();
+            else if (tabName === 'payments') loadPayments();
             else if (tabName === 'audit') loadAuditLogs();
             else if (tabName === 'banner') loadBannerConfig();
         }
@@ -2312,6 +2390,7 @@
             try {
                 if (currentTab === 'dashboard') await loadDashboard();
                 else if (currentTab === 'users') await loadUsers();
+                else if (currentTab === 'payments') await loadPayments();
                 else if (currentTab === 'audit') await loadAuditLogs();
                 else if (currentTab === 'banner') await loadBannerConfig();
                 showToast('Synchronized with live database', 'info');
@@ -2321,8 +2400,6 @@
                 setRefreshSpinning(false);
             }
         }
-
-        let cachedActivity = [];
 
         // 1. Dashboard Overview Loader
         async function loadDashboard() {
@@ -2339,6 +2416,8 @@
                 document.getElementById('stat-outstanding-credits').innerText = `₹${parseFloat(dashData.outstanding_credits || 0).toFixed(2)}`;
                 document.getElementById('stat-total-revenue').innerText = `₹${parseFloat(dashData.total_revenue || 0).toFixed(2)}`;
                 document.getElementById('stat-paid-orders-pill').innerText = `${dashData.successful_payments ?? 0} Paid`;
+                const payBadge = document.getElementById('sidebar-payment-count');
+                if (payBadge) payBadge.innerText = dashData.successful_payments ?? 0;
             }
 
             if (actData) {
@@ -2380,6 +2459,184 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        // =========================================================================
+        // 2.5 PAYMENTS & TRANSACTIONS ENGINE
+        // =========================================================================
+        let cachedPayments = [];
+        let currentPaymentFilter = 'all';
+
+        async function loadPayments() {
+            const payments = await apiCall('/api/admin/payments');
+            if (!payments) return;
+            cachedPayments = payments;
+
+            // Compute summary metrics
+            let totalRevenue = 0;
+            let successCount = 0;
+            let pendingCount = 0;
+            let failedCount = 0;
+
+            payments.forEach(p => {
+                const st = (p.status || '').toLowerCase();
+                const amt = parseFloat(p.amount || 0);
+                if (st === 'paid') {
+                    totalRevenue += amt;
+                    successCount++;
+                } else if (st === 'pending') {
+                    pendingCount++;
+                } else {
+                    failedCount++;
+                }
+            });
+
+            const revElem = document.getElementById('payment-metric-revenue');
+            if (revElem) revElem.innerText = `₹${totalRevenue.toFixed(2)}`;
+            const succElem = document.getElementById('payment-metric-successful');
+            if (succElem) succElem.innerText = successCount;
+            const pendElem = document.getElementById('payment-metric-pending');
+            if (pendElem) pendElem.innerText = pendingCount;
+            const failElem = document.getElementById('payment-metric-failed');
+            if (failElem) failElem.innerText = failedCount;
+
+            const badge = document.getElementById('sidebar-payment-count');
+            if (badge) badge.innerText = successCount;
+
+            renderPaymentsTable(cachedPayments);
+        }
+
+        function setPaymentFilter(filter) {
+            currentPaymentFilter = filter;
+            document.querySelectorAll('[data-payment-filter]').forEach(chip => {
+                if (chip.getAttribute('data-payment-filter') === filter) {
+                    chip.classList.add('active');
+                } else {
+                    chip.classList.remove('active');
+                }
+            });
+            filterPaymentsList();
+        }
+
+        function filterPaymentsList() {
+            const query = (document.getElementById('payments-search-input')?.value || '').toLowerCase().trim();
+            
+            let filtered = cachedPayments.filter(p => {
+                const st = (p.status || '').toLowerCase();
+                if (currentPaymentFilter !== 'all' && st !== currentPaymentFilter) {
+                    return false;
+                }
+                if (!query) return true;
+
+                const nameMatch = (p.user_name || '').toLowerCase().includes(query);
+                const emailMatch = (p.user_email || '').toLowerCase().includes(query);
+                const txnMatch = String(p.txnid || '').toLowerCase().includes(query);
+                const mihpayMatch = String(p.mihpayid || '').toLowerCase().includes(query);
+                const planMatch = (p.plan_name || '').toLowerCase().includes(query);
+
+                return nameMatch || emailMatch || txnMatch || mihpayMatch || planMatch;
+            });
+
+            renderPaymentsTable(filtered);
+        }
+
+        function renderPaymentsTable(list) {
+            const tbody = document.getElementById('payments-table-body');
+            if (!tbody) return;
+
+            if (list.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="40" height="40" style="margin: 0 auto 10px auto; display: block; opacity: 0.4;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-muted);">No payment records found</div>
+                            <div style="font-size: 0.8rem; margin-top: 4px; color: var(--text-dark);">Try clearing filters or search terms.</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = list.map(p => {
+                const dateStr = p.created_at ? new Date(p.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'N/A';
+                const amt = parseFloat(p.amount || 0).toFixed(2);
+                const st = (p.status || 'pending').toLowerCase();
+                
+                let statusBadge = `<span class="tag-pill" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; font-weight: 800; border: 1px solid rgba(245, 158, 11, 0.3);">⏳ Pending</span>`;
+                if (st === 'paid') {
+                    statusBadge = `<span class="tag-pill success" style="font-weight: 800; padding: 4px 10px;">✓ Paid</span>`;
+                } else if (st === 'failed' || st === 'cancelled') {
+                    statusBadge = `<span class="tag-pill danger" style="font-weight: 800; padding: 4px 10px;">✕ Failed</span>`;
+                }
+
+                const initials = (p.user_name || p.user_email || 'OP').substring(0, 2).toUpperCase();
+
+                return `
+                    <tr>
+                        <td style="font-size: 0.82rem; color: var(--text-muted); white-space: nowrap;">
+                            ${dateStr}
+                        </td>
+                        <td>
+                            <div class="user-cell">
+                                <div class="user-avatar-sm" style="width: 32px; height: 32px; font-size: 0.75rem;">${initials}</div>
+                                <div>
+                                    <div class="user-meta-name" style="font-size: 0.88rem;">${escapeHtml(p.user_name || 'Operator')}</div>
+                                    <div class="user-meta-email" style="font-size: 0.78rem;">${escapeHtml(p.user_email || 'N/A')}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="tag-pill cyan" style="font-weight: 700; font-size: 0.78rem;">
+                                ${escapeHtml(p.plan_name)}
+                            </span>
+                        </td>
+                        <td>
+                            <strong style="color: #10b981; font-size: 1rem; font-family: 'JetBrains Mono', monospace;">
+                                ₹${amt}
+                            </strong>
+                        </td>
+                        <td>
+                            <div style="font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; line-height: 1.4;">
+                                <div><span style="color: var(--text-dark);">Txn:</span> <span style="color: #818cf8;">${escapeHtml(p.txnid)}</span></div>
+                                ${p.mihpayid && p.mihpayid !== 'N/A' ? `<div><span style="color: var(--text-dark);">PayU:</span> <span style="color: var(--text-muted);">${escapeHtml(p.mihpayid)}</span></div>` : ''}
+                            </div>
+                        </td>
+                        <td>
+                            ${statusBadge}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function exportPaymentsCSV() {
+            if (!cachedPayments || cachedPayments.length === 0) {
+                showToast('No payment data available to export', 'error');
+                return;
+            }
+
+            const headers = ['Order ID', 'Transaction ID', 'PayU Payment ID', 'Customer Name', 'Customer Email', 'Plan Name', 'Amount (INR)', 'Status', 'Date'];
+            const rows = cachedPayments.map(p => [
+                p.id,
+                p.txnid,
+                p.mihpayid,
+                `"${(p.user_name || '').replace(/"/g, '""')}"`,
+                p.user_email,
+                `"${(p.plan_name || '').replace(/"/g, '""')}"`,
+                p.amount,
+                p.status,
+                p.created_at
+            ]);
+
+            const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', `RapidPVC_Payments_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('Payments CSV exported successfully', 'success');
         }
 
         // 2. Users Loader & Table Renderer

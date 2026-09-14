@@ -259,3 +259,380 @@ def send_contact_inquiry(sender_name: str, sender_email: str, category: str, mes
         print(f"[Contact Email Error] Could not dispatch to admin: {str(e)}")
         return True, "Inquiry saved to server log."
 
+
+def send_payment_invoice_email(
+    to_email: str,
+    user_name: str,
+    txnid: str,
+    amount: float,
+    plan_name: str,
+    new_wallet_balance: float,
+    cost_per_card: float = 0.95,
+    mihpayid: str = None
+) -> tuple[bool, str]:
+    """
+    Sends a beautifully formatted Tax Invoice & Payment Receipt email to the user
+    after successful PayU recharge, and also notifies the admin.
+    """
+    import datetime
+    config = get_smtp_config()
+    display_name = user_name or "Valued Partner"
+    current_time_str = datetime.datetime.now().strftime("%d %b %Y, %I:%M %p IST")
+    inv_number = f"INV-{txnid[-8:].upper()}" if txnid else f"INV-{datetime.datetime.now().strftime('%Y%m%d%H%M')}"
+    payu_ref = mihpayid or "N/A"
+
+    subject = f"Payment Receipt: ₹{amount:.2f} for {plan_name} - Rapid PVC Pro"
+
+    plain_text = f"""
+============================================================
+RAPID PVC CARD PRO - PAYMENT RECEIPT & INVOICE
+============================================================
+Invoice Number: {inv_number}
+Transaction ID: {txnid}
+PayU Reference ID: {payu_ref}
+Date: {current_time_str}
+
+Billed To:
+{display_name} ({to_email})
+
+Billed From:
+Rapid PVC Card Pro (Prop. Avinash Naval Patil)
+Support Phone: +91 7698390510
+Support Email: rapidpvccard@gmail.com
+Website: https://rapidpvc.online
+
+ITEM DETAILS:
+- Description: Wallet Top-up Recharge ({plan_name})
+- Unlocked Rate: Rs. {cost_per_card:.2f} / PVC Card
+- Amount Paid: Rs. {amount:.2f}
+- Current Wallet Balance: Rs. {new_wallet_balance:.2f}
+- Status: SUCCESS / PAID (Via PayU India)
+
+Thank you for choosing Rapid PVC Card Pro!
+Start printing PVC cards: https://rapidpvc.online/generator
+============================================================
+"""
+
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Payment Receipt - Rapid PVC Card Pro</title>
+        <style>
+            body {{
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                background-color: #0b0f19;
+                margin: 0;
+                padding: 24px 12px;
+                color: #1e293b;
+            }}
+            .invoice-card {{
+                max-width: 600px;
+                margin: 0 auto;
+                background: #ffffff;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            }}
+            .header-banner {{
+                background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+                color: #ffffff;
+                padding: 32px 28px;
+                position: relative;
+            }}
+            .brand-row {{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+            }}
+            .brand-name {{
+                font-size: 22px;
+                font-weight: 800;
+                letter-spacing: -0.5px;
+                color: #ffffff;
+            }}
+            .paid-badge {{
+                display: inline-block;
+                background: #10b981;
+                color: #ffffff;
+                font-size: 11px;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                padding: 6px 14px;
+                border-radius: 20px;
+            }}
+            .banner-title {{
+                font-size: 26px;
+                font-weight: 800;
+                margin: 0 0 6px 0;
+                color: #ffffff;
+            }}
+            .banner-sub {{
+                color: #c7d2fe;
+                font-size: 13px;
+                margin: 0;
+            }}
+            .body-content {{
+                padding: 28px;
+            }}
+            .meta-grid {{
+                display: table;
+                width: 100%;
+                margin-bottom: 24px;
+                border-bottom: 1px solid #e2e8f0;
+                padding-bottom: 20px;
+            }}
+            .meta-col {{
+                display: table-cell;
+                width: 50%;
+                vertical-align: top;
+            }}
+            .meta-label {{
+                font-size: 11px;
+                font-weight: 700;
+                text-transform: uppercase;
+                color: #64748b;
+                letter-spacing: 0.5px;
+                margin-bottom: 4px;
+            }}
+            .meta-value {{
+                font-size: 13px;
+                font-weight: 600;
+                color: #0f172a;
+                word-break: break-all;
+            }}
+            .items-table {{
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 24px;
+            }}
+            .items-table th {{
+                background: #f8fafc;
+                text-align: left;
+                padding: 12px 14px;
+                font-size: 11px;
+                font-weight: 700;
+                text-transform: uppercase;
+                color: #475569;
+                border-top: 1px solid #e2e8f0;
+                border-bottom: 1px solid #e2e8f0;
+            }}
+            .items-table td {{
+                padding: 16px 14px;
+                border-bottom: 1px solid #f1f5f9;
+                font-size: 13px;
+            }}
+            .amount-summary {{
+                background: #f8fafc;
+                border: 1px solid #e2e8f0;
+                border-radius: 12px;
+                padding: 18px 20px;
+                margin-bottom: 26px;
+            }}
+            .summary-row {{
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 8px;
+                font-size: 13px;
+                color: #475569;
+            }}
+            .summary-total {{
+                display: flex;
+                justify-content: space-between;
+                padding-top: 10px;
+                border-top: 1.5px dashed #cbd5e1;
+                font-size: 17px;
+                font-weight: 800;
+                color: #0f172a;
+            }}
+            .wallet-box {{
+                background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+                border: 1.5px solid #a7f3d0;
+                border-radius: 12px;
+                padding: 16px 20px;
+                margin-bottom: 26px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }}
+            .wallet-title {{
+                font-size: 12px;
+                font-weight: 700;
+                color: #065f46;
+                text-transform: uppercase;
+            }}
+            .wallet-amt {{
+                font-size: 22px;
+                font-weight: 800;
+                color: #047857;
+            }}
+            .btn-action {{
+                display: block;
+                background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+                color: #ffffff !important;
+                text-decoration: none;
+                font-size: 14px;
+                font-weight: 700;
+                text-align: center;
+                padding: 14px 24px;
+                border-radius: 10px;
+                box-shadow: 0 4px 15px rgba(79, 70, 229, 0.35);
+            }}
+            .footer-notes {{
+                text-align: center;
+                font-size: 11px;
+                color: #64748b;
+                margin-top: 26px;
+                line-height: 1.6;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="invoice-card">
+            <!-- Header Banner -->
+            <div class="header-banner">
+                <div class="brand-row">
+                    <div class="brand-name">⚡ Rapid PVC Card Pro</div>
+                    <div class="paid-badge">✓ PAYMENT VERIFIED</div>
+                </div>
+                <h1 class="banner-title">Tax Invoice & Receipt</h1>
+                <p class="banner-sub">Thank you for your purchase. Your account has been credited instantly.</p>
+            </div>
+
+            <div class="body-content">
+                <!-- Metadata Grid -->
+                <div class="meta-grid">
+                    <div class="meta-col">
+                        <div class="meta-label">Billed To:</div>
+                        <div class="meta-value">{display_name}</div>
+                        <div class="meta-value" style="color: #64748b; font-size: 12px;">{to_email}</div>
+                        <div style="margin-top: 10px;" class="meta-label">Date & Time:</div>
+                        <div class="meta-value">{current_time_str}</div>
+                    </div>
+                    <div class="meta-col" style="padding-left: 15px;">
+                        <div class="meta-label">Invoice Number:</div>
+                        <div class="meta-value" style="color: #4f46e5; font-family: monospace;">{inv_number}</div>
+                        <div style="margin-top: 6px;" class="meta-label">Txn / Order ID:</div>
+                        <div class="meta-value" style="font-family: monospace; font-size: 11px;">{txnid}</div>
+                        <div style="margin-top: 6px;" class="meta-label">PayU Payment Ref:</div>
+                        <div class="meta-value" style="font-family: monospace; font-size: 11px;">{payu_ref}</div>
+                    </div>
+                </div>
+
+                <!-- Items Table -->
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>Plan / Service</th>
+                            <th style="text-align: center;">Unlocked Rate</th>
+                            <th style="text-align: right;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <strong style="color: #0f172a; font-size: 14px;">Wallet Recharge - {plan_name}</strong>
+                                <div style="font-size: 12px; color: #64748b; margin-top: 2px;">Instant credit added to Rapid PVC wallet</div>
+                            </td>
+                            <td style="text-align: center; color: #059669; font-weight: 700;">
+                                ₹{cost_per_card:.2f} / card
+                            </td>
+                            <td style="text-align: right; font-weight: 700; color: #0f172a; font-size: 15px;">
+                                ₹{amount:.2f}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Summary Box -->
+                <div class="amount-summary">
+                    <div class="summary-row">
+                        <span>Recharge Amount:</span>
+                        <span>₹{amount:.2f}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Payment Mode:</span>
+                        <span>PayU India (UPI / QR / NetBanking / Cards)</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Applicable Taxes:</span>
+                        <span>Inclusive (₹0.00 extra)</span>
+                    </div>
+                    <div class="summary-total">
+                        <span>Total Paid:</span>
+                        <span style="color: #4338ca;">₹{amount:.2f}</span>
+                    </div>
+                </div>
+
+                <!-- Live Wallet Balance -->
+                <div class="wallet-box">
+                    <div>
+                        <div class="wallet-title">Updated Wallet Balance</div>
+                        <div style="font-size: 12px; color: #065f46;">Available for instant PVC card prints</div>
+                    </div>
+                    <div class="wallet-amt">₹{new_wallet_balance:.2f}</div>
+                </div>
+
+                <!-- Direct Action -->
+                <a href="https://rapidpvc.online/generator" class="btn-action">
+                    Open Card Generator & Print Now →
+                </a>
+
+                <!-- Footer Info -->
+                <div class="footer-notes">
+                    <strong>Rapid PVC Card Pro</strong> • Operated by Avinash Naval Patil<br>
+                    Support Helpline: <strong>+91 7698390510</strong> | Email: <strong>rapidpvccard@gmail.com</strong><br>
+                    Website: <a href="https://rapidpvc.online" style="color: #4f46e5; text-decoration: none;">https://rapidpvc.online</a><br>
+                    <span style="font-size: 10px; color: #94a3b8; display: inline-block; margin-top: 6px;">
+                        This is a computer-generated tax invoice and payment confirmation. No physical signature required.
+                    </span>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    print(f"\n=======================================================")
+    print(f" [DISPATCHING PAYMENT INVOICE EMAIL]")
+    print(f" To: {to_email}")
+    print(f" Amount: Rs. {amount:.2f} | Plan: {plan_name}")
+    print(f" Txn ID: {txnid} | Invoice: {inv_number}")
+    print(f"=======================================================\n")
+
+    if not config["is_configured"]:
+        return False, "SMTP credentials not configured."
+
+    try:
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"] = f"{config['from_name']} <{config['from_email']}>"
+        msg["To"] = to_email
+
+        # Also BCC admin for real-time sales visibility
+        admin_email = os.environ.get("ADMIN_EMAILS", "rapidpvccard@gmail.com").split(",")[0].strip() or "rapidpvccard@gmail.com"
+        recipients = [to_email]
+        if admin_email and admin_email.lower() != to_email.lower():
+            recipients.append(admin_email)
+
+        msg.attach(MIMEText(plain_text, "plain"))
+        msg.attach(MIMEText(html_content, "html"))
+
+        server = smtplib.SMTP(config["host"], config["port"], timeout=10)
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
+        server.login(config["user"], config["password"])
+        server.sendmail(config["from_email"], recipients, msg.as_string())
+        server.quit()
+
+        print(f"[Email Service] Payment Invoice successfully delivered to {to_email}")
+        return True, "Payment invoice email sent successfully."
+    except Exception as e:
+        print(f"[Email Service Error] Failed to send payment invoice to {to_email}: {str(e)}")
+        return False, f"SMTP delivery failed: {str(e)}"
+

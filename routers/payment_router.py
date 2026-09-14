@@ -473,6 +473,26 @@ def _process_payu_payment_success(data: dict, db: Session) -> tuple[bool, str, f
         )
         db.add(tx)
         db.commit()
+
+        # Dispatch Payment Receipt & Tax Invoice Email
+        try:
+            from services.email_service import send_payment_invoice_email
+            paid_user: Any = db.query(models.User).filter(models.User.id == order.user_id).first()
+            if paid_user and paid_user.email:
+                plan_name_val = plan.name if plan and getattr(plan, 'name', None) else f"Plan #{order.plan_id}"
+                send_payment_invoice_email(
+                    to_email=str(paid_user.email),
+                    user_name=str(paid_user.name or "Operator"),
+                    txnid=str(txnid),
+                    amount=float(recharge_amount),
+                    plan_name=str(plan_name_val),
+                    new_wallet_balance=float(user_credits.wallet_balance or 0.0),
+                    cost_per_card=float(user_credits.cost_per_card or 0.95),
+                    mihpayid=str(mihpayid) if mihpayid else None
+                )
+        except Exception as email_err:
+            print(f"[Payment Invoice Email Dispatch Error] {email_err}")
+
         return True, txnid, recharge_amount
     else:
         order.status = "failed"
