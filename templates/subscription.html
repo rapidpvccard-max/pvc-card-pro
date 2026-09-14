@@ -62,45 +62,57 @@
         gap: 2px;
     }
 
-    /* Pricing Grid (5-Pack Layout) */
+    /* Page Container expansion for Subscription dashboard */
+    .page-container {
+        max-width: 1440px !important;
+        width: 100% !important;
+        margin: 0 auto !important;
+        padding: 24px 24px !important;
+    }
+
+    /* Centered Flexbox Pricing Grid */
     .pricing-grid {
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 18px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
         align-items: stretch;
-        margin-bottom: 40px;
+        gap: 16px;
+        width: 100%;
+        max-width: 1380px;
+        margin: 0 auto 36px auto;
     }
 
     /* Individual Pricing Card */
     .plan-card {
+        flex: 1 1 205px;
+        max-width: 250px;
+        min-width: 195px;
         background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 20px;
-        padding: 28px 22px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 18px;
+        padding: 20px 14px;
         display: flex;
         flex-direction: column;
         position: relative;
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
     }
     
     .plan-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.03);
+        transform: translateY(-4px);
+        box-shadow: 0 14px 26px -4px rgba(0, 0, 0, 0.08);
     }
     
     /* Popular / Elevated Card */
     .plan-card.popular {
         border: 2px solid #2563eb;
-        box-shadow: 0 16px 32px -4px rgba(37, 99, 235, 0.18), 0 4px 6px -2px rgba(37, 99, 235, 0.05);
+        box-shadow: 0 8px 24px -3px rgba(37, 99, 235, 0.18);
         background: linear-gradient(180deg, #ffffff 0%, #f8faff 100%);
-        transform: scale(1.02);
-        z-index: 2;
     }
     
     .plan-card.popular:hover {
-        transform: scale(1.03) translateY(-4px);
-        box-shadow: 0 24px 38px -4px rgba(37, 99, 235, 0.22);
+        transform: translateY(-4px);
+        box-shadow: 0 16px 30px -4px rgba(37, 99, 235, 0.28);
     }
 
     /* Enterprise Pack Highlighting */
@@ -111,24 +123,25 @@
     
     .plan-card.enterprise:hover {
         border-color: #d97706;
-        box-shadow: 0 20px 32px -4px rgba(217, 119, 6, 0.25);
+        transform: translateY(-4px);
+        box-shadow: 0 16px 30px -4px rgba(217, 119, 6, 0.25);
     }
 
-    /* Uniform Badge Slot (Fixes vertical title misalignment) */
+    /* Uniform Badge Slot */
     .badge-slot {
-        height: 28px;
+        height: 24px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 12px;
+        margin-bottom: 8px;
     }
 
     .plan-badge {
-        font-size: 0.72rem;
+        font-size: 0.68rem;
         font-weight: 800;
-        padding: 4px 12px;
+        padding: 3px 10px;
         border-radius: 20px;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.4px;
         text-transform: uppercase;
         display: inline-flex;
         align-items: center;
@@ -151,8 +164,8 @@
         background: linear-gradient(135deg, #2563eb, #1d4ed8);
         color: #ffffff;
         box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
-        padding: 5px 14px;
-        font-size: 0.75rem;
+        padding: 4px 12px;
+        font-size: 0.7rem;
     }
     
     .badge-purple {
@@ -170,11 +183,11 @@
 
     /* Card Header */
     .plan-title {
-        font-size: 1.3rem;
+        font-size: 1.18rem;
         font-weight: 800;
         color: #0f172a;
         text-align: center;
-        margin-bottom: 8px;
+        margin-bottom: 4px;
     }
     
     .plan-card.popular .plan-title {
@@ -184,8 +197,8 @@
     /* Price Box */
     .plan-price-wrap {
         text-align: center;
-        margin-bottom: 14px;
-        min-height: 68px;
+        margin-bottom: 8px;
+        min-height: 54px;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -193,43 +206,43 @@
     }
     
     .plan-price {
-        font-size: 2.6rem;
+        font-size: 2.1rem;
         font-weight: 800;
         font-family: 'Plus Jakarta Sans', sans-serif;
         color: #0f172a;
         line-height: 1;
-        letter-spacing: -1px;
+        letter-spacing: -0.8px;
     }
     
     .plan-price-sub {
-        font-size: 0.85rem;
+        font-size: 0.76rem;
         font-weight: 700;
         color: #2563eb;
-        margin-top: 6px;
+        margin-top: 4px;
     }
 
     /* Description */
     .plan-desc {
-        font-size: 0.85rem;
+        font-size: 0.78rem;
         color: #64748b;
         text-align: center;
-        line-height: 1.45;
-        margin-bottom: 18px;
-        min-height: 40px;
+        line-height: 1.35;
+        margin-bottom: 12px;
+        min-height: 34px;
     }
 
     /* Cost per card highlight pill */
     .cost-tag-box {
-        margin-bottom: 20px;
-        padding: 8px 10px;
-        border-radius: 12px;
+        margin-bottom: 14px;
+        padding: 5px 8px;
+        border-radius: 10px;
         text-align: center;
-        font-size: 0.85rem;
+        font-size: 0.76rem;
         font-weight: 700;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 6px;
+        gap: 5px;
         white-space: nowrap;
     }
     
@@ -255,25 +268,25 @@
     .plan-features {
         list-style: none;
         padding: 0;
-        margin: 0 0 24px 0;
+        margin: 0 0 18px 0;
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 9px;
         flex-grow: 1;
     }
     
     .plan-features li {
         display: flex;
         align-items: flex-start;
-        gap: 10px;
-        font-size: 0.86rem;
+        gap: 8px;
+        font-size: 0.78rem;
         color: #334155;
-        line-height: 1.4;
+        line-height: 1.35;
     }
     
     .plan-features li svg {
         flex-shrink: 0;
-        margin-top: 2px;
+        margin-top: 1px;
     }
     
     .plan-features li strong {
@@ -283,15 +296,15 @@
     /* Buttons */
     .plan-btn {
         width: 100%;
-        padding: 13px 16px;
+        padding: 10px 12px;
         border-radius: 12px;
-        font-size: 0.95rem;
+        font-size: 0.88rem;
         font-weight: 700;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
+        gap: 6px;
         transition: all 0.2s ease;
         border: none;
         outline: none;
@@ -306,30 +319,30 @@
     .plan-btn-outline:hover {
         background: #2563eb;
         color: #ffffff;
-        box-shadow: 0 8px 16px -2px rgba(37, 99, 235, 0.3);
+        box-shadow: 0 6px 14px -2px rgba(37, 99, 235, 0.3);
     }
     
     .plan-btn-primary {
         background: linear-gradient(135deg, #2563eb, #1d4ed8);
         color: #ffffff;
-        box-shadow: 0 10px 20px -3px rgba(37, 99, 235, 0.4);
+        box-shadow: 0 8px 16px -2px rgba(37, 99, 235, 0.35);
     }
     
     .plan-btn-primary:hover {
         background: linear-gradient(135deg, #1d4ed8, #1e40af);
-        box-shadow: 0 12px 24px -3px rgba(37, 99, 235, 0.5);
+        box-shadow: 0 10px 20px -2px rgba(37, 99, 235, 0.45);
         transform: translateY(-1px);
     }
 
     .plan-btn-amber {
         background: linear-gradient(135deg, #d97706, #b45309);
         color: #ffffff;
-        box-shadow: 0 10px 20px -3px rgba(217, 119, 6, 0.35);
+        box-shadow: 0 8px 16px -2px rgba(217, 119, 6, 0.35);
     }
     
     .plan-btn-amber:hover {
         background: linear-gradient(135deg, #b45309, #92400e);
-        box-shadow: 0 12px 24px -3px rgba(217, 119, 6, 0.45);
+        box-shadow: 0 10px 20px -2px rgba(217, 119, 6, 0.45);
         transform: translateY(-1px);
     }
 
@@ -413,27 +426,26 @@
     }
 
     /* Responsive */
-    @media (max-width: 1400px) {
+    @media (max-width: 1100px) {
         .pricing-grid {
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
+            gap: 14px;
         }
-    }
-    
-    @media (max-width: 960px) {
-        .pricing-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
+        .plan-card {
+            flex: 1 1 230px;
+            max-width: 280px;
         }
         .trust-banner-grid {
             grid-template-columns: repeat(2, 1fr);
         }
     }
     
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
         .pricing-grid {
-            grid-template-columns: 1fr;
-            gap: 16px;
+            gap: 12px;
+        }
+        .plan-card {
+            flex: 1 1 100%;
+            max-width: 100%;
         }
         .trust-banner-grid {
             grid-template-columns: 1fr;
@@ -507,37 +519,37 @@
         
         <div class="plan-price-wrap">
             <div class="plan-price">₹20</div>
-            <div class="plan-price-sub" style="color: #059669;">/ 10 Cards Limit</div>
+            <div class="plan-price-sub" style="color: #059669;">10 Cards Test Limit</div>
         </div>
         
-        <p class="plan-desc">Perfect for testing print quality, card alignment & PDF downloads before regular usage.</p>
+        <p class="plan-desc">Perfect to test print quality, alignment & PDF export before regular use.</p>
         
         <!-- Cost per Card Pill (2.00) -->
         <div class="cost-tag-box rate-trial">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
             <span>Cost per Card: <strong>₹2.00</strong></span>
         </div>
         
         <ul class="plan-features">
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span><strong>10 Cards Generation</strong> Limit</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span><strong>10 Cards</strong> Test Capacity</span>
             </li>
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span>Aadhaar, Ayushman PMJAY Cards</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Aadhaar & Ayushman Cards</span>
             </li>
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span>AI Auto-Alignment & Regional Language</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>AI Auto-Alignment Engine</span>
             </li>
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 <span>Instant A4 Duplex Print PDF</span>
             </li>
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span><strong>Lifetime Validity</strong> (No Expiry)</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span><strong>Lifetime Validity</strong></span>
             </li>
         </ul>
         
@@ -556,37 +568,37 @@
         
         <div class="plan-price-wrap">
             <div class="plan-price">₹100</div>
-            <div class="plan-price-sub">/ ~105 Cards Capacity</div>
+            <div class="plan-price-sub">~105 Cards Capacity</div>
         </div>
         
-        <p class="plan-desc">Great for Cyber Cafes, CSC Centers & local shop operators with daily card printing.</p>
+        <p class="plan-desc">Great for Cyber Cafes & CSC Centers with daily card printing needs.</p>
         
         <!-- Cost per Card Pill (0.95) -->
         <div class="cost-tag-box rate-standard">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
             <span>Cost per Card: <strong>₹0.95</strong></span>
         </div>
         
         <ul class="plan-features">
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span><strong>₹100 Full Wallet Recharge</strong> (~105 Cards)</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span><strong>₹100 Full Balance</strong> (~105 Cards)</span>
             </li>
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 <span>All Card Types Supported</span>
             </li>
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span>High-Precision AI Extraction Engine</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>High-Precision AI Engine</span>
             </li>
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 <span>Instant A4 Duplex Print PDF</span>
             </li>
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span><strong>Lifetime Validity</strong> (No Expiry)</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span><strong>Lifetime Validity</strong></span>
             </li>
         </ul>
         
@@ -605,37 +617,37 @@
         
         <div class="plan-price-wrap">
             <div class="plan-price" style="color: #1d4ed8;">₹200</div>
-            <div class="plan-price-sub" style="color: #1d4ed8;">/ ~210 Cards Capacity</div>
+            <div class="plan-price-sub" style="color: #1d4ed8;">~210 Cards Capacity</div>
         </div>
         
-        <p class="plan-desc">Best value for high-volume CSC kiosks & busy online centers printing daily cards.</p>
+        <p class="plan-desc">Best value for active CSC kiosks & busy online centers printing daily.</p>
         
         <!-- Cost per Card Pill (0.95) -->
         <div class="cost-tag-box rate-pro">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
             <span>Cost per Card: <strong>₹0.95</strong></span>
         </div>
         
         <ul class="plan-features">
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span><strong>₹200 Full Wallet Recharge</strong> (~210 Cards)</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span><strong>₹200 Full Balance</strong> (~210 Cards)</span>
             </li>
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span>All Card Formats & Regional Languages</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Priority AI Neural Pipeline</span>
             </li>
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span>Priority AI Neural Rendering Pipeline</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Multi-Card A4 Print Layout</span>
             </li>
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span>Multi-Card A4 Print Duplex Layout</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Regional Language Support</span>
             </li>
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span><strong>Lifetime Validity</strong> (No Expiry)</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span><strong>Lifetime Validity</strong></span>
             </li>
         </ul>
         
@@ -654,37 +666,37 @@
         
         <div class="plan-price-wrap">
             <div class="plan-price">₹300</div>
-            <div class="plan-price-sub" style="color: #7e22ce;">/ ~315 Cards Capacity</div>
+            <div class="plan-price-sub" style="color: #7e22ce;">~315 Cards Capacity</div>
         </div>
         
-        <p class="plan-desc">Maximum savings & uninterrupted operations for bulk card distributors & large kiosks.</p>
+        <p class="plan-desc">Maximum savings for bulk card distributors & large kiosks operators.</p>
         
         <!-- Cost per Card Pill (0.95) -->
         <div class="cost-tag-box rate-standard">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
             <span>Cost per Card: <strong>₹0.95</strong></span>
         </div>
         
         <ul class="plan-features">
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7e22ce" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span><strong>₹300 Full Wallet Recharge</strong> (~315 Cards)</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7e22ce" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span><strong>₹300 Full Balance</strong> (~315 Cards)</span>
             </li>
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7e22ce" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span>All Current & Future Card Services</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7e22ce" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>All Current & Future Services</span>
             </li>
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7e22ce" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span>Ultra-Fast High-Throughput Engine</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7e22ce" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Ultra-Fast Batch Engine</span>
             </li>
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7e22ce" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span>Full Duplex Mirror A4 Print PDF</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7e22ce" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Mirror Duplex 300 DPI PDF</span>
             </li>
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7e22ce" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span><strong>Lifetime Validity</strong> (No Expiry)</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7e22ce" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span><strong>Lifetime Validity</strong></span>
             </li>
         </ul>
         
@@ -703,41 +715,37 @@
         
         <div class="plan-price-wrap">
             <div class="plan-price" style="color: #92400e;">₹1000</div>
-            <div class="plan-price-sub" style="color: #b45309;">/ ~1,050 Cards Capacity</div>
+            <div class="plan-price-sub" style="color: #b45309;">~1,050 Cards Capacity</div>
         </div>
         
-        <p class="plan-desc">Ultimate powerhouse pack for high-scale CSC kiosks, bulk card printers & agencies.</p>
+        <p class="plan-desc">Powerhouse pack for bulk printing hubs & commercial PVC agencies.</p>
         
         <!-- Cost per Card Pill (0.95) -->
         <div class="cost-tag-box rate-standard" style="background: #fffbeb; border-color: #fde68a;">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
             <span style="color: #92400e;">Cost per Card: <strong style="color: #78350f;">₹0.95</strong></span>
         </div>
         
         <ul class="plan-features">
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span><strong>₹1,000 Full Wallet Recharge</strong> (~1,050 Cards)</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span><strong>₹1,000 Full Balance</strong> (~1,050 Cards)</span>
             </li>
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span><strong>VIP Priority Fast-Track Server</strong></span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>VIP Priority Fast-Track Server</span>
             </li>
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span>All Government & Photo ID Services</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>All Government & Photo IDs</span>
             </li>
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span>High-Speed AI Batch Engine</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Ultra-HD 300 DPI Duplex Print</span>
             </li>
             <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span>Mirror Duplex 300 DPI A4 PDF</span>
-            </li>
-            <li>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                <span><strong>Lifetime Validity</strong> (No Expiry)</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span><strong>Lifetime Validity</strong></span>
             </li>
         </ul>
         

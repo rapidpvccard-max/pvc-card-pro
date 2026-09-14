@@ -361,18 +361,26 @@
             box-shadow: 0 6px 14px rgba(37, 99, 235, 0.3);
         }
 
+        .section-wrapper.pricing-wrapper {
+            max-width: 1380px;
+        }
+
         /* Pricing Section Cards */
         .pricing-plans-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 16px;
         }
 
         .pricing-plan-box {
+            flex: 1 1 205px;
+            max-width: 250px;
+            min-width: 195px;
             background: #ffffff;
             border: 1.5px solid #e2e8f0;
-            border-radius: 22px;
-            padding: 28px 22px;
+            border-radius: 20px;
+            padding: 24px 18px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -718,7 +726,7 @@
     </section>
 
     <!-- Pricing Section -->
-    <section class="section-wrapper" id="pricing">
+    <section class="section-wrapper pricing-wrapper" id="pricing">
         <div class="section-title-center">
             <div style="display: inline-block; background: #ecfdf5; color: #047857; padding: 4px 14px; border-radius: 20px; font-weight: 800; font-size: 0.75rem; margin-bottom: 12px; border: 1px solid #a7f3d0;">
                 TRANSPARENT RECHARGE PLANS
