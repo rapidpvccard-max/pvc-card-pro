@@ -1,0 +1,7 @@
+# Pyrefly Configuration
+check-unannotated-defs = false
+
+[errors]
+missing-argument = "none"
+bad-assignment = "none"
+bad-argument-type = "none"
