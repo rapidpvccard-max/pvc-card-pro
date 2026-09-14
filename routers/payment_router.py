@@ -38,7 +38,8 @@ def recharge_plan(
             1: {"name": "Trial Pack", "price": 20.0, "credits": 20.0, "cost_per_card": 2.00},
             2: {"name": "Starter Pack", "price": 100.0, "credits": 100.0, "cost_per_card": 0.95},
             3: {"name": "Pro Pack", "price": 200.0, "credits": 200.0, "cost_per_card": 0.95},
-            4: {"name": "Business Pack", "price": 300.0, "credits": 300.0, "cost_per_card": 0.95}
+            4: {"name": "Business Pack", "price": 300.0, "credits": 300.0, "cost_per_card": 0.95},
+            5: {"name": "Enterprise Pack", "price": 1000.0, "credits": 1000.0, "cost_per_card": 0.95}
         }
         if order_data.plan_id in default_plans:
             pinfo = default_plans[order_data.plan_id]
@@ -319,7 +320,8 @@ def initiate_payu_payment(
             1: {"name": "Trial Pack", "price": 20.0, "credits": 20.0, "cost_per_card": 2.00},
             2: {"name": "Starter Pack", "price": 100.0, "credits": 100.0, "cost_per_card": 0.95},
             3: {"name": "Pro Pack", "price": 200.0, "credits": 200.0, "cost_per_card": 0.95},
-            4: {"name": "Business Pack", "price": 300.0, "credits": 300.0, "cost_per_card": 0.95}
+            4: {"name": "Business Pack", "price": 300.0, "credits": 300.0, "cost_per_card": 0.95},
+            5: {"name": "Enterprise Pack", "price": 1000.0, "credits": 1000.0, "cost_per_card": 0.95}
         }
         if order_data.plan_id in default_plans:
             pinfo = default_plans[order_data.plan_id]
