@@ -2346,6 +2346,17 @@
             setRefreshSpinning(false);
         }
 
+        function parseUtcDate(val) {
+            if (!val) return null;
+            if (val instanceof Date) return val;
+            let s = String(val).trim();
+            if (!s.endsWith('Z') && !s.includes('+') && !/-\d{2}:\d{2}$/.test(s)) {
+                s = s + 'Z';
+            }
+            const d = new Date(s);
+            return isNaN(d.getTime()) ? null : d;
+        }
+
         function setRefreshSpinning(spinning) {
             const btn = document.getElementById('refresh-btn');
             if (btn) {
@@ -2558,7 +2569,8 @@
             }
 
             tbody.innerHTML = list.map(p => {
-                const dateStr = p.created_at ? new Date(p.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'N/A';
+                const parsedDate = parseUtcDate(p.created_at);
+                const dateStr = parsedDate ? parsedDate.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'N/A';
                 const amt = parseFloat(p.amount || 0).toFixed(2);
                 const st = (p.status || 'pending').toLowerCase();
                 
@@ -2673,7 +2685,8 @@
                 const walletBal = parseFloat(user.wallet_balance || 0).toFixed(2);
                 const totalSpent = parseFloat(user.total_spent || 0).toFixed(2);
                 const cardsCount = user.total_cards_generated || 0;
-                const regDate = user.created_at ? new Date(user.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
+                const parsedRegDate = parseUtcDate(user.created_at);
+                const regDate = parsedRegDate ? parsedRegDate.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
                 const lastActiveStr = user.last_active ? formatRelativeTime(user.last_active) : regDate;
                 
                 const statusBadge = user.status === 'active' 
@@ -2751,16 +2764,18 @@
         function formatRelativeTime(dateStr) {
             if (!dateStr) return '-';
             const now = new Date();
-            const date = new Date(dateStr);
+            const date = parseUtcDate(dateStr);
+            if (!date) return '-';
             const diffMs = now - date;
             const diffSec = Math.floor(diffMs / 1000);
-            const diffMin = Math.floor(diffSec / 60);
-            const diffHr = Math.floor(diffMin / 60);
-            const diffDay = Math.floor(diffHr / 24);
 
+            if (diffSec < 0) return 'Just now';
             if (diffSec < 60) return 'Just now';
+            const diffMin = Math.floor(diffSec / 60);
             if (diffMin < 60) return `${diffMin}m ago`;
+            const diffHr = Math.floor(diffMin / 60);
             if (diffHr < 24) return `${diffHr}h ago`;
+            const diffDay = Math.floor(diffHr / 24);
             if (diffDay < 7) return `${diffDay}d ago`;
             return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
         }
@@ -2869,7 +2884,7 @@
                                 <td><span class="tag-pill info" style="text-transform: uppercase;">${escapeHtml(g.document_type || 'Aadhaar')}</span></td>
                                 <td><strong>${g.card_count || 1} Card(s)</strong></td>
                                 <td><span class="status-badge ${g.status === 'success' ? 'active' : 'inactive'}">${escapeHtml(g.status)}</span></td>
-                                <td style="color: var(--text-muted);">${new Date(g.created_at).toLocaleString()}</td>
+                                <td style="color: var(--text-muted);">${(parseUtcDate(g.created_at) || new Date()).toLocaleString()}</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -2900,7 +2915,7 @@
                                 <td style="font-family: monospace;">#${o.id.substring(0, 8)}...</td>
                                 <td style="font-weight: 700; color: #10b981;">₹${parseFloat(o.amount).toFixed(2)} ${o.currency || 'INR'}</td>
                                 <td><span class="status-badge ${o.status === 'paid' ? 'active' : 'inactive'}">${escapeHtml(o.status)}</span></td>
-                                <td style="color: var(--text-muted);">${new Date(o.created_at).toLocaleDateString()}</td>
+                                <td style="color: var(--text-muted);">${(parseUtcDate(o.created_at) || new Date()).toLocaleDateString()}</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -2934,7 +2949,7 @@
                                     <td><span class="audit-action-tag other">${escapeHtml(t.transaction_type)}</span></td>
                                     <td style="font-weight: 700; color: ${isPositive ? '#10b981' : '#f43f5e'};">${sign}</td>
                                     <td style="font-weight: 600; color: var(--text-main);">₹${parseFloat(t.balance_after).toFixed(2)}</td>
-                                    <td style="color: var(--text-muted);">${new Date(t.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+                                    <td style="color: var(--text-muted);">${(parseUtcDate(t.created_at) || new Date()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
                                 </tr>
                             `;
                         }).join('')}
@@ -3008,10 +3023,11 @@
             }
 
             tbody.innerHTML = logsToRender.map(log => {
-                const date = new Date(log.created_at).toLocaleString([], { 
+                const parsedLogDate = parseUtcDate(log.created_at);
+                const date = parsedLogDate ? parsedLogDate.toLocaleString([], { 
                     month: 'short', day: 'numeric', year: 'numeric',
                     hour: '2-digit', minute: '2-digit', second: '2-digit' 
-                });
+                }) : '-';
 
                 let actionTag = `<span class="audit-action-tag other">${escapeHtml(log.action)}</span>`;
                 if (log.action.includes('credit')) {

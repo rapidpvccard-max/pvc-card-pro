@@ -10,6 +10,23 @@ import auth
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
+def ensure_utc(dt):
+    if not dt:
+        return None
+    if isinstance(dt, datetime.datetime):
+        if dt.tzinfo is None:
+            return dt.replace(tzinfo=datetime.timezone.utc)
+    return dt
+
+def to_iso_utc(dt):
+    if not dt:
+        return None
+    if isinstance(dt, datetime.datetime):
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=datetime.timezone.utc)
+        return dt.isoformat()
+    return str(dt)
+
 def log_admin_action(db: Session, admin_id: int, action: str, target_user_id: int = None, details: str = None):
     try:
         log = models.AdminAuditLog(
@@ -126,7 +143,7 @@ def build_admin_user_dict(user: models.User, db: Session) -> dict:
 
     candidates = [getattr(user, 'updated_at', None), getattr(user, 'created_at', None), last_gen, last_tx]
     valid_candidates = [c for c in candidates if c is not None]
-    last_active = max(valid_candidates) if valid_candidates else (getattr(user, 'created_at', None) or datetime.datetime.utcnow())
+    last_active = max(valid_candidates) if valid_candidates else (getattr(user, 'created_at', None) or datetime.datetime.now(datetime.timezone.utc))
 
     return {
         "id": user.id,
@@ -134,14 +151,14 @@ def build_admin_user_dict(user: models.User, db: Session) -> dict:
         "email": user.email,
         "status": user.status or "active",
         "is_admin": bool(user.is_admin),
-        "created_at": user.created_at or datetime.datetime.utcnow(),
+        "created_at": ensure_utc(user.created_at) or datetime.datetime.now(datetime.timezone.utc),
         "auth_provider": auth_provider,
         "avatar_url": user.avatar_url,
         "wallet_balance": float(wallet_bal),
         "total_cards_generated": int(total_cards or 0),
         "total_spent": float(total_spent or 0.0),
         "paid_orders_count": int(paid_orders_count or 0),
-        "last_active": last_active,
+        "last_active": ensure_utc(last_active),
         "credits": user.credits
     }
 
@@ -304,7 +321,7 @@ def get_system_activity(
                 "status": g.status or "success",
                 "badge_label": f"🖨️ {doc}",
                 "badge_type": "info" if is_success else "danger",
-                "created_at": g.created_at or datetime.datetime.utcnow()
+                "created_at": ensure_utc(g.created_at) or datetime.datetime.now(datetime.timezone.utc)
             })
     except Exception as e:
         print(f"[Activity Generations Error] {e}")
@@ -325,7 +342,7 @@ def get_system_activity(
                 "status": "success",
                 "badge_label": "👤 USER",
                 "badge_type": "cyan" if getattr(u, 'google_id', None) else "success",
-                "created_at": u.created_at or datetime.datetime.utcnow()
+                "created_at": ensure_utc(u.created_at) or datetime.datetime.now(datetime.timezone.utc)
             })
     except Exception as e:
         print(f"[Activity Users Error] {e}")
@@ -354,7 +371,7 @@ def get_system_activity(
                 "status": "success",
                 "badge_label": f"💳 {sign}",
                 "badge_type": "success" if is_pos else "purple",
-                "created_at": t.created_at or datetime.datetime.utcnow()
+                "created_at": ensure_utc(t.created_at) or datetime.datetime.now(datetime.timezone.utc)
             })
     except Exception as e:
         print(f"[Activity Transactions Error] {e}")
@@ -377,7 +394,7 @@ def get_system_activity(
                 "status": "success",
                 "badge_label": "⚡ ADMIN",
                 "badge_type": "purple",
-                "created_at": a.created_at or datetime.datetime.utcnow()
+                "created_at": ensure_utc(a.created_at) or datetime.datetime.now(datetime.timezone.utc)
             })
     except Exception as e:
         print(f"[Activity Audit Error] {e}")
@@ -478,8 +495,8 @@ def get_admin_payments(
                 "amount": float(o.amount or 0.0),
                 "currency": o.currency or "INR",
                 "status": o.status or "pending",
-                "created_at": o.created_at.isoformat() if o.created_at else None,
-                "updated_at": o.updated_at.isoformat() if o.updated_at else None
+                "created_at": to_iso_utc(o.created_at),
+                "updated_at": to_iso_utc(o.updated_at)
             }
             
             if search:

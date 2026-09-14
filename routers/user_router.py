@@ -71,8 +71,8 @@ def get_full_user_history(current_user: models.User = Depends(auth.get_current_u
                 "run_id": g.run_id,
                 "document_type": g.document_type,
                 "status": g.status,
-                "created_at": g.created_at.isoformat() if g.created_at else None,
-                "completed_at": g.completed_at.isoformat() if g.completed_at else None
+                "created_at": (g.created_at.isoformat() + "Z") if g.created_at else None,
+                "completed_at": (g.completed_at.isoformat() + "Z") if g.completed_at else None
             } for g in generations
         ],
         "transactions": [
@@ -82,7 +82,7 @@ def get_full_user_history(current_user: models.User = Depends(auth.get_current_u
                 "transaction_type": t.transaction_type,
                 "reference_id": t.reference_id,
                 "balance_after": t.balance_after,
-                "created_at": t.created_at.isoformat() if t.created_at else None
+                "created_at": (t.created_at.isoformat() + "Z") if t.created_at else None
             } for t in transactions
         ]
     }
