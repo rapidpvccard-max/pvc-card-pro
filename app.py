@@ -523,7 +523,8 @@ async def generate_pipeline(
 class A4GenerateRequest(BaseModel):
     run_id: str
     cards_count: int = 1
-    mirror_duplex: bool = True
+    mirror_duplex: bool = False
+    side_by_side: bool = True
 
 @app.post("/generate-a4")
 async def generate_a4(
@@ -553,7 +554,7 @@ async def generate_a4(
     backs = [back_path] * req.cards_count
     
     try:
-        result = await run_in_threadpool(create_a4_print_pdf, fronts, backs, pdf_path, req.mirror_duplex)
+        result = await run_in_threadpool(create_a4_print_pdf, fronts, backs, pdf_path, req.mirror_duplex, req.side_by_side)
         result["pdf_url"] = f"/download-pdf/{run_id}"
         return result
     except Exception as e:

@@ -20,15 +20,15 @@ def test_print_layouts():
     os.makedirs(output_dir, exist_ok=True)
     
     for count in test_cases:
-        print(f"Generating PDF for {count} cards...")
+        print(f"Generating Side-by-Side PDF for {count} cards...")
         
         # Duplicate the same image paths to simulate multiple cards
         fronts = [front_img] * count
         backs = [back_img] * count
         
-        output_pdf = os.path.join(output_dir, f"print_{count}_cards.pdf")
+        output_pdf = os.path.join(output_dir, f"print_{count}_cards_side_by_side.pdf")
         
-        result = create_a4_print_pdf(fronts, backs, output_pdf)
+        result = create_a4_print_pdf(fronts, backs, output_pdf, side_by_side=True)
         
         print(f"  Success: {result['success']}")
         print(f"  Pages: {result['page_count']}")
@@ -37,12 +37,20 @@ def test_print_layouts():
         # Validation checks
         assert os.path.exists(output_pdf), f"PDF was not created for {count} cards"
         
-        # Verify page count
-        # For each 10 cards, we have 1 front sheet + 1 back sheet = 2 pages
-        expected_pages = ((count + 9) // 10) * 2
+        # In side-by-side mode: 5 cards per A4 page (Front + Back on same row)
+        # 1 card = 1 page
+        expected_pages = (count + 4) // 5
         if count == 0:
-            expected_pages = 2
+            expected_pages = 1
         assert result['page_count'] == expected_pages, f"Expected {expected_pages} pages, got {result['page_count']}"
+        assert result['layout_mode'] == "side_by_side"
+
+    # Also test duplex mode
+    print("Testing Duplex mode...")
+    output_duplex = os.path.join(output_dir, "print_1_card_duplex.pdf")
+    res_duplex = create_a4_print_pdf([front_img], [back_img], output_duplex, mirror_columns_for_duplex=True, side_by_side=False)
+    assert res_duplex['page_count'] == 2
+    assert res_duplex['layout_mode'] == "duplex_mirrored"
         
     print("All A4 PDF generation tests passed!")
 
