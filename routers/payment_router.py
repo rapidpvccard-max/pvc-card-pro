@@ -337,14 +337,14 @@ def initiate_payu_payment(
     salt = os.environ.get("PAYU_MERCHANT_SALT", PAYU_MERCHANT_SALT)
     action_url = os.environ.get("PAYU_PAYMENT_URL", PAYU_PAYMENT_URL)
 
-    env_base_url = os.environ.get("BASE_URL", "").rstrip("/")
+    env_base_url = os.environ.get("BASE_URL", "https://rapidpvc.online").rstrip("/")
     req_base_url = str(request.base_url).rstrip("/")
     if "localhost" in req_base_url or "127.0.0.1" in req_base_url:
         base_url = req_base_url
     elif env_base_url:
         base_url = env_base_url
     else:
-        base_url = req_base_url
+        base_url = "https://rapidpvc.online"
 
     txnid = f"pvc_{uuid.uuid4().hex[:14]}"
     amount_str = f"{float(plan.price):.2f}"
