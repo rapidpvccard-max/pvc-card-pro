@@ -81,6 +81,10 @@
         <div class="stat-value" id="hist-balance" style="color: var(--success);">₹0.00</div>
     </div>
     <div class="stat-card">
+        <div class="stat-label">Total Money Recharged</div>
+        <div class="stat-value" id="hist-total-recharged" style="color: #047857;">₹0.00</div>
+    </div>
+    <div class="stat-card">
         <div class="stat-label">Aadhaar PVC Cards</div>
         <div class="stat-value" id="hist-aadhaar-count">0</div>
     </div>
@@ -93,12 +97,15 @@
 <!-- History Tabs & Container -->
 <div class="card history-card-wrap" style="padding: 24px;">
     <div class="flex justify-between items-center history-tab-bar" style="margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
-        <div class="history-tab-buttons" style="display: flex; gap: 10px;">
-            <button id="tab-btn-generations" class="btn-primary" onclick="showTab('generations')" style="padding: 8px 18px; font-size: 0.85rem;">
-                Card Generations
+        <div class="history-tab-buttons" style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button type="button" id="tab-btn-generations" class="btn-primary" onclick="showTab('generations')" style="padding: 8px 18px; font-size: 0.85rem;">
+                Card Generations (<span id="hist-gen-badge">0</span>)
             </button>
-            <button id="tab-btn-transactions" class="btn-outline" onclick="showTab('transactions')" style="padding: 8px 18px; font-size: 0.85rem;">
-                Wallet Transactions
+            <button type="button" id="tab-btn-recharges" class="btn-outline" onclick="showTab('recharges')" style="padding: 8px 18px; font-size: 0.85rem;">
+                Wallet Recharges (<span id="hist-rec-badge">0</span>)
+            </button>
+            <button type="button" id="tab-btn-transactions" class="btn-outline" onclick="showTab('transactions')" style="padding: 8px 18px; font-size: 0.85rem;">
+                All Wallet Deductions
             </button>
         </div>
         <div id="record-count" class="text-muted" style="font-size: 0.85rem; font-weight: 600;">
@@ -122,6 +129,29 @@
                 <tr>
                     <td colspan="5" style="text-align: center; padding: 32px; color: var(--text-muted);">
                         Loading generation records...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Recharges Table -->
+    <div id="view-recharges" style="display: none; overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--border); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                    <th style="padding: 12px 16px;">Date & Time</th>
+                    <th style="padding: 12px 16px;">Recharge Plan</th>
+                    <th style="padding: 12px 16px;">Amount Added</th>
+                    <th style="padding: 12px 16px;">Transaction ID / Ref</th>
+                    <th style="padding: 12px 16px;">Payment Mode</th>
+                    <th style="padding: 12px 16px; text-align: right;">Status</th>
+                </tr>
+            </thead>
+            <tbody id="recharges-tbody">
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 32px; color: var(--text-muted);">
+                        Loading recharge records...
                     </td>
                 </tr>
             </tbody>
@@ -154,27 +184,41 @@
 
 {% block extra_scripts %}
 <script>
-    let historyData = { generations: [], transactions: [] };
+    let historyData = { generations: [], recharges: [], transactions: [] };
 
     function showTab(tab) {
         const genView = document.getElementById('view-generations');
+        const recView = document.getElementById('view-recharges');
         const txView = document.getElementById('view-transactions');
         const genBtn = document.getElementById('tab-btn-generations');
+        const recBtn = document.getElementById('tab-btn-recharges');
         const txBtn = document.getElementById('tab-btn-transactions');
         const countEl = document.getElementById('record-count');
 
         if (tab === 'generations') {
             genView.style.display = 'block';
+            recView.style.display = 'none';
             txView.style.display = 'none';
             genBtn.className = 'btn-primary';
+            recBtn.className = 'btn-outline';
             txBtn.className = 'btn-outline';
-            countEl.textContent = `${historyData.generations.length} Card Generations`;
+            countEl.textContent = `${(historyData.generations || []).length} Card Generations`;
+        } else if (tab === 'recharges') {
+            genView.style.display = 'none';
+            recView.style.display = 'block';
+            txView.style.display = 'none';
+            genBtn.className = 'btn-outline';
+            recBtn.className = 'btn-primary';
+            txBtn.className = 'btn-outline';
+            countEl.textContent = `${(historyData.recharges || []).length} Wallet Recharges`;
         } else {
             genView.style.display = 'none';
+            recView.style.display = 'none';
             txView.style.display = 'block';
             genBtn.className = 'btn-outline';
+            recBtn.className = 'btn-outline';
             txBtn.className = 'btn-primary';
-            countEl.textContent = `${historyData.transactions.length} Transactions`;
+            countEl.textContent = `${(historyData.transactions || []).length} Wallet Records`;
         }
     }
 
@@ -198,16 +242,21 @@
 
     function renderHistory() {
         const genTbody = document.getElementById('generations-tbody');
+        const recTbody = document.getElementById('recharges-tbody');
         const txTbody = document.getElementById('transactions-tbody');
         
         let aadhaarCount = 0;
         let ayushmanCount = 0;
 
-        // Render Generations
-        if (historyData.generations.length === 0) {
+        const generations = historyData.generations || [];
+        const recharges = historyData.recharges || [];
+        const transactions = historyData.transactions || [];
+
+        // 1. Render Generations
+        if (generations.length === 0) {
             genTbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--text-muted);">No cards generated yet. <a href="/generator" style="color: var(--primary); font-weight: 600;">Generate your first card!</a></td></tr>`;
         } else {
-            genTbody.innerHTML = historyData.generations.map(g => {
+            genTbody.innerHTML = generations.map(g => {
                 const isAadhaar = (g.document_type || '').toLowerCase() === 'aadhaar';
                 if (isAadhaar) aadhaarCount++;
                 else ayushmanCount++;
@@ -249,11 +298,59 @@
             }).join('');
         }
 
-        // Render Transactions
-        if (historyData.transactions.length === 0) {
+        // 2. Render Recharges
+        if (recharges.length === 0) {
+            recTbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                        <div style="font-size: 1.6rem; margin-bottom: 6px;">💳</div>
+                        <div style="font-weight: 700;">No recharges recorded yet.</div>
+                        <div style="font-size: 0.82rem; margin-top: 4px;">Top up your wallet from the Recharge Plans tab.</div>
+                    </td>
+                </tr>
+            `;
+        } else {
+            recTbody.innerHTML = recharges.map(r => {
+                const amt = parseFloat(r.amount || 0).toFixed(2);
+                const refId = r.order_id || r.id || '-';
+                const shortRef = refId.length > 20 ? refId.substring(0, 20) + '...' : refId;
+                const planName = r.plan_name || 'Wallet Top-Up';
+                const mode = r.payment_mode || 'PayU / UPI';
+
+                return `
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 14px 16px; font-size: 0.84rem; color: var(--text-muted); white-space: nowrap;">
+                            ${formatDate(r.created_at)}
+                        </td>
+                        <td style="padding: 14px 16px;">
+                            <strong style="color: var(--text-main); font-size: 0.88rem;">${planName}</strong>
+                        </td>
+                        <td style="padding: 14px 16px; font-weight: 800; font-size: 0.95rem; color: var(--success);">
+                            +₹${amt}
+                        </td>
+                        <td style="padding: 14px 16px; font-family: monospace; font-size: 0.8rem; color: var(--text-muted);" title="${refId}">
+                            ${shortRef}
+                        </td>
+                        <td style="padding: 14px 16px; font-size: 0.82rem;">
+                            <span style="background: var(--bg-surface-soft, #f1f5f9); padding: 3px 8px; border-radius: 6px; font-weight: 600;">
+                                ⚡ ${mode}
+                            </span>
+                        </td>
+                        <td style="padding: 14px 16px; text-align: right;">
+                            <span class="status-badge-success">
+                                ✓ Successful
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // 3. Render All Transactions
+        if (transactions.length === 0) {
             txTbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--text-muted);">No wallet transactions found.</td></tr>`;
         } else {
-            txTbody.innerHTML = historyData.transactions.map(t => {
+            txTbody.innerHTML = transactions.map(t => {
                 const isAdd = t.amount > 0;
                 const amtColor = isAdd ? 'var(--success)' : 'var(--danger)';
                 const amtSign = isAdd ? '+₹' : '-₹';
@@ -283,12 +380,19 @@
             }).join('');
         }
 
-        // Update stats
-        document.getElementById('hist-total-cards').textContent = historyData.generations.length;
+        // Update stats and badges
+        document.getElementById('hist-total-cards').textContent = generations.length;
         document.getElementById('hist-balance').textContent = '₹' + parseFloat(historyData.credits?.wallet_balance || 0).toFixed(2);
+        document.getElementById('hist-total-recharged').textContent = '₹' + parseFloat(historyData.total_recharged_amount || 0).toFixed(2);
         document.getElementById('hist-aadhaar-count').textContent = aadhaarCount;
         document.getElementById('hist-ayushman-count').textContent = ayushmanCount;
-        document.getElementById('record-count').textContent = `${historyData.generations.length} Card Generations`;
+
+        const genBadge = document.getElementById('hist-gen-badge');
+        if (genBadge) genBadge.textContent = generations.length;
+        const recBadge = document.getElementById('hist-rec-badge');
+        if (recBadge) recBadge.textContent = recharges.length;
+
+        document.getElementById('record-count').textContent = `${generations.length} Card Generations`;
     }
 
     fetch('/api/user/history')

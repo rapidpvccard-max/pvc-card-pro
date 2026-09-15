@@ -72,12 +72,27 @@ class CreditTransactionResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class UserRechargeResponse(BaseModel):
+    id: str
+    order_id: str
+    plan_name: str
+    amount: float
+    status: str
+    created_at: Optional[datetime] = None
+    payment_mode: Optional[str] = "PayU / UPI"
+
+    class Config:
+        from_attributes = True
+
 class DashboardResponse(BaseModel):
     user: UserResponse
     credits: UserCreditsResponse
     history: List[GenerationHistoryResponse]
     transactions: List[CreditTransactionResponse]
     plans: List[PlanResponse]
+    recharges: Optional[List[UserRechargeResponse]] = []
+    total_recharged_amount: Optional[float] = 0.0
+    total_recharge_count: Optional[int] = 0
 
 class AdminDashboardResponse(BaseModel):
     total_users: Optional[int] = 0
