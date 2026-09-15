@@ -2,6 +2,7 @@ import os
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.utils import formatdate, make_msgid
 from dotenv import load_dotenv
 
 def get_smtp_config():
@@ -189,6 +190,9 @@ If you did not request this, please ignore this email.
         msg["Subject"] = "Reset Your Password - Rapid PVC Card Pro"
         msg["From"] = f"{config['from_name']} <{config['from_email']}>"
         msg["To"] = to_email
+        msg["Reply-To"] = config["from_email"]
+        msg["Date"] = formatdate(localtime=True)
+        msg["Message-ID"] = make_msgid(domain="rapidpvc.online")
         
         msg.attach(MIMEText(plain_text, "plain"))
         msg.attach(MIMEText(html_content, "html"))

@@ -313,7 +313,14 @@ def forgot_password(
         raise HTTPException(status_code=403, detail="This account is currently disabled. Please contact support.")
         
     token = auth.create_password_reset_token(user)
-    base_url = str(request.base_url).rstrip("/")
+    env_base_url = os.environ.get("BASE_URL", "https://rapidpvc.online").rstrip("/")
+    req_base_url = str(request.base_url).rstrip("/")
+    if "localhost" in req_base_url or "127.0.0.1" in req_base_url:
+        base_url = req_base_url
+    elif env_base_url:
+        base_url = env_base_url
+    else:
+        base_url = "https://rapidpvc.online"
     reset_url = f"{base_url}/reset-password?token={token}"
     
     sent, msg = send_password_reset_email(user.email, user.name, reset_url)
