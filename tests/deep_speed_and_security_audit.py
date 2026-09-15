@@ -9,7 +9,8 @@ from PIL import Image
 
 # Reconfigure stdout to avoid Windows cp1252 UnicodeEncodeError
 try:
-    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    if hasattr(sys.stdout, "reconfigure"):
+        getattr(sys.stdout, "reconfigure")(encoding="utf-8", errors="replace")
 except Exception:
     pass
 
