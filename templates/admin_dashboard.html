@@ -2174,7 +2174,7 @@
                                 <h3 style="font-size: 1rem; font-weight: 700; color: var(--text-main); margin-bottom: 16px;">2. Advertisement Image</h3>
                                 
                                 <div class="form-group">
-                                    <label class="form-label">Upload Banner Image (Recommended: 1200x200 px)</label>
+                                    <label class="form-label">Upload Banner Image (Recommended: 1200x350 px ya 1200x300 px)</label>
                                     <div style="border: 2px dashed #6366f1; border-radius: 12px; padding: 24px; text-align: center; background: rgba(99, 102, 241, 0.04); cursor: pointer;" onclick="document.getElementById('banner-file-input').click()">
                                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" style="margin-bottom: 8px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                                         <div style="font-weight: 700; color: var(--text-main); font-size: 0.9rem;">Click to Upload Advertisement Banner</div>
@@ -3314,10 +3314,10 @@
             }
 
             if (mode === 'image') {
-                const imgUrl = document.getElementById('banner-image-url-input').value.trim() || 'https://placehold.co/1200x200/1e293b/ffffff?text=Upload+Your+Advertisement+Banner+Image';
+                const imgUrl = document.getElementById('banner-image-url-input').value.trim() || 'https://placehold.co/1200x350/1e293b/ffffff?text=Upload+Your+Advertisement+Banner+Image';
                 previewBox.innerHTML = `
                     <div style="border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
-                        <img src="${escapeHtml(imgUrl)}" alt="Advertisement Preview" style="width: 100%; max-height: 180px; object-fit: cover; display: block; border-radius: var(--radius-lg);" onerror="this.src='https://placehold.co/1200x200/1e293b/ffffff?text=Invalid+Image+URL';" />
+                        <img src="${escapeHtml(imgUrl)}" alt="Advertisement Preview" style="width: 100%; max-height: 260px; object-fit: cover; display: block; border-radius: var(--radius-lg);" onerror="this.src='https://placehold.co/1200x350/1e293b/ffffff?text=Invalid+Image+URL';" />
                     </div>
                 `;
             } else {

@@ -917,9 +917,9 @@
 </div>
 
 <!-- Promotional Banner (Dynamic from Admin Panel) -->
-<div id="dynamic-promo-banner-container" style="margin-top: 24px; margin-bottom: 20px;">
+<div id="dynamic-promo-banner-container" style="margin-top: 24px; margin-bottom: 24px;">
     <!-- Default initial structure -->
-    <div id="dynamic-promo-banner" style="border-radius: var(--radius-lg); background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); overflow: hidden; display: flex; align-items: center; justify-content: space-between; padding: 30px 36px; color: white; box-shadow: 0 10px 25px rgba(0,0,0,0.06); border: 1px solid rgba(255,255,255,0.05);">
+    <div id="dynamic-promo-banner" style="border-radius: var(--radius-lg); background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); overflow: hidden; display: flex; align-items: center; justify-content: space-between; padding: 42px 38px; min-height: 160px; color: white; box-shadow: 0 10px 25px rgba(0,0,0,0.06); border: 1px solid rgba(255,255,255,0.05);">
         <div>
             <div style="font-weight: 800; font-size: 1.8rem; font-style: italic; color: #f59e0b; margin-bottom: 6px;">HIGH QUALITY PVC CARD</div>
             <div style="display: flex; align-items: center; gap: 14px;">
@@ -1153,7 +1153,7 @@
                         const targetLink = bannerRes.link_url || '#';
                         container.innerHTML = `
                             <a href="${targetLink}" style="display: block; text-decoration: none; border-radius: 18px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.06); transition: transform 0.2s ease;">
-                                <img src="${bannerRes.image_url}" alt="Promotional Offer" style="width: 100%; max-height: 200px; object-fit: cover; display: block; border-radius: 18px;" />
+                                <img src="${bannerRes.image_url}" alt="Promotional Offer" style="width: 100%; height: auto; max-height: 380px; object-fit: cover; display: block; border-radius: 18px;" />
                             </a>
                         `;
                     }
