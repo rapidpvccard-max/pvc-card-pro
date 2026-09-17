@@ -270,13 +270,39 @@
             box-shadow: 0 20px 40px -5px rgba(245, 158, 11, 0.22);
         }
 
+        .showcase-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            width: 100%;
+        }
+
         .showcase-badges-group {
-            position: absolute;
-            top: 20px;
-            right: 20px;
             display: flex;
             align-items: center;
             gap: 6px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .showcase-title-box {
+            margin-bottom: 16px;
+        }
+
+        .showcase-title-box h3 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 3px;
+            line-height: 1.25;
+            letter-spacing: -0.3px;
+        }
+
+        .showcase-title-box p {
+            font-size: 0.85rem;
+            color: #64748b;
+            line-height: 1.4;
         }
 
         .showcase-badge-pill {
@@ -665,19 +691,23 @@
     <div class="showcase-cards-container" id="supported-cards">
         <!-- 1. Classic Aadhaar Card Box -->
         <div class="showcase-preview-box" onclick="window.location.href='/register'">
-            <div class="showcase-badges-group">
-                <span class="showcase-badge-pill blue">₹0.95 / Card</span>
-            </div>
             <div>
-                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                <!-- Top Header: Icon on Left, Badges on Right -->
+                <div class="showcase-card-header">
                     <div style="width: 52px; height: 52px; border-radius: 14px; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                     </div>
-                    <div>
-                        <h3 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;">Aadhaar PVC Card</h3>
-                        <p style="font-size: 0.85rem; color: #64748b;">Classic e-Aadhaar & Enrolment Slip</p>
+                    <div class="showcase-badges-group">
+                        <span class="showcase-badge-pill blue">₹0.95 / Card</span>
                     </div>
                 </div>
+
+                <!-- Dedicated Full-Width Title & Subtitle Row (Zero Overlap!) -->
+                <div class="showcase-title-box">
+                    <h3>Aadhaar PVC Card</h3>
+                    <p>Classic e-Aadhaar & Enrolment Slip 1-Click Extraction</p>
+                </div>
+
                 <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 0.88rem; color: #334155;">
                     <li style="display: flex; align-items: center; gap: 8px;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -701,20 +731,24 @@
 
         <!-- 2. Colour Aadhaar Card Box (Featured / Trending) -->
         <div class="showcase-preview-box featured-color" onclick="window.location.href='/register'">
-            <div class="showcase-badges-group">
-                <span class="showcase-badge-pill special">NEW ✨</span>
-                <span class="showcase-badge-pill amber">₹0.95 / Card</span>
-            </div>
             <div>
-                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                <!-- Top Header: Icon on Left, Badges on Right -->
+                <div class="showcase-card-header">
                     <div style="width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, #f59e0b, #ea580c); color: #ffffff; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35); flex-shrink: 0;">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
                     </div>
-                    <div>
-                        <h3 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;">Colour Aadhaar Card</h3>
-                        <p style="font-size: 0.85rem; color: #b45309; font-weight: 600;">HD Gradient & B&W Ghost Security Photo</p>
+                    <div class="showcase-badges-group">
+                        <span class="showcase-badge-pill special">NEW ✨</span>
+                        <span class="showcase-badge-pill amber">₹0.95 / Card</span>
                     </div>
                 </div>
+
+                <!-- Dedicated Full-Width Title & Subtitle Row (Zero Overlap!) -->
+                <div class="showcase-title-box">
+                    <h3>Colour Aadhaar Card</h3>
+                    <p style="color: #b45309; font-weight: 600;">HD Gradient & B&W Ghost Security Photo</p>
+                </div>
+
                 <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 0.88rem; color: #334155;">
                     <li style="display: flex; align-items: center; gap: 8px;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -744,19 +778,23 @@
 
         <!-- 3. Ayushman PMJAY Card Box -->
         <div class="showcase-preview-box" onclick="window.location.href='/register'">
-            <div class="showcase-badges-group">
-                <span class="showcase-badge-pill green">₹0.95 / Card</span>
-            </div>
             <div>
-                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                <!-- Top Header: Icon on Left, Badges on Right -->
+                <div class="showcase-card-header">
                     <div style="width: 52px; height: 52px; border-radius: 14px; background: #ecfdf5; color: #059669; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
                     </div>
-                    <div>
-                        <h3 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;">Ayushman PMJAY Card</h3>
-                        <p style="font-size: 0.85rem; color: #64748b;">National Health Authority Golden Card Spec</p>
+                    <div class="showcase-badges-group">
+                        <span class="showcase-badge-pill green">₹0.95 / Card</span>
                     </div>
                 </div>
+
+                <!-- Dedicated Full-Width Title & Subtitle Row (Zero Overlap!) -->
+                <div class="showcase-title-box">
+                    <h3>Ayushman PMJAY Card</h3>
+                    <p>National Health Authority Golden Card Spec</p>
+                </div>
+
                 <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 0.88rem; color: #334155;">
                     <li style="display: flex; align-items: center; gap: 8px;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
