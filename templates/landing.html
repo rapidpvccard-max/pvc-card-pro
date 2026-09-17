@@ -231,11 +231,11 @@
 
         /* 3D Floating Showcase Grid */
         .showcase-cards-container {
-            max-width: 1000px;
+            max-width: 1240px;
             margin: 40px auto 70px auto;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 28px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
             padding: 0 20px;
         }
 
@@ -245,9 +245,13 @@
             border-radius: 24px;
             padding: 28px;
             box-shadow: 0 12px 30px -5px rgba(0,0,0,0.06);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
             text-align: left;
             position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
         }
 
         .showcase-preview-box:hover {
@@ -255,18 +259,56 @@
             box-shadow: 0 20px 40px -5px rgba(0,0,0,0.1);
         }
 
-        .showcase-badge-pill {
+        .showcase-preview-box.featured-color {
+            border: 1.5px solid #fde68a;
+            background: linear-gradient(145deg, #ffffff 0%, #fffdf5 100%);
+            box-shadow: 0 12px 30px -5px rgba(245, 158, 11, 0.12);
+        }
+
+        .showcase-preview-box.featured-color:hover {
+            border-color: #f59e0b;
+            box-shadow: 0 20px 40px -5px rgba(245, 158, 11, 0.22);
+        }
+
+        .showcase-badges-group {
             position: absolute;
             top: 20px;
             right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .showcase-badge-pill {
             font-size: 0.75rem;
             font-weight: 800;
             padding: 4px 10px;
             border-radius: 12px;
+            display: inline-block;
         }
 
         .showcase-badge-pill.blue { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
         .showcase-badge-pill.green { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+        .showcase-badge-pill.amber { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+        .showcase-badge-pill.special { 
+            background: linear-gradient(135deg, #f59e0b, #ea580c); 
+            color: #ffffff; 
+            border: none; 
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35); 
+        }
+
+        .showcase-card-footer {
+            margin-top: 22px;
+            padding-top: 14px;
+            border-top: 1px dashed #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .showcase-card-footer.color-footer {
+            border-top-color: #fde68a;
+        }
 
         /* Metrics Bar */
         .metrics-banner-bar {
@@ -507,10 +549,10 @@
         @media (max-width: 1300px) {
             .pricing-plans-grid { grid-template-columns: repeat(3, 1fr); }
         }
-        @media (max-width: 1024px) {
+        @media (max-width: 1100px) {
             .pricing-plans-grid { grid-template-columns: repeat(2, 1fr); }
             .metrics-grid-4 { grid-template-columns: repeat(2, 1fr); }
-            .showcase-cards-container { grid-template-columns: 1fr; }
+            .showcase-cards-container { grid-template-columns: 1fr; max-width: 560px; }
         }
 
         @media (max-width: 768px) {
@@ -585,7 +627,7 @@
         </h1>
         
         <p class="hero-subtext">
-            Extract e-Aadhaar, Ayushman PMJAY, Voter ID & ABHA cards in 1-Click with zero alignment errors. Automatic regional Indic language font repair and 300 DPI high-definition A4 duplex print export.
+            Extract e-Aadhaar (Classic & Smart Colour), Ayushman PMJAY, Voter ID & ABHA cards in 1-Click with zero alignment errors. Automatic regional Indic language font repair and 300 DPI high-definition A4 duplex print export.
         </p>
         
         <div class="hero-cta-wrap">
@@ -621,60 +663,119 @@
 
     <!-- Visual 3D Showcase Section -->
     <div class="showcase-cards-container" id="supported-cards">
-        <!-- Aadhaar Card Box -->
-        <div class="showcase-preview-box">
-            <span class="showcase-badge-pill blue">₹0.95 / Card</span>
-            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
-                <div style="width: 52px; height: 52px; border-radius: 14px; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center;">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                </div>
-                <div>
-                    <h3 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;">Aadhaar PVC Card</h3>
-                    <p style="font-size: 0.85rem; color: #64748b;">e-Aadhaar & Enrolment Slip 1-Click Extraction</p>
-                </div>
+        <!-- 1. Classic Aadhaar Card Box -->
+        <div class="showcase-preview-box" onclick="window.location.href='/register'">
+            <div class="showcase-badges-group">
+                <span class="showcase-badge-pill blue">₹0.95 / Card</span>
             </div>
-            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 0.88rem; color: #334155;">
-                <li style="display: flex; align-items: center; gap: 8px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span>Instant extraction of text, photo and QR codes</span>
-                </li>
-                <li style="display: flex; align-items: center; gap: 8px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span>Hindi, Marathi, Gujarati, Telugu language auto-repair</span>
-                </li>
-                <li style="display: flex; align-items: center; gap: 8px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span>CR80 standard geometry + Mirror A4 duplex PDF</span>
-                </li>
-            </ul>
+            <div>
+                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                    <div style="width: 52px; height: 52px; border-radius: 14px; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;">Aadhaar PVC Card</h3>
+                        <p style="font-size: 0.85rem; color: #64748b;">Classic e-Aadhaar & Enrolment Slip</p>
+                    </div>
+                </div>
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 0.88rem; color: #334155;">
+                    <li style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>Instant extraction of text, photo and QR codes</span>
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>Hindi, Marathi, Gujarati, Telugu language auto-repair</span>
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>CR80 standard geometry + Mirror A4 duplex PDF</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="showcase-card-footer">
+                <span style="font-size: 0.8rem; font-weight: 600; color: #64748b;">Standard Government Spec</span>
+                <span style="font-size: 0.82rem; font-weight: 700; color: #2563eb; display: inline-flex; align-items: center; gap: 4px;">Print Now &rarr;</span>
+            </div>
         </div>
 
-        <!-- Ayushman Card Box -->
-        <div class="showcase-preview-box">
-            <span class="showcase-badge-pill green">₹0.95 / Card</span>
-            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
-                <div style="width: 52px; height: 52px; border-radius: 14px; background: #ecfdf5; color: #059669; display: flex; align-items: center; justify-content: center;">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
-                </div>
-                <div>
-                    <h3 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;">Ayushman PMJAY Card</h3>
-                    <p style="font-size: 0.85rem; color: #64748b;">National Health Authority Golden Card Spec</p>
-                </div>
+        <!-- 2. Colour Aadhaar Card Box (Featured / Trending) -->
+        <div class="showcase-preview-box featured-color" onclick="window.location.href='/register'">
+            <div class="showcase-badges-group">
+                <span class="showcase-badge-pill special">NEW ✨</span>
+                <span class="showcase-badge-pill amber">₹0.95 / Card</span>
             </div>
-            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 0.88rem; color: #334155;">
-                <li style="display: flex; align-items: center; gap: 8px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span>Official PMJAY golden card background & typography</span>
-                </li>
-                <li style="display: flex; align-items: center; gap: 8px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span>High-resolution QR code recovery & enhancement</span>
-                </li>
-                <li style="display: flex; align-items: center; gap: 8px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span>Exact color matching with 300 DPI print output</span>
-                </li>
-            </ul>
+            <div>
+                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                    <div style="width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, #f59e0b, #ea580c); color: #ffffff; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35); flex-shrink: 0;">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;">Colour Aadhaar Card</h3>
+                        <p style="font-size: 0.85rem; color: #b45309; font-weight: 600;">HD Gradient & B&W Ghost Security Photo</p>
+                    </div>
+                </div>
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 0.88rem; color: #334155;">
+                    <li style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span><strong>Micro B&W Ghost Photo</strong> & Aadhaar No. (Anti-Tamper)</span>
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>Official Tricolor multicolor gradient template & fonts</span>
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>AI Indic Regional Script Fix (Nirmala UI)</span>
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>CR80 Duplex Spec + 300 DPI high-res mirror print</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="showcase-card-footer color-footer">
+                <span style="font-size: 0.8rem; font-weight: 700; color: #d97706; display: flex; align-items: center; gap: 5px;">
+                    <span>🛡️ Ghost Security Photo</span>
+                </span>
+                <span style="font-size: 0.82rem; font-weight: 800; color: #ea580c; display: inline-flex; align-items: center; gap: 4px;">Try Colour Card &rarr;</span>
+            </div>
+        </div>
+
+        <!-- 3. Ayushman PMJAY Card Box -->
+        <div class="showcase-preview-box" onclick="window.location.href='/register'">
+            <div class="showcase-badges-group">
+                <span class="showcase-badge-pill green">₹0.95 / Card</span>
+            </div>
+            <div>
+                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                    <div style="width: 52px; height: 52px; border-radius: 14px; background: #ecfdf5; color: #059669; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;">Ayushman PMJAY Card</h3>
+                        <p style="font-size: 0.85rem; color: #64748b;">National Health Authority Golden Card Spec</p>
+                    </div>
+                </div>
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 0.88rem; color: #334155;">
+                    <li style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>Official PMJAY golden card background & typography</span>
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>High-resolution QR code recovery & enhancement</span>
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>Exact color matching with 300 DPI print output</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="showcase-card-footer">
+                <span style="font-size: 0.8rem; font-weight: 600; color: #64748b;">PMJAY Golden Card Spec</span>
+                <span style="font-size: 0.82rem; font-weight: 700; color: #059669; display: inline-flex; align-items: center; gap: 4px;">Print Now &rarr;</span>
+            </div>
         </div>
     </div>
     
