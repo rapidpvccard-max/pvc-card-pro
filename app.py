@@ -8,7 +8,7 @@ import time
 
 load_dotenv()
 from fastapi import FastAPI, Request, UploadFile, File, Form, Depends
-from fastapi.responses import JSONResponse, RedirectResponse, HTMLResponse
+from fastapi.responses import JSONResponse, RedirectResponse, HTMLResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from contextlib import asynccontextmanager
@@ -230,6 +230,14 @@ async def shipping_page(request: Request):
 @app.get("/pricing", response_class=HTMLResponse)
 async def pricing_page(request: Request):
     return templates.TemplateResponse(request=request, name="subscription.html")
+
+@app.get("/ads.txt", response_class=PlainTextResponse)
+async def get_ads_txt():
+    ads_file = os.path.join("static", "ads.txt")
+    if os.path.exists(ads_file):
+        with open(ads_file, "r", encoding="utf-8") as f:
+            return f.read()
+    return "google.com, pub-7359691130707617, DIRECT, f08c47fec0942fa0\n"
 
 class ContactMessageSchema(BaseModel):
     name: str
