@@ -6,12 +6,12 @@ echo "📦 Installing Nirmala UI Indian Script Fonts on Linux AWS"
 echo "=========================================================="
 
 FONT_DIR="/usr/local/share/fonts/nirmala"
-mkdir -p "$FONT_DIR"
-cp static/fonts/*.ttf "$FONT_DIR/"
-chmod 644 "$FONT_DIR"/*.ttf
+sudo mkdir -p "$FONT_DIR"
+sudo cp static/fonts/*.ttf "$FONT_DIR/"
+sudo chmod 644 "$FONT_DIR"/*.ttf
 
 echo "🔄 Rebuilding font cache..."
-fc-cache -f -v
+sudo fc-cache -f -v
 
 echo "🔍 Verifying Nirmala UI installation..."
 fc-list | grep -i "nirmala" || echo "Warning: Font not listed yet"
