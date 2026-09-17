@@ -157,8 +157,12 @@ def get_full_user_history(current_user: models.User = Depends(auth.get_current_u
 def get_user_credits(current_user: models.User = Depends(auth.get_current_user), db: Session = Depends(database.get_db)):
     credits = db.query(models.UserCredits).filter(models.UserCredits.user_id == current_user.id).first()
     if not credits:
-        return {"wallet_balance": 0.0, "total_generated": 0}
-    return {"wallet_balance": credits.wallet_balance, "total_generated": credits.total_generated}
+        return {"wallet_balance": 0.0, "total_generated": 0, "cost_per_card": 0.95}
+    return {
+        "wallet_balance": credits.wallet_balance, 
+        "total_generated": credits.total_generated,
+        "cost_per_card": float(credits.cost_per_card or 0.95)
+    }
 
 @router.post("/update-profile")
 def update_profile(req: UpdateProfileRequest, current_user: models.User = Depends(auth.get_current_user), db: Session = Depends(database.get_db)):

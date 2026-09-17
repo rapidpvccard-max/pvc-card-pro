@@ -752,6 +752,11 @@
                 if(el && data.wallet_balance !== undefined) {
                     el.textContent = '₹' + parseFloat(data.wallet_balance).toFixed(2);
                 }
+                const rate = data.cost_per_card !== undefined ? parseFloat(data.cost_per_card).toFixed(2) : '0.95';
+                const rateBadge = document.getElementById('user-rate-badge');
+                if(rateBadge) rateBadge.textContent = '⚡ Rate: ₹' + rate + ' / Card';
+                const btnGenText = document.getElementById('btn-generate-text');
+                if(btnGenText) btnGenText.textContent = 'Generate PVC Card (-₹' + rate + ')';
             }).catch(e => console.error(e));
             
         function logout() {
