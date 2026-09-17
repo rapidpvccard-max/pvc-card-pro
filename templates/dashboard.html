@@ -341,15 +341,48 @@
         box-shadow: 0 20px 35px -5px rgba(16, 185, 129, 0.15);
     }
 
+    .service-card-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    .service-badges-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
     .service-price-pill {
-        position: absolute;
-        top: 24px;
-        right: 24px;
+        display: inline-flex;
+        align-items: center;
         padding: 6px 14px;
         border-radius: 20px;
-        font-size: 0.85rem;
+        font-size: 0.88rem;
         font-weight: 800;
         font-family: 'Plus Jakarta Sans', sans-serif;
+        letter-spacing: 0.2px;
+        white-space: nowrap;
+    }
+
+    .service-badge-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.82rem;
+        font-weight: 800;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        white-space: nowrap;
+    }
+
+    .service-badge-pill.amber-badge {
+        background: #fef3c7;
+        color: #b45309;
+        border: 1px solid #fde68a;
     }
 
     .service-price-pill.blue {
@@ -364,17 +397,16 @@
         border: 1px solid #a7f3d0;
     }
 
-    .service-card-top {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-        margin-bottom: 20px;
+    .service-price-pill.amber {
+        background: #fef3c7;
+        color: #b45309;
+        border: 1px solid #fde68a;
     }
 
     .service-icon-box {
-        width: 72px;
-        height: 72px;
-        border-radius: 20px;
+        width: 60px;
+        height: 60px;
+        border-radius: 18px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -393,18 +425,30 @@
         box-shadow: 0 10px 20px -3px rgba(16, 185, 129, 0.35);
     }
 
+    .service-icon-box.amber {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: #ffffff;
+        box-shadow: 0 10px 20px -3px rgba(245, 158, 11, 0.35);
+    }
+
+    .service-title-box {
+        margin-bottom: 18px;
+    }
+
     .service-name {
-        font-size: 1.45rem;
+        font-size: 1.35rem;
         font-weight: 800;
         color: #0f172a;
         font-family: 'Plus Jakarta Sans', sans-serif;
-        margin-bottom: 4px;
+        margin-bottom: 6px;
+        line-height: 1.3;
     }
 
     .service-subtitle {
-        font-size: 0.92rem;
+        font-size: 0.9rem;
         color: #64748b;
         font-weight: 500;
+        line-height: 1.4;
     }
 
     .service-features-list {
@@ -443,17 +487,6 @@
         gap: 12px;
     }
 
-    .service-price-pill.amber {
-        background: #fef3c7;
-        color: #b45309;
-        border: 1px solid #fde68a;
-    }
-
-    .service-icon-box.amber {
-        background: linear-gradient(135deg, #f59e0b, #d97706);
-        color: #ffffff;
-        box-shadow: 0 10px 20px -3px rgba(245, 158, 11, 0.35);
-    }
 
     .service-launch-link.blue { color: #2563eb; }
     .service-launch-link.amber { color: #d97706; }
@@ -607,16 +640,24 @@
             padding: 20px 16px;
             border-radius: 18px;
         }
+        .service-card-top {
+            margin-bottom: 14px;
+        }
         .service-price-pill {
-            top: 16px;
-            right: 16px;
-            font-size: 0.75rem;
+            font-size: 0.78rem;
             padding: 4px 10px;
         }
+        .service-badge-pill {
+            font-size: 0.74rem;
+            padding: 4px 8px;
+        }
         .service-icon-box {
-            width: 52px;
-            height: 52px;
+            width: 48px;
+            height: 48px;
             border-radius: 14px;
+        }
+        .service-title-box {
+            margin-bottom: 14px;
         }
         .service-name {
             font-size: 1.18rem;
@@ -772,17 +813,19 @@
     
     <!-- Aadhaar PVC Card -->
     <div class="service-showcase-card card-aadhaar" onclick="window.location.href='/generator?type=aadhaar'">
-        <div class="service-price-pill blue">₹0.95 / card</div>
-        
         <div>
             <div class="service-card-top">
                 <div class="service-icon-box blue">
-                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 </div>
-                <div>
-                    <h3 class="service-name">Aadhaar PVC Card</h3>
-                    <p class="service-subtitle">e-Aadhaar & Enrolment PDF Auto-Extraction</p>
+                <div class="service-badges-wrap">
+                    <span class="service-price-pill blue">₹0.95 / card</span>
                 </div>
+            </div>
+
+            <div class="service-title-box">
+                <h3 class="service-name">Aadhaar PVC Card</h3>
+                <p class="service-subtitle">e-Aadhaar & Enrolment PDF Auto-Extraction</p>
             </div>
             
             <div class="service-features-list">
@@ -811,17 +854,19 @@
 
     <!-- Ayushman PVC Card -->
     <div class="service-showcase-card card-ayushman" onclick="window.location.href='/generator?type=ayushman'">
-        <div class="service-price-pill green">₹0.95 / card</div>
-        
         <div>
             <div class="service-card-top">
                 <div class="service-icon-box green">
-                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
                 </div>
-                <div>
-                    <h3 class="service-name">Ayushman PVC Card</h3>
-                    <p class="service-subtitle">PMJAY National Health Authority Golden Card</p>
+                <div class="service-badges-wrap">
+                    <span class="service-price-pill green">₹0.95 / card</span>
                 </div>
+            </div>
+
+            <div class="service-title-box">
+                <h3 class="service-name">Ayushman PVC Card</h3>
+                <p class="service-subtitle">PMJAY National Health Authority Golden Card</p>
             </div>
             
             <div class="service-features-list">
@@ -850,17 +895,20 @@
 
     <!-- Aadhaar PVC Card (Colourful HD) -->
     <div class="service-showcase-card card-aadhaar-color" onclick="window.location.href='/generator?type=aadhaar_color'">
-        <div class="service-price-pill amber">New ✨ ₹0.95</div>
-        
         <div>
             <div class="service-card-top">
                 <div class="service-icon-box amber">
-                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
                 </div>
-                <div>
-                    <h3 class="service-name">Aadhaar (Colourful)</h3>
-                    <p class="service-subtitle">HD Vibrant Gradient Background Layout</p>
+                <div class="service-badges-wrap">
+                    <span class="service-badge-pill amber-badge">New ✨</span>
+                    <span class="service-price-pill amber">₹0.95 / card</span>
                 </div>
+            </div>
+
+            <div class="service-title-box">
+                <h3 class="service-name">Aadhaar (Colourful)</h3>
+                <p class="service-subtitle">HD Vibrant Gradient Background Layout</p>
             </div>
             
             <div class="service-features-list">
@@ -888,6 +936,7 @@
     </div>
 
 </div>
+
 
 <!-- Recent Activity & Recharge History (Dual Tabbed Card) -->
 <div class="recent-activity-card" id="activity-section">
