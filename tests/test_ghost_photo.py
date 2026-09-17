@@ -22,7 +22,13 @@ def create_sample_avatar():
     return base64.b64encode(buf.getvalue()).decode("utf-8")
 
 def run():
-    photo_b64 = create_sample_avatar()
+    photo_b64 = ""
+    user_photo_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tests_output", "user_photo.png")
+    if os.path.exists(user_photo_path):
+        with open(user_photo_path, "rb") as f:
+            photo_b64 = base64.b64encode(f.read()).decode("utf-8")
+    if not photo_b64:
+        photo_b64 = create_sample_avatar()
     
     test_data = {
         "person": {
