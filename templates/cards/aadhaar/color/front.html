@@ -182,6 +182,16 @@
             {% endif %}
         </div>
         
+        {# ── Micro Ghost Photo with Aadhaar Number (Colour Aadhaar Exclusive) ── #}
+        {% if photo_base64 %}
+        <div class="ghost-photo-box">
+            <div class="ghost-photo-frame">
+                <img src="data:image/png;base64,{{ photo_base64 }}" class="ghost-photo-img">
+            </div>
+            <div class="ghost-aadhaar-number">{{ identity.aadhaar_number }}</div>
+        </div>
+        {% endif %}
+        
         {% set notice_locals = {
             'Hindi':      'आधार पहचान का प्रमाण है, नागरिकता या जन्मतिथि का नहीं। इसका उपयोग सत्यापन (ऑनलाइन प्रमाणीकरण या क्यूआर कोड / ऑफलाइन एक्सएमएल स्कैनिंग) के साथ किया जाना चाहिए।',
             'Devanagari': 'आधार पहचान का प्रमाण है, नागरिकता या जन्मतिथि का नहीं। इसका उपयोग सत्यापन (ऑनलाइन प्रमाणीकरण या क्यूआर कोड / ऑफलाइन एक्सएमएल स्कैनिंग) के साथ किया जाना चाहिए।',
