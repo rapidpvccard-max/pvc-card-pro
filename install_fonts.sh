@@ -17,7 +17,7 @@ echo "🔍 Verifying Nirmala UI installation..."
 fc-list | grep -i "nirmala" || echo "Warning: Font not listed yet"
 
 echo "🔄 Restarting pvc_pro service..."
-systemctl restart pvc_pro || true
+sudo systemctl restart pvc_pro || true
 
 echo "=========================================================="
 echo "✅ Nirmala UI fonts installed and active on AWS!"
