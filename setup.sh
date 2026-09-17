@@ -50,8 +50,13 @@ python3 -m venv venv
 ./venv/bin/playwright install chromium
 ./venv/bin/playwright install-deps chromium
 
-# 5. Prepare directories & environment file
+# 5. Prepare directories, fonts & environment file
 mkdir -p uploads output static/renders
+mkdir -p /usr/local/share/fonts/nirmala
+cp static/fonts/*.ttf /usr/local/share/fonts/nirmala/ 2>/dev/null || true
+chmod 644 /usr/local/share/fonts/nirmala/*.ttf 2>/dev/null || true
+fc-cache -f -v || true
+
 if [ ! -f .env ]; then
     cp .env.example .env
 fi

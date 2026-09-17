@@ -124,7 +124,7 @@ class PersistentBrowserWorker:
 
                     # Pre-warm Chromium layout engine and Indian fonts
                     try:
-                        warm_html = "<html><head><style>body{font-family:'Noto Sans','Noto Sans Devanagari','Noto Sans Gujarati',sans-serif;}</style></head><body><h1>भारत સરકાર 1234</h1></body></html>"
+                        warm_html = "<html><head><style>body{font-family:'Nirmala UI','Noto Sans','Noto Sans Devanagari','Noto Sans Gujarati',sans-serif;}</style></head><body><h1>भारत સરકાર 1234</h1></body></html>"
                         page_front.set_content(warm_html, wait_until="commit", timeout=5000)
                         page_front.screenshot(type="png")
                         page_back.set_content(warm_html, wait_until="commit", timeout=5000)

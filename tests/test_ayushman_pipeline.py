@@ -15,6 +15,8 @@ def run_tests():
     print("==================================================")
 
     pdf_path = "test_ayushman.pdf"
+    if not os.path.exists(pdf_path):
+        pdf_path = os.path.join(os.path.dirname(__file__), "test_ayushman.pdf")
     assert os.path.exists(pdf_path), "test_ayushman.pdf not found!"
 
     # 1. Extraction Test
