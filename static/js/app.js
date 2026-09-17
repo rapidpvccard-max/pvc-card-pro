@@ -112,9 +112,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Document Type Selector Handler
     window.setDocumentType = function(type) {
-        const input = document.getElementById('selected-document-type');
-        if (input) input.value = type;
+        const inputDoc = document.getElementById('selected-document-type');
+        const inputStyle = document.getElementById('selected-template-style');
         const btnAadhaar = document.getElementById('doc-btn-aadhaar');
+        const btnAadhaarColor = document.getElementById('doc-btn-aadhaar-color');
         const btnAyushman = document.getElementById('doc-btn-ayushman');
         const uploadText = document.getElementById('upload-zone-text');
         const heroTitle = document.getElementById('hero-title');
@@ -123,9 +124,15 @@ document.addEventListener('DOMContentLoaded', () => {
         
         window.clearPasswordError();
 
+        // Reset all active classes
+        if (btnAadhaar) btnAadhaar.classList.remove('active');
+        if (btnAadhaarColor) btnAadhaarColor.classList.remove('active');
+        if (btnAyushman) btnAyushman.classList.remove('active');
+
         if (type === 'ayushman') {
+            if (inputDoc) inputDoc.value = 'ayushman';
+            if (inputStyle) inputStyle.value = 'default';
             if (btnAyushman) btnAyushman.classList.add('active');
-            if (btnAadhaar) btnAadhaar.classList.remove('active');
             if (uploadText) uploadText.textContent = 'Upload Ayushman PDF';
             if (heroTitle) heroTitle.textContent = 'Create Professional Ayushman PVC Cards';
             if (heroDesc) heroDesc.textContent = 'Upload your Ayushman / PM-JAY PDF and PVC Card Pro will extract the required details and generate print-ready files.';
@@ -136,10 +143,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 passwordHintPill.style.background = '#d1fae5';
                 passwordHintPill.style.borderColor = '#a7f3d0';
             }
+        } else if (type === 'aadhaar_color' || type === 'color') {
+            if (inputDoc) inputDoc.value = 'aadhaar';
+            if (inputStyle) inputStyle.value = 'color';
+            if (btnAadhaarColor) btnAadhaarColor.classList.add('active');
+            if (uploadText) uploadText.textContent = 'Upload Aadhaar PDF (Colourful HD Card)';
+            if (heroTitle) heroTitle.textContent = 'Create Vibrant Colourful Aadhaar Cards';
+            if (heroDesc) heroDesc.textContent = 'Upload your Aadhaar PDF and PVC Card Pro will generate a stunning multicolor HD background layout ready for duplex print.';
+            if (pwDesc) pwDesc.textContent = 'Some Aadhaar PDFs are protected. Enter the PDF password if required.';
+            if (passwordHintPill) {
+                passwordHintPill.textContent = 'Aadhaar Hint: NAME4 + YOB (e.g. SURE1995)';
+                passwordHintPill.style.color = '#92400e';
+                passwordHintPill.style.background = '#fef3c7';
+                passwordHintPill.style.borderColor = '#fde68a';
+            }
         } else {
+            if (inputDoc) inputDoc.value = 'aadhaar';
+            if (inputStyle) inputStyle.value = 'default';
             if (btnAadhaar) btnAadhaar.classList.add('active');
-            if (btnAyushman) btnAyushman.classList.remove('active');
-            if (uploadText) uploadText.textContent = 'Upload Aadhaar PDF';
+            if (uploadText) uploadText.textContent = 'Upload Aadhaar PDF (Standard White)';
             if (heroTitle) heroTitle.textContent = 'Create Professional PVC Cards in Seconds';
             if (heroDesc) heroDesc.textContent = 'Upload your Aadhaar PDF and PVC Card Pro will securely extract the required details, prepare the card design and generate print-ready files.';
             if (pwDesc) pwDesc.textContent = 'Some Aadhaar PDFs are protected. Enter the PDF password if required.';
@@ -153,11 +175,18 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const docBtnAadhaar = document.getElementById('doc-btn-aadhaar');
+    const docBtnAadhaarColor = document.getElementById('doc-btn-aadhaar-color');
     const docBtnAyushman = document.getElementById('doc-btn-ayushman');
     if (docBtnAadhaar) {
         docBtnAadhaar.addEventListener('click', (e) => {
             e.preventDefault();
             window.setDocumentType('aadhaar');
+        });
+    }
+    if (docBtnAadhaarColor) {
+        docBtnAadhaarColor.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.setDocumentType('aadhaar_color');
         });
     }
     if (docBtnAyushman) {

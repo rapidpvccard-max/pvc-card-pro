@@ -332,6 +332,7 @@ async def extract_pdf(
     file: UploadFile = File(...), 
     password: str = Form(None), 
     document_type: str = Form("aadhaar"),
+    template_style: str = Form("default"),
     current_user: models.User = Depends(auth.get_current_user)
 ):
     if file.content_type != "application/pdf":
@@ -355,6 +356,11 @@ async def extract_pdf(
         
     try:
         doc_type = (document_type or "aadhaar").lower().strip()
+        style = (template_style or "default").lower().strip()
+        if doc_type in ["aadhaar_color", "aadhaar-color", "aadhaar_colour", "colour_aadhaar", "color_aadhaar"]:
+            doc_type = "aadhaar"
+            style = "color"
+
         if doc_type == "ayushman":
             result = extract_ayushman_data(filepath, password=password)
             data = result.to_json_safe_dict()
@@ -377,7 +383,7 @@ async def extract_pdf(
         try: os.remove(filepath)
         except: pass
             
-        return {"success": True, "engine_data": data, "mapped_data": mapped_data, "document_type": doc_type}
+        return {"success": True, "engine_data": data, "mapped_data": mapped_data, "document_type": doc_type, "template_style": style}
     except Exception as e:
         try: os.remove(filepath)
         except: pass
@@ -388,6 +394,7 @@ async def generate_pipeline(
     file: UploadFile = File(...), 
     password: str = Form(None), 
     document_type: str = Form("aadhaar"),
+    template_style: str = Form("default"),
     current_user: models.User = Depends(auth.get_current_user),
     db: Session = Depends(database.get_db)
 ):
@@ -409,16 +416,22 @@ async def generate_pipeline(
         return JSONResponse(status_code=400, content={"success": False, "error": "File does not appear to be a valid PDF"})
 
     doc_type = (document_type or "aadhaar").lower().strip()
+    style = (template_style or "default").lower().strip()
+    if doc_type in ["aadhaar_color", "aadhaar-color", "aadhaar_colour", "colour_aadhaar", "color_aadhaar"]:
+        doc_type = "aadhaar"
+        style = "color"
+
     run_id = str(uuid.uuid4())
     filename = f"{run_id}.pdf"
     filepath = os.path.join(UPLOAD_DIR, filename)
     
     # Initialize history record
+    doc_label = f"aadhaar (colourful)" if (doc_type == "aadhaar" and style == "color") else doc_type
     history = models.GenerationHistory(
         id=run_id,
         user_id=current_user.id,
         run_id=run_id,
-        document_type=doc_type,
+        document_type=doc_label,
         status="processing"
     )
     db.add(history)
@@ -471,8 +484,8 @@ async def generate_pipeline(
         output_dir = os.path.join("static", "renders", run_id)
         os.makedirs(output_dir, exist_ok=True)
         
-        # High-Speed Persistent Rendering Worker
-        front_path, back_path = await run_in_threadpool(render_card, mapped_data, engine_data, output_dir, doc_type)
+        # High-Speed Persistent Rendering Worker (Passes doc_type and template_style)
+        front_path, back_path = await run_in_threadpool(render_card, mapped_data, engine_data, output_dir, doc_type, style)
         
         # Pre-generate standard A4 print PDF in the same pass
         pdf_path = os.path.join(output_dir, "a4_print.pdf")
@@ -502,6 +515,7 @@ async def generate_pipeline(
             "success": True,
             "run_id": run_id,
             "document_type": doc_type,
+            "template_style": style,
             "mapped_data": mapped_data,
             "front_url": f"/download-card/{run_id}/front",
             "back_url": f"/download-card/{run_id}/back",

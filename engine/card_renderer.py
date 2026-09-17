@@ -26,9 +26,9 @@ _template_dir = os.path.join(os.path.dirname(__file__), "..", "templates")
 _jinja_env = Environment(loader=FileSystemLoader(_template_dir))
 
 
-def _get_template_b64(images_dir: str, doc_type: str, side: str) -> str:
+def _get_template_b64(images_dir: str, doc_type: str, side: str, template_style: str = "default") -> str:
     """Load and cache template background images as base64 strings."""
-    cache_key = f"{doc_type}_{side}"
+    cache_key = f"{doc_type}_{template_style}_{side}"
     if cache_key in _template_b64_cache:
         return _template_b64_cache[cache_key]
 
@@ -43,6 +43,8 @@ def _get_template_b64(images_dir: str, doc_type: str, side: str) -> str:
         f"AADHAAR_{side.upper()}.png" if doc_type == "aadhaar" else "",
         f"{side.lower()}.png",
         f"{side.upper()}.png",
+        f"{side.lower()}.jpg",
+        f"{side.upper()}.jpg",
     ]
     for name in candidates:
         if not name:
@@ -219,27 +221,47 @@ atexit.register(_cleanup_worker)
 # Public Entrypoint
 # ---------------------------------------------------------------------------
 
-def render_card(mapped_data: dict, engine_data: dict, output_dir: str, document_type: str = "aadhaar"):
+def render_card(mapped_data: dict, engine_data: dict, output_dir: str, document_type: str = "aadhaar", template_style: str = "default"):
     """
     Renders PVC Card front and back images using the high-speed persistent browser worker.
     Returns (front_path, back_path).
+    Supports both standard and vibrant colourful Aadhaar templates.
     """
     os.makedirs(output_dir, exist_ok=True)
-    doc_type = (document_type or mapped_data.get("document_type") or "aadhaar").lower().strip()
-    if doc_type not in ["aadhaar", "ayushman"]:
-        doc_type = "aadhaar"
+    raw_doc = (document_type or mapped_data.get("document_type") or "aadhaar").lower().strip()
+    style = (template_style or mapped_data.get("template_style") or "default").lower().strip()
 
-    front_template = _jinja_env.get_template(f"cards/{doc_type}/default/front.html")
-    back_template = _jinja_env.get_template(f"cards/{doc_type}/default/back.html")
+    if raw_doc in ["aadhaar_color", "aadhaar-color", "aadhaar_colour", "colour_aadhaar", "color_aadhaar"]:
+        doc_type = "aadhaar"
+        style = "color"
+    elif raw_doc == "ayushman":
+        doc_type = "ayushman"
+        style = "default"
+    else:
+        doc_type = "aadhaar"
+        if style not in ["default", "color"]:
+            style = "default"
+
+    # Verify template exists, fallback to default if not found
+    tpl_front_path = f"cards/{doc_type}/{style}/front.html"
+    tpl_back_path = f"cards/{doc_type}/{style}/back.html"
+    try:
+        front_template = _jinja_env.get_template(tpl_front_path)
+        back_template = _jinja_env.get_template(tpl_back_path)
+    except Exception:
+        style = "default"
+        front_template = _jinja_env.get_template(f"cards/{doc_type}/default/front.html")
+        back_template = _jinja_env.get_template(f"cards/{doc_type}/default/back.html")
 
     photo_base64 = mapped_data.get("photo", {}).get("base64", "")
     qr_base64 = mapped_data.get("qr", {}).get("base64", "")
-    images_dir = os.path.join(_template_dir, "cards", doc_type, "default", "images")
-    template_front_base64 = _get_template_b64(images_dir, doc_type, "front")
-    template_back_base64 = _get_template_b64(images_dir, doc_type, "back")
+    images_dir = os.path.join(_template_dir, "cards", doc_type, style, "images")
+    template_front_base64 = _get_template_b64(images_dir, doc_type, "front", style)
+    template_back_base64 = _get_template_b64(images_dir, doc_type, "back", style)
 
     context = {
         "document_type": doc_type,
+        "template_style": style,
         "language": mapped_data.get("language", {}),
         "person": mapped_data.get("person", {}),
         "identity": mapped_data.get("identity", {}),

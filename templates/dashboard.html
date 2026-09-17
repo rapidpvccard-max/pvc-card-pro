@@ -299,10 +299,10 @@
         color: #64748b;
     }
 
-    /* Service Cards (Aadhaar & Ayushman) */
+    /* Service Cards (Aadhaar & Ayushman & Colourful Aadhaar) */
     .services-showcase-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
         gap: 24px;
         margin-bottom: 36px;
     }
@@ -329,6 +329,11 @@
     .service-showcase-card.card-aadhaar:hover {
         border-color: #3b82f6;
         box-shadow: 0 20px 35px -5px rgba(37, 99, 235, 0.15);
+    }
+
+    .service-showcase-card.card-aadhaar-color:hover {
+        border-color: #f59e0b;
+        box-shadow: 0 20px 35px -5px rgba(245, 158, 11, 0.18);
     }
 
     .service-showcase-card.card-ayushman:hover {
@@ -438,7 +443,20 @@
         gap: 12px;
     }
 
+    .service-price-pill.amber {
+        background: #fef3c7;
+        color: #b45309;
+        border: 1px solid #fde68a;
+    }
+
+    .service-icon-box.amber {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: #ffffff;
+        box-shadow: 0 10px 20px -3px rgba(245, 158, 11, 0.35);
+    }
+
     .service-launch-link.blue { color: #2563eb; }
+    .service-launch-link.amber { color: #d97706; }
     .service-launch-link.green { color: #059669; }
 
     /* Recent Generations Section */
@@ -826,6 +844,45 @@
             <span style="font-size: 0.82rem; color: #64748b; font-weight: 600;">PMJAY Golden Card Spec</span>
             <span class="service-launch-link green">
                 Generate Ayushman Card &rarr;
+            </span>
+        </div>
+    </div>
+
+    <!-- Aadhaar PVC Card (Colourful HD) -->
+    <div class="service-showcase-card card-aadhaar-color" onclick="window.location.href='/generator?type=aadhaar_color'">
+        <div class="service-price-pill amber">New ✨ ₹0.95</div>
+        
+        <div>
+            <div class="service-card-top">
+                <div class="service-icon-box amber">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
+                </div>
+                <div>
+                    <h3 class="service-name">Aadhaar (Colourful)</h3>
+                    <p class="service-subtitle">HD Vibrant Gradient Background Layout</p>
+                </div>
+            </div>
+            
+            <div class="service-features-list">
+                <div class="service-feature-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Vibrant Multicolor Official Gradient Template</span>
+                </div>
+                <div class="service-feature-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>100% Matching Font Sizes, Photo & Security Guilloche</span>
+                </div>
+                <div class="service-feature-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>CR80 Duplex Spec + Mirror A4 Print Export</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="service-card-footer">
+            <span style="font-size: 0.82rem; color: #64748b; font-weight: 600;">HD Gradient Edition</span>
+            <span class="service-launch-link amber">
+                Generate Colourful Card &rarr;
             </span>
         </div>
     </div>

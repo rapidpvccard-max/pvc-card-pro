@@ -30,7 +30,7 @@ body {
     top: 35px;
     left: 210px;
     width: 560px;
-    height: 100px;
+    height: 87px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -86,7 +86,7 @@ body {
 
 .top-right-label {
     position: absolute;
-    top: 129px;
+    top: 113px;
     right: 30px;
     width: 220px;
     text-align: center;
@@ -290,16 +290,61 @@ body {
 }
 
 .aadhaar-number-back {
-    bottom: 128px;
+    bottom: 107px;
 }
 
 .vid-back {
-    bottom: 104px;
+    bottom: 81px;
 }
 
 /* --------------------------------------------------
    BACK FOOTER CONTACTS
    -------------------------------------------------- */
+
+.back-divider-line {
+    position: absolute;
+    bottom: 74px;
+    left: 0;
+    width: 1016px;
+    height: 3.5px;
+    background-color: #e50914;
+    z-index: 10;
+}
+
+.back-contact-bar {
+    position: absolute;
+    bottom: 22px;
+    left: 0;
+    width: 1016px;
+    padding: 0 65px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #000;
+}
+
+.contact-svg {
+    width: 27px;
+    height: 27px;
+    flex-shrink: 0;
+    color: #000;
+}
+
+.contact-sep {
+    font-size: 28px;
+    font-weight: 300;
+    color: #000;
+    opacity: 0.6;
+}
 
 .contact-phone {
     position: absolute;
