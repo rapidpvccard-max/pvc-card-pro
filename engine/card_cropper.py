@@ -605,6 +605,10 @@ def crop_card_box(
             y0 = max(0, int(box["y"] * ph))
             x1 = min(pw, int((box["x"] + box["w"]) * pw))
             y1 = min(ph, int((box["y"] + box["h"]) * ph))
+            if x1 <= x0:
+                x1 = min(pw, x0 + 10)
+            if y1 <= y0:
+                y1 = min(ph, y0 + 10)
             card_img = full_img.crop((x0, y0, x1, y1)).convert("RGB")
             if card_img.size != (CARD_WIDTH, CARD_HEIGHT):
                 card_img = card_img.resize((CARD_WIDTH, CARD_HEIGHT), Image.Resampling.LANCZOS)
@@ -624,6 +628,10 @@ def crop_card_box(
         y0 = max(0.0, box["y"] * ph)
         x1 = min(pw, (box["x"] + box["w"]) * pw)
         y1 = min(ph, (box["y"] + box["h"]) * ph)
+        if x1 <= x0:
+            x1 = min(pw, x0 + 10.0)
+        if y1 <= y0:
+            y1 = min(ph, y0 + 10.0)
         
         clip_rect = pymupdf.Rect(x0, y0, x1, y1)
         

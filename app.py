@@ -681,8 +681,10 @@ async def crop_generate(
         return JSONResponse(status_code=404, content={"success": False, "error": "Uploaded file session expired or not found. Please upload again."})
 
     try:
-        f_box = json.loads(front_box)
-        b_box = json.loads(back_box) if back_box and back_box.strip() and back_box not in ["null", "None"] else None
+        f_box = json.loads(front_box) if isinstance(front_box, str) else front_box
+        b_box = json.loads(back_box) if back_box and isinstance(back_box, str) and back_box.strip() and back_box not in ["null", "None"] else (back_box if isinstance(back_box, dict) else None)
+        if not isinstance(f_box, dict) or "x" not in f_box or "y" not in f_box:
+            raise ValueError("Invalid front box structure")
     except Exception as pe:
         return JSONResponse(status_code=400, content={"success": False, "error": "Invalid crop coordinates provided."})
 
