@@ -228,6 +228,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Auto-detect and set initial document type from URL query param (e.g. /generator?type=crop)
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const initialType = urlParams.get('type') || urlParams.get('doc_type');
+        if (initialType && typeof window.setDocumentType === 'function') {
+            window.setDocumentType(initialType);
+        }
+    } catch (urlErr) {
+        console.warn("Could not read URL parameter:", urlErr);
+    }
+
+
     // API Status Check
     const systemStatus = document.getElementById('system-status');
     const statusContainer = document.querySelector('.status-container');

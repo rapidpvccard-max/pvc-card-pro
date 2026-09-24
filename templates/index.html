@@ -12,22 +12,21 @@
 
     /* Document Type Selector Tabs */
     .doc-type-selector-bar {
-        display: flex;
-        gap: 16px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
         margin-bottom: 24px;
-        flex-wrap: wrap;
     }
 
     .doc-type-btn {
-        flex: 1;
-        min-width: 260px;
+        min-width: 0;
         background: #ffffff;
         border: 2px solid #e2e8f0;
         border-radius: 16px;
-        padding: 16px 20px;
+        padding: 12px 14px;
         display: flex;
         align-items: center;
-        gap: 16px;
+        gap: 12px;
         cursor: pointer;
         transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         text-align: left;
@@ -605,10 +604,17 @@
         }
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 1080px) {
         .doc-type-selector-bar {
-            flex-direction: column;
+            grid-template-columns: repeat(2, 1fr);
             gap: 10px;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .doc-type-selector-bar {
+            grid-template-columns: 1fr;
+            gap: 8px;
         }
 
         .doc-type-btn {
@@ -1198,17 +1204,6 @@
         const input = document.getElementById('pdf-password');
         input.type = input.type === 'password' ? 'text' : 'password';
     }
-    
-    // Check URL params for document type selection
-    window.addEventListener('DOMContentLoaded', () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const type = urlParams.get('type');
-        if (type) {
-            if (typeof setDocumentType === 'function') {
-                setDocumentType(type);
-            }
-        }
-    });
 </script>
-<script src="/static/js/app.js?v=13"></script>
+<script src="/static/js/app.js?v=25"></script>
 {% endblock %}
