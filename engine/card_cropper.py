@@ -312,15 +312,30 @@ def smart_detect_card_layout(
                         "aspect": asp
                     })
 
-        # Deduplicate overlapping candidates
+        # Smart Overlap & Non-Maximum Suppression (NMS) Filtering
+        # Two cards on an ID document NEVER overlap with each other. If two boxes overlap (>20%),
+        # they represent the same card (e.g. inner text box vs outer card cut boundary).
+        # We prioritize the box whose aspect ratio is closest to exact CR80 (1.5858).
+        def _box_overlap(b1: Dict[str, float], b2: Dict[str, float]) -> float:
+            x_l = max(b1["x"], b2["x"])
+            y_t = max(b1["y"], b2["y"])
+            x_r = min(b1["x"] + b1["w"], b2["x"] + b2["w"])
+            y_b = min(b1["y"] + b1["h"], b2["y"] + b2["h"])
+            if x_r <= x_l or y_b <= y_t:
+                return 0.0
+            inter = (x_r - x_l) * (y_b - y_t)
+            min_a = min(b1["w"] * b1["h"], b2["w"] * b2["h"])
+            return inter / min_a if min_a > 0 else 0.0
+
+        sorted_raw = sorted(raw_boxes, key=lambda b: abs(b["aspect"] - CR80_ASPECT_RATIO))
         clean_boxes: List[Dict[str, float]] = []
-        for b in raw_boxes:
-            dup = False
+        for b in sorted_raw:
+            has_overlap = False
             for cb in clean_boxes:
-                if abs(cb["x"] - b["x"]) < 0.04 and abs(cb["y"] - b["y"]) < 0.04:
-                    dup = True
+                if _box_overlap(b, cb) > 0.20 or (abs(cb["x"] - b["x"]) < 0.06 and abs(cb["y"] - b["y"]) < 0.06):
+                    has_overlap = True
                     break
-            if not dup:
+            if not has_overlap:
                 clean_boxes.append(b)
 
         # Sort: Top-to-bottom, Left-to-right
@@ -341,6 +356,9 @@ def smart_detect_card_layout(
             elif abs(b0["y"] - b1["y"]) < 0.08 and 0.45 <= b0["y"] < 0.70:
                 detected_type = "voter"
                 card_label = "Voter ID / Dual Card"
+            elif abs(b0["y"] - b1["y"]) < 0.08 and 0.05 <= b0["y"] <= 0.25:
+                detected_type = "voter"
+                card_label = "Voter ID (e-EPIC)"
             elif abs(b0["y"] - b1["y"]) < 0.08 and 0.25 <= b0["y"] <= 0.45:
                 detected_type = "dl"
                 card_label = "Driving Licence (DL)"
@@ -370,6 +388,16 @@ def smart_detect_card_layout(
                 abha_candidates.sort(key=lambda b: b["y"])
                 front_box = abha_candidates[0]
                 back_box = abha_candidates[1]
+                is_detected = True
+        elif detected_type == "voter":
+            voter_candidates = [b for b in clean_boxes if b["w"] < 0.60]
+            if len(voter_candidates) >= 2:
+                if abs(voter_candidates[0]["y"] - voter_candidates[1]["y"]) < 0.08:
+                    voter_candidates.sort(key=lambda b: b["x"])
+                else:
+                    voter_candidates.sort(key=lambda b: b["y"])
+                front_box = voter_candidates[0]
+                back_box = voter_candidates[1]
                 is_detected = True
 
         if not is_detected:
