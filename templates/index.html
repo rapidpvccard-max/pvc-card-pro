@@ -982,6 +982,15 @@
                 <button type="button" class="preset-chip-btn" data-preset="eshram" onclick="applyCropPreset('eshram')">
                     💼 e-Shram Card
                 </button>
+                <button type="button" class="preset-chip-btn" data-preset="kisan" onclick="applyCropPreset('kisan')">
+                    🌾 Kisan Credit Card
+                </button>
+                <button type="button" class="preset-chip-btn" data-preset="ration" onclick="applyCropPreset('ration')">
+                    🌾 Smart Ration Card
+                </button>
+                <button type="button" class="preset-chip-btn" data-preset="labour" onclick="applyCropPreset('labour')">
+                    👷 Labour / Shramik
+                </button>
                 <button type="button" class="preset-chip-btn" data-preset="abha" onclick="applyCropPreset('abha')">
                     🏥 ABHA Card (Health)
                 </button>
@@ -995,7 +1004,7 @@
                     🚗 Driving Licence (DL)
                 </button>
                 <button type="button" class="preset-chip-btn" data-preset="custom" onclick="applyCropPreset('custom')">
-                    ⚡ Auto-Detect Card
+                    ⚡ Auto-Detect Any Card
                 </button>
             </div>
 
@@ -1205,5 +1214,5 @@
         input.type = input.type === 'password' ? 'text' : 'password';
     }
 </script>
-<script src="/static/js/app.js?v=25"></script>
+<script src="/static/js/app.js?v=26"></script>
 {% endblock %}

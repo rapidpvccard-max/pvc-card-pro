@@ -865,6 +865,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let cropPresetsMap = {
         voter: { front: { x: 0.076, y: 0.582, w: 0.412, h: 0.185 }, back: { x: 0.512, y: 0.582, w: 0.412, h: 0.185 } },
         eshram: { front: { x: 0.1824, y: 0.0696, w: 0.3880, h: 0.1878 }, back: { x: 0.1824, y: 0.2615, w: 0.3880, h: 0.1872 } },
+        kisan: { front: { x: 0.068, y: 0.143, w: 0.410, h: 0.183 }, back: { x: 0.521, y: 0.143, w: 0.411, h: 0.183 } },
+        ration: { front: { x: 0.254, y: 0.120, w: 0.492, h: 0.219 }, back: { x: 0.254, y: 0.381, w: 0.492, h: 0.218 } },
+        labour: { front: { x: 0.078, y: 0.550, w: 0.412, h: 0.185 }, back: { x: 0.510, y: 0.550, w: 0.412, h: 0.185 } },
         pan_dual: { front: { x: 0.1137, y: 0.7721, w: 0.4032, h: 0.1761 }, back: { x: 0.5169, y: 0.7721, w: 0.3952, h: 0.1761 } },
         pan_single: { front: { x: 0.1137, y: 0.7721, w: 0.4032, h: 0.1761 }, back: null },
         dl: { front: { x: 0.078, y: 0.330, w: 0.412, h: 0.185 }, back: { x: 0.510, y: 0.330, w: 0.412, h: 0.185 } },
@@ -971,6 +974,17 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (presetKey === 'eshram') {
                 cropBoxes.front = { x: 0.1824, y: 0.0696, w: 0.3880, h: 0.1878 };
                 cropBoxes.back  = { x: 0.1824, y: 0.2615, w: 0.3880, h: 0.1872 };
+            } else if (presetKey === 'kisan') {
+                cropBoxes.front = { x: 0.068, y: 0.143, w: 0.410, h: 0.183 };
+                cropBoxes.back  = { x: 0.521, y: 0.143, w: 0.411, h: 0.183 };
+                window.toggleCropMode('dual');
+            } else if (presetKey === 'ration') {
+                cropBoxes.front = { x: 0.254, y: 0.120, w: 0.492, h: 0.219 };
+                cropBoxes.back  = { x: 0.254, y: 0.381, w: 0.492, h: 0.218 };
+                window.toggleCropMode('dual');
+            } else if (presetKey === 'labour') {
+                cropBoxes.front = { x: 0.078, y: 0.550, w: 0.412, h: 0.185 };
+                cropBoxes.back  = { x: 0.510, y: 0.550, w: 0.412, h: 0.185 };
                 window.toggleCropMode('dual');
             } else if (presetKey === 'abha') {
                 cropBoxes.front = { x: 0.0186, y: 0.0158, w: 0.9628, h: 0.4775 };

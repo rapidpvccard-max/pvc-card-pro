@@ -78,6 +78,30 @@ PRESETS: Dict[str, Dict[str, Any]] = {
         "front": {"x": 0.078, "y": 0.330, "w": 0.412, "h": 0.185},
         "back":  {"x": 0.510, "y": 0.330, "w": 0.412, "h": 0.185}
     },
+    "kisan": {
+        "name": "Kisan Credit Card (KCC)",
+        "icon": "🌾",
+        "description": "PM-Kisan / KCC side-by-side or stacked layout",
+        "dual": True,
+        "front": {"x": 0.068, "y": 0.143, "w": 0.410, "h": 0.183},
+        "back":  {"x": 0.521, "y": 0.143, "w": 0.411, "h": 0.183}
+    },
+    "ration": {
+        "name": "Smart Ration Card",
+        "icon": "🌾",
+        "description": "NFSA / PDS Smart Ration Card layout",
+        "dual": True,
+        "front": {"x": 0.254, "y": 0.120, "w": 0.492, "h": 0.219},
+        "back":  {"x": 0.254, "y": 0.381, "w": 0.492, "h": 0.218}
+    },
+    "labour": {
+        "name": "Labour / Shramik Card",
+        "icon": "👷",
+        "description": "BOCW State Shramik Kalyan Card",
+        "dual": True,
+        "front": {"x": 0.078, "y": 0.550, "w": 0.412, "h": 0.185},
+        "back":  {"x": 0.510, "y": 0.550, "w": 0.412, "h": 0.185}
+    },
     "custom": {
         "name": "Universal Auto-Detect",
         "icon": "⚡",
@@ -102,6 +126,87 @@ def open_pdf_document(pdf_path: str, password: Optional[str] = None) -> pymupdf.
     return doc
 
 
+def _box_overlap(b1: Dict[str, float], b2: Dict[str, float]) -> float:
+    """Calculates intersection over minimum area between two bounding boxes."""
+    x_l = max(b1["x"], b2["x"])
+    y_t = max(b1["y"], b2["y"])
+    x_r = min(b1["x"] + b1["w"], b2["x"] + b2["w"])
+    y_b = min(b1["y"] + b1["h"], b2["y"] + b2["h"])
+    if x_r <= x_l or y_b <= y_t:
+        return 0.0
+    inter = (x_r - x_l) * (y_b - y_t)
+    min_a = min(b1["w"] * b1["h"], b2["w"] * b2["h"])
+    return inter / min_a if min_a > 0 else 0.0
+
+
+def find_best_card_pair(clean_boxes: List[Dict[str, float]]) -> Optional[Tuple[Dict[str, float], Dict[str, float]]]:
+    """
+    Universal Geometric Pair Finder:
+    Evaluates all candidate boxes on ANY document (Kisan, Ration, Labour, Student, Voter, etc.)
+    and discovers the matching Front & Back PVC cards:
+    - Verifies identical dimensions (|w1 - w2| <= 15%, |h1 - h2| <= 15%).
+    - Evaluates proximity to standard CR80 aspect ratio (~1.5858).
+    - Checks geometric alignment:
+      * Horizontal (side-by-side): Left is FRONT, Right is BACK.
+      * Vertical (stacked): Top is FRONT, Bottom is BACK.
+    """
+    if len(clean_boxes) < 2:
+        return None
+
+    best_score = float('inf')
+    best_pair = None
+    n = len(clean_boxes)
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            b1 = clean_boxes[i]
+            b2 = clean_boxes[j]
+
+            # Cards must not overlap
+            if _box_overlap(b1, b2) > 0.05:
+                continue
+
+            max_w = max(b1['w'], b2['w'])
+            max_h = max(b1['h'], b2['h'])
+            w_diff = abs(b1['w'] - b2['w']) / max_w if max_w > 0 else 1.0
+            h_diff = abs(b1['h'] - b2['h']) / max_h if max_h > 0 else 1.0
+
+            # Real PVC cards on official documents have matched sizes (< 15% diff)
+            if w_diff > 0.15 or h_diff > 0.15:
+                continue
+
+            asp_err1 = abs(b1['aspect'] - CR80_ASPECT_RATIO)
+            asp_err2 = abs(b2['aspect'] - CR80_ASPECT_RATIO)
+
+            is_horiz = abs(b1['y'] - b2['y']) < 0.06
+            is_vert = abs(b1['x'] - b2['x']) < 0.06
+
+            align_score = 0.0
+            if is_horiz:
+                align_score = abs(b1['y'] - b2['y']) * 3.0
+            elif is_vert:
+                align_score = abs(b1['x'] - b2['x']) * 3.0
+            else:
+                align_score = 4.0  # diagonal / unaligned penalty
+
+            # Size penalty + aspect ratio penalty + alignment score
+            score = (w_diff * 4.0) + (h_diff * 4.0) + (asp_err1 + asp_err2) * 2.0 + align_score
+
+            if score < best_score:
+                best_score = score
+                if is_horiz:
+                    front = b1 if b1['x'] < b2['x'] else b2
+                    back = b2 if b1['x'] < b2['x'] else b1
+                elif is_vert:
+                    front = b1 if b1['y'] < b2['y'] else b2
+                    back = b2 if b1['y'] < b2['y'] else b1
+                else:
+                    front, back = (b1, b2) if (b1['y'], b1['x']) < (b2['y'], b2['x']) else (b2, b1)
+                best_pair = (front, back)
+
+    return best_pair
+
+
 def smart_detect_card_layout(
     pdf_path_or_page: Any,
     page_number: int = 0,
@@ -110,13 +215,16 @@ def smart_detect_card_layout(
 ) -> Dict[str, Any]:
     """
     Advanced multi-layered universal card boundary and type detection:
-    1. Document Text/Keyword analysis (identifies e-Shram, Voter, PAN, DL, etc.)
-    2. Computer Vision (OpenCV Canny edge detection + cv2.RETR_TREE morphology contour extraction)
+    1. Document Text/Keyword analysis (identifies Kisan, Ration, Labour, e-Shram, Voter, PAN, DL, etc.)
+    2. Computer Vision:
+       - Pass A: OpenCV Canny edge detection + cv2.RETR_TREE (captures black borders & scissor lines)
+       - Pass B: Otsu binary thresholding with inversion (captures solid/tinted colored cards)
        - Detects individual CR80 cards (~1.58 ratio) even inside outer borders
-       - Detects stacked dual-cards (~0.79 ratio, e.g. official e-Shram) and splits into Front & Back
-       - Detects side-by-side dual-cards (~3.0 ratio, e.g. e-PAN) and splits into Front & Back
+       - Detects stacked dual-cards (~0.79 ratio) and splits into Front & Back
+       - Detects side-by-side dual-cards (~3.0 ratio) and splits into Front & Back
     3. PyMuPDF embedded image bounding boxes and vector drawing inspection
-    4. Automatic preset mapping with 100% pixel-accurate snap
+    4. Smart Overlap NMS to discard inner text boxes and isolate card boundaries
+    5. Universal Geometric Pair Matching: Pairs Front and Back cards with 100% precision
     """
     page_text = ""
     img_bgr = None
@@ -161,52 +269,78 @@ def smart_detect_card_layout(
 
         detected_type = None
         card_label = "Auto-Detected Card"
-        if any(k in page_text for k in ["e-shram", "eshram", "universal account number", "uan", "ई-श्रम", "shram.gov.in"]):
+        import re
+        if any(k in page_text for k in ["election commission", "epic", "voter", "निर्वाचन आयोग", "electoral photo", "electoral roll"]) or "voter" in filename_hint or "epic" in filename_hint:
+            detected_type = "voter"
+            card_label = "Voter ID (e-EPIC)"
+        elif any(k in page_text for k in ["kisan", "krishi", "kcc", "किसान", "कृषि", "pm-kisan", "pm kisan"]) or "kisan" in filename_hint or "kcc" in filename_hint:
+            detected_type = "kisan"
+            card_label = "Kisan Credit Card (KCC)"
+        elif any(k in page_text for k in ["ration card", "khadya", "food & civil supplies", "nfsa", "राशन", "खाद्य", "pds", "ration"]) or "ration" in filename_hint:
+            # Prevent 'registration' from matching 'ration'
+            if "ration card" in page_text or re.search(r'\bration\b', page_text) or any(k in page_text for k in ["khadya", "food & civil supplies", "nfsa", "राशन", "खाद्य", "pds"]) or "ration" in filename_hint:
+                detected_type = "ration"
+                card_label = "Smart Ration Card"
+        elif any(k in page_text for k in ["labour", "shramik", "bocw", "भवन एवं सन्निर्माण", "श्रमिक", "मजदूर"]) or "labour" in filename_hint or "shramik" in filename_hint:
+            detected_type = "labour"
+            card_label = "Labour / Shramik Card"
+        elif any(k in page_text for k in ["jan aadhaar", "जन आधार"]) or "jan" in filename_hint:
+            detected_type = "janaadhaar"
+            card_label = "Jan Aadhaar Card"
+        elif any(k in page_text for k in ["e-shram", "eshram", "universal account number", "uan", "ई-श्रम", "shram.gov.in"]) or "uan" in filename_hint or "eshram" in filename_hint:
             detected_type = "eshram"
             card_label = "e-Shram Card"
         elif any(k in page_text for k in ["abha", "abdm", "@abdm", "health account", "स्वास्थ्य खाता", "national health authority", "राष्ट्रीय स्वास्थ्य प्राधिकरण"]) or "abha" in filename_hint:
             detected_type = "abha"
             card_label = "ABHA Card (Health Account)"
-        elif any(k in page_text for k in ["income tax department", "permanent account number", "pan", "cxs"]):
+        elif any(k in page_text for k in ["income tax department", "permanent account number", "pan", "cxs"]) or "pan" in filename_hint:
             detected_type = "pan_dual"
             card_label = "e-PAN Card"
-        elif any(k in page_text for k in ["election commission", "epic", "voter", "निर्वाचन आयोग"]):
-            detected_type = "voter"
-            card_label = "Voter ID (e-EPIC)"
-        elif any(k in page_text for k in ["driving licence", "transport department", "dl no", "form 7"]):
+        elif any(k in page_text for k in ["driving licence", "transport department", "dl no", "form 7", "parivahan"]) or "dl" in filename_hint:
             detected_type = "dl"
             card_label = "Driving Licence"
+        elif any(k in page_text for k in ["pmjay", "ayushman", "pm-jay", "आयुष्मान"]) or "ayushman" in filename_hint:
+            detected_type = "ayushman"
+            card_label = "Ayushman / Health Card"
 
-        import re
         if not detected_type and re.search(r'\b\d{2}-\d{4}-\d{4}-\d{4}\b', page_text):
             detected_type = "abha"
             card_label = "ABHA Card (Health Account)"
 
         raw_boxes: List[Dict[str, float]] = []
 
-        # 2. OpenCV Contour Edge Analysis with RETR_TREE (retrieves inner card boundaries)
+        # 2. Dual-Pass OpenCV Contour Vision Analysis
         if img_bgr is not None:
             img_h, img_w = img_bgr.shape[:2]
             tot_area = img_w * img_h
             gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
             blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-            edges = cv2.Canny(blurred, 30, 120)
             kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
-            dilated = cv2.dilate(edges, kernel, iterations=1)
-            contours, _ = cv2.findContours(dilated, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-            for c in contours:
+            # Pass A: Canny edge detection (thin lines, printed borders, dashed cut lines)
+            edges = cv2.Canny(blurred, 30, 120)
+            dilated_edges = cv2.dilate(edges, kernel, iterations=1)
+            cnts_canny, _ = cv2.findContours(dilated_edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+            # Pass B: Otsu binary thresholding with inversion (colored card bodies on white paper)
+            _, thresh_otsu = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+            dilated_otsu = cv2.dilate(thresh_otsu, kernel, iterations=1)
+            cnts_otsu, _ = cv2.findContours(dilated_otsu, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+            all_contours = list(cnts_canny) + list(cnts_otsu)
+
+            for c in all_contours:
                 x, y, w, h = cv2.boundingRect(c)
                 aspect = w / h if h > 0 else 0
                 area = w * h
                 area_ratio = area / tot_area
 
                 # Skip outer page border or tiny text/barcode noise
-                if area_ratio > 0.75 or area_ratio < 0.015:
+                if area_ratio > 0.85 or area_ratio < 0.015:
                     continue
 
                 # A. Individual CR80 Card (aspect ~ 1.58)
-                if 1.35 <= aspect <= 1.85 and 0.02 <= area_ratio <= 0.60:
+                if 1.25 <= aspect <= 1.95 and 0.02 <= area_ratio <= 0.65:
                     raw_boxes.append({
                         "x": max(0.0, min(1.0, x / img_w)),
                         "y": max(0.0, min(1.0, y / img_h)),
@@ -214,8 +348,8 @@ def smart_detect_card_layout(
                         "h": max(0.05, min(1.0, h / img_h)),
                         "aspect": aspect
                     })
-                # B. Stacked Dual Card (aspect ~ 0.79, e.g. official e-Shram)
-                elif 0.65 <= aspect <= 0.95 and 0.05 <= area_ratio <= 0.60:
+                # B. Stacked Dual Card (aspect ~ 0.79, e.g. official e-Shram, Ration)
+                elif 0.65 <= aspect <= 0.95 and 0.05 <= area_ratio <= 0.65:
                     half_h = h // 2
                     raw_boxes.append({
                         "x": max(0.0, min(1.0, x / img_w)),
@@ -231,8 +365,8 @@ def smart_detect_card_layout(
                         "h": max(0.05, min(1.0, half_h / img_h)),
                         "aspect": w / half_h
                     })
-                # C. Side-by-Side Dual Card (aspect ~ 3.0, e.g. e-PAN)
-                elif 2.60 <= aspect <= 3.50 and 0.05 <= area_ratio <= 0.60:
+                # C. Side-by-Side Dual Card (aspect ~ 3.0, e.g. e-PAN, Voter)
+                elif 2.60 <= aspect <= 3.50 and 0.05 <= area_ratio <= 0.65:
                     half_w = w // 2
                     raw_boxes.append({
                         "x": max(0.0, min(1.0, x / img_w)),
@@ -312,21 +446,8 @@ def smart_detect_card_layout(
                         "aspect": asp
                     })
 
-        # Smart Overlap & Non-Maximum Suppression (NMS) Filtering
-        # Two cards on an ID document NEVER overlap with each other. If two boxes overlap (>20%),
-        # they represent the same card (e.g. inner text box vs outer card cut boundary).
-        # We prioritize the box whose aspect ratio is closest to exact CR80 (1.5858).
-        def _box_overlap(b1: Dict[str, float], b2: Dict[str, float]) -> float:
-            x_l = max(b1["x"], b2["x"])
-            y_t = max(b1["y"], b2["y"])
-            x_r = min(b1["x"] + b1["w"], b2["x"] + b2["w"])
-            y_b = min(b1["y"] + b1["h"], b2["y"] + b2["h"])
-            if x_r <= x_l or y_b <= y_t:
-                return 0.0
-            inter = (x_r - x_l) * (y_b - y_t)
-            min_a = min(b1["w"] * b1["h"], b2["w"] * b2["h"])
-            return inter / min_a if min_a > 0 else 0.0
-
+        # 4. Smart Overlap & Non-Maximum Suppression (NMS) Filtering
+        # Filters duplicate nested boxes and inner text contours
         sorted_raw = sorted(raw_boxes, key=lambda b: abs(b["aspect"] - CR80_ASPECT_RATIO))
         clean_boxes: List[Dict[str, float]] = []
         for b in sorted_raw:
@@ -341,7 +462,7 @@ def smart_detect_card_layout(
         # Sort: Top-to-bottom, Left-to-right
         clean_boxes.sort(key=lambda b: (round(b["y"] * 10) / 10, b["x"]))
 
-        # 4. Infer card type from geometry if not already identified from text
+        # 5. Infer card type from geometry if not already identified from text
         if not detected_type and len(clean_boxes) >= 2:
             b0, b1 = clean_boxes[0], clean_boxes[1]
             if abs(b0["x"] - b1["x"]) < 0.05 and b0["y"] < 0.22 and b1["y"] < 0.45:
@@ -363,11 +484,12 @@ def smart_detect_card_layout(
                 detected_type = "dl"
                 card_label = "Driving Licence (DL)"
 
-        # Prepare front and back boxes smartly according to detected card type
+        # 6. Resolve Front & Back using Universal Geometric Pair Finder
         front_box = None
         back_box = None
         is_detected = False
 
+        # First, test if specific presets or known types have targeted candidate subsets
         if detected_type == "pan_dual":
             pan_candidates = [b for b in clean_boxes if b["y"] >= 0.65 and b["w"] < 0.60]
             if len(pan_candidates) >= 2:
@@ -375,42 +497,27 @@ def smart_detect_card_layout(
                 front_box = pan_candidates[0]
                 back_box = pan_candidates[1]
                 is_detected = True
-        elif detected_type == "eshram":
-            eshram_candidates = [b for b in clean_boxes if b["w"] < 0.60]
-            if len(eshram_candidates) >= 2:
-                eshram_candidates.sort(key=lambda b: b["y"])
-                front_box = eshram_candidates[0]
-                back_box = eshram_candidates[1]
-                is_detected = True
-        elif detected_type == "abha":
-            abha_candidates = [b for b in clean_boxes if b["w"] > 0.60 or (1.35 <= b["aspect"] <= 1.85)]
-            if len(abha_candidates) >= 2:
-                abha_candidates.sort(key=lambda b: b["y"])
-                front_box = abha_candidates[0]
-                back_box = abha_candidates[1]
-                is_detected = True
-        elif detected_type == "voter":
-            voter_candidates = [b for b in clean_boxes if b["w"] < 0.60]
-            if len(voter_candidates) >= 2:
-                if abs(voter_candidates[0]["y"] - voter_candidates[1]["y"]) < 0.08:
-                    voter_candidates.sort(key=lambda b: b["x"])
-                else:
-                    voter_candidates.sort(key=lambda b: b["y"])
-                front_box = voter_candidates[0]
-                back_box = voter_candidates[1]
-                is_detected = True
 
+        # Universal Pair Discovery across all clean candidate boxes
         if not is_detected:
-            if len(clean_boxes) >= 2:
-                front_box = clean_boxes[0]
-                back_box = clean_boxes[1]
+            pair = find_best_card_pair(clean_boxes)
+            if pair is not None:
+                front_box, back_box = pair
                 is_detected = True
-            elif len(clean_boxes) == 1:
-                front_box = clean_boxes[0]
+                if card_label == "Auto-Detected Card":
+                    card_label = "Smart PVC Card (Dual Front & Back)"
+
+        # Single Card Discovery (if document contains only 1 front card)
+        if not is_detected:
+            single_candidates = [b for b in clean_boxes if 1.25 <= b["aspect"] <= 1.95]
+            if single_candidates:
+                single_candidates.sort(key=lambda b: abs(b["aspect"] - CR80_ASPECT_RATIO))
+                front_box = single_candidates[0]
                 back_box = None
                 is_detected = True
+                if card_label == "Auto-Detected Card":
+                    card_label = "Smart PVC Card (Single Front)"
             elif detected_type and detected_type in PRESETS:
-                # Fallback to recognized preset
                 p = PRESETS[detected_type]
                 front_box = p["front"]
                 back_box = p.get("back")
