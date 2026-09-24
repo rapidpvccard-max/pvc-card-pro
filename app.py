@@ -5,6 +5,9 @@ import datetime
 from dotenv import load_dotenv
 import asyncio
 import time
+import base64
+import io
+import json
 
 load_dotenv()
 from fastapi import FastAPI, Request, UploadFile, File, Form, Depends
@@ -75,6 +78,14 @@ try:
     from engine.card_renderer import render_card
     from engine.qr_recovery import recover_qr_from_pdf
     from engine.a4_print import create_a4_print_pdf
+    from engine.card_cropper import (
+        PRESETS,
+        generate_page_preview,
+        detect_card_boxes_in_page,
+        smart_detect_card_layout,
+        process_crop_and_print,
+        open_pdf_document
+    )
 except (ImportError, FileNotFoundError) as e:
     err_msg = str(e)
     def extract_aadhaar_data(pdf_path, password=None):
@@ -541,6 +552,204 @@ async def generate_pipeline(
         try: os.remove(filepath)
         except: pass
         return JSONResponse(status_code=500, content={"success": False, "error": f"Pipeline failure: {type(e).__name__}: {str(e) or repr(e)}"})
+
+# =========================================================
+# UNIVERSAL SMART AUTO-CROP PVC PIPELINE (VOTER, E-SHRAM, PAN, DL)
+# =========================================================
+
+@app.post("/api/crop/upload-preview")
+async def crop_upload_preview(
+    file: UploadFile = File(...),
+    password: str = Form(None),
+    preset: str = Form("voter"),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    content = await file.read(MAX_FILE_SIZE + 1)
+    if len(content) > MAX_FILE_SIZE:
+        return JSONResponse(status_code=413, content={"success": False, "error": "File size exceeds 10 MB limit"})
+    
+    is_pdf = content.startswith(b"%PDF-") or (file.filename and file.filename.lower().endswith(".pdf"))
+    is_img = any(content.startswith(header) for header in [b"\xff\xd8\xff", b"\x89PNG\r\n\x1a\n", b"RIFF"]) or (file.filename and file.filename.lower().endswith((".png", ".jpg", ".jpeg", ".webp")))
+    
+    if not is_pdf and not is_img:
+        return JSONResponse(status_code=400, content={"success": False, "error": "Only PDF and standard image files (PNG/JPG) are supported."})
+        
+    temp_id = str(uuid.uuid4())
+    ext = ".pdf" if is_pdf else (os.path.splitext(file.filename)[1].lower() if file.filename else ".png")
+    filepath = os.path.join(UPLOAD_DIR, f"crop_{temp_id}{ext}")
+    
+    try:
+        with open(filepath, "wb") as f:
+            f.write(content)
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"success": False, "error": "Could not save uploaded file."})
+
+    try:
+        if is_pdf:
+            try:
+                doc = open_pdf_document(filepath, password)
+                try:
+                    total_pages = len(doc)
+                finally:
+                    doc.close()
+            except ValueError as ve:
+                err_text = str(ve)
+                code = "PASSWORD_REQUIRED" if "password protected" in err_text.lower() else "INCORRECT_PASSWORD"
+                try: os.remove(filepath)
+                except: pass
+                return JSONResponse(status_code=400, content={"success": False, "error": err_text, "code": code})
+                
+            preview_img, orig_w, orig_h = generate_page_preview(filepath, page_number=0, password=password, target_width=900)
+            detect_res = smart_detect_card_layout(filepath, page_number=0, password=password)
+        else:
+            from PIL import Image as PILImage
+            with PILImage.open(filepath) as pil_img:
+                orig_w, orig_h = pil_img.size
+                scale = 900.0 / orig_w if orig_w > 900 else 1.0
+                new_size = (int(orig_w * scale), int(orig_h * scale))
+                preview_img = pil_img.resize(new_size, PILImage.Resampling.LANCZOS).convert("RGB")
+            total_pages = 1
+            detect_res = smart_detect_card_layout(filepath, pil_image=preview_img)
+
+        buf = io.BytesIO()
+        preview_img.convert("RGB").save(buf, format="JPEG", quality=85)
+        b64_preview = base64.b64encode(buf.getvalue()).decode("utf-8")
+        preview_data_url = f"data:image/jpeg;base64,{b64_preview}"
+        
+        is_auto_detected = detect_res.get("detected", False)
+        detected_card_type = detect_res.get("card_type", preset)
+        detected_label = detect_res.get("card_label", "Auto-Detected Card")
+        front_box = detect_res.get("front_box")
+        back_box = detect_res.get("back_box")
+        is_dual = detect_res.get("is_dual", (back_box is not None))
+        
+        # If user explicitly passed a non-voter preset and auto-detect wasn't conclusive:
+        if not is_auto_detected and preset in PRESETS and preset != "voter":
+            preset_info = PRESETS[preset]
+            front_box = preset_info["front"]
+            back_box = preset_info.get("back")
+            is_dual = (back_box is not None)
+            detected_card_type = preset
+            detected_label = preset_info["name"]
+
+        return {
+            "success": True,
+            "temp_id": temp_id,
+            "filename": file.filename,
+            "file_ext": ext,
+            "total_pages": total_pages,
+            "preview_url": preview_data_url,
+            "original_width": orig_w,
+            "original_height": orig_h,
+            "detected": is_auto_detected,
+            "detected_type": detected_card_type,
+            "detected_label": detected_label,
+            "front_box": front_box,
+            "back_box": back_box,
+            "is_dual": is_dual,
+            "presets": PRESETS
+        }
+    except Exception as e:
+        try: os.remove(filepath)
+        except: pass
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(status_code=500, content={"success": False, "error": f"Preview generation failed: {str(e)}"})
+
+@app.post("/api/crop/generate")
+async def crop_generate(
+    temp_id: str = Form(...),
+    file_ext: str = Form(".pdf"),
+    front_box: str = Form(...),
+    back_box: str = Form(None),
+    card_type: str = Form("voter"),
+    page_number: int = Form(0),
+    password: str = Form(None),
+    duplex_mode: bool = Form(False),
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    user_rate = float(getattr(current_user.credits, 'cost_per_card', 0.95) or 0.95)
+    if current_user.credits.wallet_balance < user_rate:
+        return JSONResponse(
+            status_code=402,
+            content={"success": False, "error": f"Insufficient wallet balance. Required: ₹{user_rate:.2f}"}
+        )
+
+    filepath = os.path.join(UPLOAD_DIR, f"crop_{temp_id}{file_ext}")
+    if not os.path.exists(filepath):
+        return JSONResponse(status_code=404, content={"success": False, "error": "Uploaded file session expired or not found. Please upload again."})
+
+    try:
+        f_box = json.loads(front_box)
+        b_box = json.loads(back_box) if back_box and back_box.strip() and back_box not in ["null", "None"] else None
+    except Exception as pe:
+        return JSONResponse(status_code=400, content={"success": False, "error": "Invalid crop coordinates provided."})
+
+    run_id = str(uuid.uuid4())
+    doc_label = f"crop ({card_type.upper()})"
+    history = models.GenerationHistory(
+        id=run_id,
+        user_id=current_user.id,
+        run_id=run_id,
+        document_type=doc_label,
+        status="processing"
+    )
+    db.add(history)
+    db.commit()
+
+    output_dir = os.path.join("static", "renders", run_id)
+    os.makedirs(output_dir, exist_ok=True)
+
+    try:
+        result = await run_in_threadpool(
+            process_crop_and_print,
+            pdf_path=filepath,
+            front_box=f_box,
+            back_box=b_box,
+            output_dir=output_dir,
+            page_number=page_number,
+            password=password,
+            duplex_mode=duplex_mode
+        )
+
+        try: os.remove(filepath)
+        except: pass
+
+        current_user.credits.wallet_balance -= user_rate
+        current_user.credits.total_generated += 1
+        history.status = "success"
+        history.completed_at = datetime.datetime.utcnow()
+
+        tx = models.CreditTransaction(
+            user_id=current_user.id,
+            amount=-user_rate,
+            transaction_type="generation_usage",
+            reference_id=run_id,
+            balance_after=current_user.credits.wallet_balance
+        )
+        db.add(tx)
+        db.commit()
+
+        return {
+            "success": True,
+            "run_id": run_id,
+            "document_type": doc_label,
+            "front_url": f"/download-card/{run_id}/front",
+            "back_url": f"/download-card/{run_id}/back" if result.get("has_back") else None,
+            "has_back": result.get("has_back", False),
+            "pdf_url": f"/download-pdf/{run_id}",
+            "wallet_balance": current_user.credits.wallet_balance
+        }
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        history.status = "failed"
+        history.completed_at = datetime.datetime.utcnow()
+        db.commit()
+        try: os.remove(filepath)
+        except: pass
+        return JSONResponse(status_code=500, content={"success": False, "error": f"Crop processing failed: {str(e)}"})
 
 class A4GenerateRequest(BaseModel):
     run_id: str

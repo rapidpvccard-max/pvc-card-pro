@@ -142,7 +142,6 @@ def ensure_database_schema(engine):
                         )
     except Exception as e:
         print(f"[Schema Auto-Migration Warning] {e}")
-        print(f"[Schema Auto-Migration Warning] {e}")
 
 def get_db():
     db = SessionLocal()

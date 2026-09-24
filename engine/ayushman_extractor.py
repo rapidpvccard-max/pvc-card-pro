@@ -490,6 +490,7 @@ def extract_ayushman_data(pdf_path: str, password: Optional[str] = None) -> Ayus
     """Main extraction powerhouse for Ayushman / PM-JAY 2-page PDFs."""
     data = AyushmanData()
     trace: list[str] = []
+    doc = None
 
     try:
         doc = fitz.open(pdf_path)
@@ -766,3 +767,10 @@ def extract_ayushman_data(pdf_path: str, password: Optional[str] = None) -> Ayus
         data.errors.append(str(e))
         data.trace = trace
         return data
+    finally:
+        if doc:
+            try:
+                doc.close()
+            except Exception:
+                pass
+

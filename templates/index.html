@@ -103,6 +103,23 @@
         box-shadow: 0 6px 14px rgba(16, 185, 129, 0.35);
     }
 
+    .doc-type-btn.crop-tab .doc-tab-icon {
+        background: #f5f3ff;
+        color: #7c3aed;
+    }
+
+    .doc-type-btn.active.crop-tab {
+        border-color: #7c3aed;
+        background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 100%);
+        box-shadow: 0 10px 20px -3px rgba(124, 58, 237, 0.2);
+    }
+
+    .doc-type-btn.active.crop-tab .doc-tab-icon {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: #ffffff;
+        box-shadow: 0 6px 14px rgba(124, 58, 237, 0.35);
+    }
+
     .doc-tab-content {
         flex: 1;
     }
@@ -402,6 +419,184 @@
         cursor: not-allowed;
     }
 
+    /* =========================================================
+       SMART CROPPER WORKSPACE & INTERACTIVE BOX STYLES
+       ========================================================= */
+    .cropper-editor-panel {
+        background: #ffffff;
+        border-radius: 20px;
+        margin-top: 24px;
+        animation: fadeIn 0.25s ease-out;
+    }
+
+    .preset-pill-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+    }
+
+    .preset-chip-btn {
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        color: #475569;
+        font-size: 0.82rem;
+        font-weight: 700;
+        padding: 7px 14px;
+        border-radius: 10px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .preset-chip-btn:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+        color: #0f172a;
+    }
+
+    .preset-chip-btn.active {
+        background: #7c3aed;
+        border-color: #7c3aed;
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    }
+
+    .cropper-preview-container {
+        position: relative;
+        background: #0f172a;
+        border-radius: 16px;
+        padding: 24px;
+        margin: 16px 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        user-select: none;
+        border: 1px solid #1e293b;
+    }
+
+    .cropper-page-wrapper {
+        position: relative;
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+        border-radius: 4px;
+        line-height: 0;
+        max-width: 100%;
+        display: inline-block;
+    }
+
+    .cropper-page-img {
+        display: block;
+        max-width: 100%;
+        max-height: 580px;
+        width: auto;
+        height: auto;
+        border-radius: 4px;
+        pointer-events: none;
+    }
+
+    .crop-box-element {
+        position: absolute;
+        box-sizing: border-box;
+        cursor: move;
+        touch-action: none;
+    }
+
+    .crop-box-element.front-box {
+        border: 2.5px solid #2563eb;
+        background: rgba(37, 99, 235, 0.2);
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.6), 0 4px 18px rgba(37, 99, 235, 0.4);
+    }
+
+    .crop-box-element.back-box {
+        border: 2.5px solid #10b981;
+        background: rgba(16, 185, 129, 0.2);
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.6), 0 4px 18px rgba(16, 185, 129, 0.4);
+    }
+
+    .crop-box-element.active-focus {
+        z-index: 20;
+    }
+
+    .crop-box-badge {
+        position: absolute;
+        top: -12px;
+        left: 8px;
+        padding: 2px 10px;
+        border-radius: 6px;
+        font-size: 0.72rem;
+        font-weight: 800;
+        color: #ffffff;
+        letter-spacing: 0.4px;
+        pointer-events: none;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .crop-box-element.front-box .crop-box-badge {
+        background: #2563eb;
+    }
+
+    .crop-box-element.back-box .crop-box-badge {
+        background: #059669;
+    }
+
+    .crop-handle {
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        background: #ffffff;
+        border-radius: 50%;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+        touch-action: none;
+    }
+
+    .front-box .crop-handle { border: 2.5px solid #2563eb; }
+    .back-box .crop-handle { border: 2.5px solid #10b981; }
+
+    .crop-handle.tl { top: -7px; left: -7px; cursor: nwse-resize; }
+    .crop-handle.tr { top: -7px; right: -7px; cursor: nesw-resize; }
+    .crop-handle.bl { bottom: -7px; left: -7px; cursor: nesw-resize; }
+    .crop-handle.br { bottom: -7px; right: -7px; cursor: nwse-resize; }
+
+    .cropper-toolbar-strip {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .nudge-btn {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        color: #1e293b;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-weight: 700;
+        transition: all 0.15s ease;
+    }
+
+    .nudge-btn:hover {
+        background: #f1f5f9;
+        border-color: #94a3b8;
+    }
+
     /* Responsive Mobile CSS */
     @media (max-width: 900px) {
         .generator-workspace-grid {
@@ -557,6 +752,17 @@
                 <div class="doc-tab-subtitle">PMJAY Golden Card Layout</div>
             </div>
             <span class="doc-tab-badge">₹0.95</span>
+        </button>
+
+        <button type="button" class="doc-type-btn crop-tab" id="doc-btn-crop" onclick="setDocumentType('crop')">
+            <div class="doc-tab-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+            </div>
+            <div class="doc-tab-content">
+                <div class="doc-tab-title">Auto Card Cropper ✂️</div>
+                <div class="doc-tab-subtitle">Voter, e-Shram, PAN, DL</div>
+            </div>
+            <span class="doc-tab-badge" style="background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe;">Hot 🔥</span>
         </button>
     </div>
 </div>
@@ -716,12 +922,151 @@
                     </div>
                 </div>
 
+                <!-- 1-Click Instant Auto-Crop Option for Universal Smart Cropper -->
+                <div id="instant-autocrop-container" style="display: none; background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 1.5px solid #86efac; border-radius: 14px; padding: 12px 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.08);">
+                    <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; margin: 0; user-select: none;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 1.35rem;">⚡</span>
+                            <div>
+                                <div style="font-size: 0.92rem; font-weight: 800; color: #166534;">1-Click Direct Auto-Crop</div>
+                                <div style="font-size: 0.78rem; color: #15803d;">Auto-detect card borders & direct print ready PVC banao (Zero manual adjustment)</div>
+                            </div>
+                        </div>
+                        <input type="checkbox" id="chk-instant-autocrop" style="width: 20px; height: 20px; accent-color: #16a34a; cursor: pointer;" checked>
+                    </label>
+                </div>
+
                 <!-- Submit Button -->
                 <button type="submit" class="btn-generate-main" id="upload-btn" disabled>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                     <span id="btn-generate-text">Generate PVC Card (-₹0.95)</span>
                 </button>
             </form>
+        </div>
+
+        <!-- Interactive Smart Cropper Editor Section -->
+        <div id="crop-editor-section" style="display: none;" class="cropper-editor-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <h3 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin: 0; font-family: 'Plus Jakarta Sans', sans-serif;">
+                            Precision PVC Card Cropper ✂️
+                        </h3>
+                        <span id="crop-auto-detect-badge" style="display: none; align-items: center; gap: 6px; background: #ecfdf5; border: 1.5px solid #a7f3d0; color: #065f46; font-size: 0.8rem; font-weight: 800; padding: 4px 12px; border-radius: 20px; box-shadow: 0 2px 6px rgba(5, 150, 105, 0.1);">
+                            ✨ Auto-Detected Card
+                        </span>
+                    </div>
+                    <p style="font-size: 0.85rem; color: #64748b; margin: 4px 0 0 0;">
+                        Verify or adjust the card cut borders. Aspect ratio is locked to standard CR80 PVC (85.60 × 53.98 mm).
+                    </p>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" id="btn-crop-reupload" class="btn-outline" style="padding: 8px 14px; font-size: 0.82rem; font-weight: 700; border-radius: 10px;">
+                        &larr; Choose Different File
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Document Presets Bar -->
+            <div class="preset-pill-bar">
+                <span style="font-size: 0.8rem; font-weight: 800; color: #64748b; margin-right: 4px; text-transform: uppercase;">Presets:</span>
+                <button type="button" class="preset-chip-btn active" data-preset="voter" onclick="applyCropPreset('voter')">
+                    🗳️ Voter ID (e-EPIC)
+                </button>
+                <button type="button" class="preset-chip-btn" data-preset="eshram" onclick="applyCropPreset('eshram')">
+                    💼 e-Shram Card
+                </button>
+                <button type="button" class="preset-chip-btn" data-preset="abha" onclick="applyCropPreset('abha')">
+                    🏥 ABHA Card (Health)
+                </button>
+                <button type="button" class="preset-chip-btn" data-preset="pan_dual" onclick="applyCropPreset('pan_dual')">
+                    💳 e-PAN (Dual Cut)
+                </button>
+                <button type="button" class="preset-chip-btn" data-preset="pan_single" onclick="applyCropPreset('pan_single')">
+                    💳 e-PAN (Single Front)
+                </button>
+                <button type="button" class="preset-chip-btn" data-preset="dl" onclick="applyCropPreset('dl')">
+                    🚗 Driving Licence (DL)
+                </button>
+                <button type="button" class="preset-chip-btn" data-preset="custom" onclick="applyCropPreset('custom')">
+                    ⚡ Auto-Detect Card
+                </button>
+            </div>
+
+            <!-- Precision Toolbar Strip -->
+            <div class="cropper-toolbar-strip">
+                <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                    <!-- Dual vs Single Card Mode -->
+                    <div style="display: flex; align-items: center; gap: 6px; font-size: 0.84rem; font-weight: 700; color: #1e293b;">
+                        <span>Mode:</span>
+                        <select id="crop-mode-select" onchange="toggleCropMode(this.value)" style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 5px 10px; font-size: 0.82rem; font-weight: 700; color: #0f172a; cursor: pointer;">
+                            <option value="dual">Front & Back (Dual Card)</option>
+                            <option value="single">Front Only (Single Card)</option>
+                        </select>
+                    </div>
+
+                    <!-- Active Box Focus Selector -->
+                    <div style="display: flex; align-items: center; gap: 6px; font-size: 0.84rem; font-weight: 700; color: #1e293b;">
+                        <span>Target:</span>
+                        <div style="display: inline-flex; border: 1.5px solid #cbd5e1; border-radius: 8px; overflow: hidden; background: #fff;">
+                            <button type="button" id="btn-target-front" onclick="setActiveBoxTarget('front')" style="padding: 5px 12px; font-size: 0.8rem; font-weight: 800; border: none; background: #2563eb; color: #ffffff; cursor: pointer;">
+                                Front Box
+                            </button>
+                            <button type="button" id="btn-target-back" onclick="setActiveBoxTarget('back')" style="padding: 5px 12px; font-size: 0.8rem; font-weight: 800; border: none; background: #f8fafc; color: #64748b; cursor: pointer;">
+                                Back Box
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nudge Arrows & Sizing -->
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                    <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; margin-right: 2px;">Nudge:</span>
+                    <button type="button" class="nudge-btn" onclick="nudgeActiveBox(0, -5)" title="Nudge Up">⬆️</button>
+                    <button type="button" class="nudge-btn" onclick="nudgeActiveBox(0, 5)" title="Nudge Down">⬇️</button>
+                    <button type="button" class="nudge-btn" onclick="nudgeActiveBox(-5, 0)" title="Nudge Left">⬅️</button>
+                    <button type="button" class="nudge-btn" onclick="nudgeActiveBox(5, 0)" title="Nudge Right">➡️</button>
+                    <div style="width: 1px; height: 20px; background: #cbd5e1; margin: 0 4px;"></div>
+                    <button type="button" class="nudge-btn" onclick="resizeActiveBox(1.03)" title="Grow Size" style="font-size: 1rem;">➕</button>
+                    <button type="button" class="nudge-btn" onclick="resizeActiveBox(0.97)" title="Shrink Size" style="font-size: 1rem;">➖</button>
+                    <button type="button" class="nudge-btn" onclick="resetActiveBox()" title="Reset to Preset" style="width: auto; padding: 0 10px; font-size: 0.78rem;">Reset</button>
+                </div>
+            </div>
+
+            <!-- Canvas Container -->
+            <div class="cropper-preview-container" id="cropper-container">
+                <div class="cropper-page-wrapper" id="cropper-page-wrapper">
+                    <img id="cropper-preview-image" class="cropper-page-img" src="" alt="Page Preview">
+                    
+                    <!-- Front Card Highlight Box -->
+                    <div id="front-crop-box" class="crop-box-element front-box active-focus">
+                        <div class="crop-box-badge">
+                            <span>Front Card (CR80)</span>
+                        </div>
+                        <div class="crop-handle tl" data-handle="tl"></div>
+                        <div class="crop-handle tr" data-handle="tr"></div>
+                        <div class="crop-handle bl" data-handle="bl"></div>
+                        <div class="crop-handle br" data-handle="br"></div>
+                    </div>
+
+                    <!-- Back Card Highlight Box -->
+                    <div id="back-crop-box" class="crop-box-element back-box" style="display: block;">
+                        <div class="crop-box-badge">
+                            <span>Back Card (CR80)</span>
+                        </div>
+                        <div class="crop-handle tl" data-handle="tl"></div>
+                        <div class="crop-handle tr" data-handle="tr"></div>
+                        <div class="crop-handle bl" data-handle="bl"></div>
+                        <div class="crop-handle br" data-handle="br"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generate Button -->
+            <button type="button" id="btn-submit-crop" class="btn-generate-main" style="background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); box-shadow: 0 10px 24px -3px rgba(124, 58, 237, 0.4);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+                <span>Crop & Generate PVC Card (-₹0.95)</span>
+            </button>
         </div>
 
         <!-- Processing Section -->

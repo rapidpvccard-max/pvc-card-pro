@@ -229,22 +229,23 @@
             gap: 6px;
         }
 
-        /* 3D Floating Showcase Grid */
+        /* 3D Floating Showcase Grid (4 Cards in One Line on Desktop) */
         .showcase-cards-container {
-            max-width: 1240px;
+            max-width: 1400px;
             margin: 40px auto 70px auto;
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 20px;
             padding: 0 20px;
+            scroll-margin-top: 90px;
         }
 
         .showcase-preview-box {
             background: linear-gradient(145deg, #ffffff, #f8fafc);
             border: 1px solid #e2e8f0;
-            border-radius: 24px;
-            padding: 28px;
-            box-shadow: 0 12px 30px -5px rgba(0,0,0,0.06);
+            border-radius: 22px;
+            padding: 24px 18px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
             transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
             text-align: left;
             position: relative;
@@ -270,6 +271,17 @@
             box-shadow: 0 20px 40px -5px rgba(245, 158, 11, 0.22);
         }
 
+        .showcase-preview-box.featured-cropper {
+            border: 1.5px solid #ddd6fe;
+            background: linear-gradient(145deg, #ffffff 0%, #faf5ff 100%);
+            box-shadow: 0 12px 30px -5px rgba(124, 58, 237, 0.12);
+        }
+
+        .showcase-preview-box.featured-cropper:hover {
+            border-color: #7c3aed;
+            box-shadow: 0 20px 40px -5px rgba(124, 58, 237, 0.22);
+        }
+
         .showcase-card-header {
             display: flex;
             align-items: center;
@@ -287,11 +299,11 @@
         }
 
         .showcase-title-box {
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
         .showcase-title-box h3 {
-            font-size: 1.3rem;
+            font-size: 1.18rem;
             font-weight: 800;
             color: #0f172a;
             margin-bottom: 3px;
@@ -300,13 +312,14 @@
         }
 
         .showcase-title-box p {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #64748b;
-            line-height: 1.4;
+            line-height: 1.35;
+            min-height: 34px;
         }
 
         .showcase-badge-pill {
-            font-size: 0.75rem;
+            font-size: 0.74rem;
             font-weight: 800;
             padding: 4px 10px;
             border-radius: 12px;
@@ -322,10 +335,47 @@
             border: none; 
             box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35); 
         }
+        .showcase-badge-pill.purple { background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; }
+        .showcase-badge-pill.purple-hot { 
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed); 
+            color: #ffffff; 
+            border: none; 
+            box-shadow: 0 2px 8px rgba(124, 58, 237, 0.35); 
+        }
+
+        /* What Can Be Cropped? Badges Grid */
+        .crop-supported-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 10px 0 14px 0;
+            padding: 8px 10px;
+            background: rgba(245, 243, 255, 0.8);
+            border: 1px solid #e9d5ff;
+            border-radius: 12px;
+        }
+
+        .crop-tag {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 3px 7px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+
+        .crop-tag.pan { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+        .crop-tag.shram { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+        .crop-tag.abha { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+        .crop-tag.voter { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+        .crop-tag.dl { background: #fefce8; color: #a16207; border: 1px solid #fef08a; }
+        .crop-tag.any { background: #fdf4ff; color: #86198f; border: 1px solid #f5d0fe; }
 
         .showcase-card-footer {
-            margin-top: 22px;
-            padding-top: 14px;
+            margin-top: 18px;
+            padding-top: 12px;
             border-top: 1px dashed #e2e8f0;
             display: flex;
             align-items: center;
@@ -334,6 +384,9 @@
 
         .showcase-card-footer.color-footer {
             border-top-color: #fde68a;
+        }
+        .showcase-card-footer.cropper-footer {
+            border-top-color: #ddd6fe;
         }
 
         /* Metrics Bar */
@@ -578,7 +631,7 @@
         @media (max-width: 1100px) {
             .pricing-plans-grid { grid-template-columns: repeat(2, 1fr); }
             .metrics-grid-4 { grid-template-columns: repeat(2, 1fr); }
-            .showcase-cards-container { grid-template-columns: 1fr; max-width: 560px; }
+            .showcase-cards-container { grid-template-columns: repeat(2, 1fr); max-width: 780px; gap: 16px; }
         }
 
         @media (max-width: 768px) {
@@ -653,7 +706,7 @@
         </h1>
         
         <p class="hero-subtext">
-            Extract e-Aadhaar (Classic & Smart Colour), Ayushman PMJAY, Voter ID & ABHA cards in 1-Click with zero alignment errors. Automatic regional Indic language font repair and 300 DPI high-definition A4 duplex print export.
+            Extract e-Aadhaar (Classic & Smart Colour), Ayushman PMJAY, or 1-Click Auto-Crop PAN, e-Shram, ABHA, Voter & DL cards with zero scissor-cut errors. Automatic regional Indic font repair and 300 DPI high-definition A4 duplex print export.
         </p>
         
         <div class="hero-cta-wrap">
@@ -813,6 +866,63 @@
             <div class="showcase-card-footer">
                 <span style="font-size: 0.8rem; font-weight: 600; color: #64748b;">PMJAY Golden Card Spec</span>
                 <span style="font-size: 0.82rem; font-weight: 700; color: #059669; display: inline-flex; align-items: center; gap: 4px;">Print Now &rarr;</span>
+            </div>
+        </div>
+
+        <!-- 4. Universal Auto Card Cropper Box (Hot / Multi-Card) -->
+        <div class="showcase-preview-box featured-cropper" onclick="window.location.href='/register'">
+            <div>
+                <!-- Top Header: Icon on Left, Badges on Right -->
+                <div class="showcase-card-header">
+                    <div style="width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: #ffffff; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35); flex-shrink: 0;">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+                    </div>
+                    <div class="showcase-badges-group">
+                        <span class="showcase-badge-pill purple-hot">HOT ✂️</span>
+                        <span class="showcase-badge-pill purple">₹0.95 / Card</span>
+                    </div>
+                </div>
+
+                <!-- Dedicated Title & Subtitle -->
+                <div class="showcase-title-box">
+                    <h3>Auto Card Cropper</h3>
+                    <p style="color: #7c3aed; font-weight: 600;">1-Click AI PVC Boundary Snap & Scissor Removal</p>
+                </div>
+
+                <!-- What All Can Be Cropped? (Visual Badges Grid) -->
+                <div class="crop-supported-tags" title="All Supported PDF Cards">
+                    <span class="crop-tag pan">💳 PAN Card</span>
+                    <span class="crop-tag shram">💼 e-Shram</span>
+                    <span class="crop-tag abha">🏥 ABHA Health</span>
+                    <span class="crop-tag voter">🗳️ Voter ID</span>
+                    <span class="crop-tag dl">🚗 Driving Lic.</span>
+                    <span class="crop-tag any">✨ Custom IDs</span>
+                </div>
+
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 0.88rem; color: #334155;">
+                    <li style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span><strong>1-Click Direct Auto-Crop</strong> — Zero manual adjustment</span>
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>Auto scissor line & notice text remover (NSDL/UTI)</span>
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>Dual card auto-splitter (Stacked & Side-by-Side)</span>
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>Edge-to-edge CR80 export + 1-Page A4 Duplex sheet</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="showcase-card-footer cropper-footer">
+                <span style="font-size: 0.8rem; font-weight: 700; color: #7c3aed; display: flex; align-items: center; gap: 5px;">
+                    <span>⚡ 100% Auto-Detect</span>
+                </span>
+                <span style="font-size: 0.82rem; font-weight: 800; color: #7c3aed; display: inline-flex; align-items: center; gap: 4px;">Crop & Print Now &rarr;</span>
             </div>
         </div>
     </div>

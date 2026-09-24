@@ -299,19 +299,19 @@
         color: #64748b;
     }
 
-    /* Service Cards (Aadhaar & Ayushman & Colourful Aadhaar) */
+    /* Service Cards (Aadhaar, Ayushman, Colourful Aadhaar, Cropper) - 4 in 1 Line */
     .services-showcase-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 24px;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 18px;
         margin-bottom: 36px;
     }
 
     .service-showcase-card {
         background: #ffffff;
         border: 1px solid #e2e8f0;
-        border-radius: 24px;
-        padding: 32px;
+        border-radius: 20px;
+        padding: 24px 18px;
         position: relative;
         cursor: pointer;
         display: flex;
@@ -322,36 +322,42 @@
     }
 
     .service-showcase-card:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.08);
+        transform: translateY(-5px);
+        box-shadow: 0 16px 30px -5px rgba(0, 0, 0, 0.08);
     }
 
     .service-showcase-card.card-aadhaar:hover {
         border-color: #3b82f6;
-        box-shadow: 0 20px 35px -5px rgba(37, 99, 235, 0.15);
+        box-shadow: 0 16px 30px -5px rgba(37, 99, 235, 0.15);
     }
 
     .service-showcase-card.card-aadhaar-color:hover {
         border-color: #f59e0b;
-        box-shadow: 0 20px 35px -5px rgba(245, 158, 11, 0.18);
+        box-shadow: 0 16px 30px -5px rgba(245, 158, 11, 0.18);
     }
 
     .service-showcase-card.card-ayushman:hover {
         border-color: #10b981;
-        box-shadow: 0 20px 35px -5px rgba(16, 185, 129, 0.15);
+        box-shadow: 0 16px 30px -5px rgba(16, 185, 129, 0.15);
+    }
+
+    .service-showcase-card.card-crop:hover {
+        border-color: #7c3aed;
+        box-shadow: 0 16px 30px -5px rgba(124, 58, 237, 0.2);
     }
 
     .service-card-top {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 20px;
+        margin-bottom: 16px;
+        gap: 8px;
     }
 
     .service-badges-wrap {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         flex-wrap: wrap;
         justify-content: flex-end;
     }
@@ -359,9 +365,9 @@
     .service-price-pill {
         display: inline-flex;
         align-items: center;
-        padding: 6px 14px;
+        padding: 4px 10px;
         border-radius: 20px;
-        font-size: 0.88rem;
+        font-size: 0.78rem;
         font-weight: 800;
         font-family: 'Plus Jakarta Sans', sans-serif;
         letter-spacing: 0.2px;
@@ -371,9 +377,9 @@
     .service-badge-pill {
         display: inline-flex;
         align-items: center;
-        padding: 6px 12px;
+        padding: 4px 8px;
         border-radius: 20px;
-        font-size: 0.82rem;
+        font-size: 0.74rem;
         font-weight: 800;
         font-family: 'Plus Jakarta Sans', sans-serif;
         white-space: nowrap;
@@ -404,93 +410,121 @@
     }
 
     .service-icon-box {
-        width: 60px;
-        height: 60px;
-        border-radius: 18px;
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
     }
 
+    .service-icon-box svg {
+        width: 24px;
+        height: 24px;
+    }
+
     .service-icon-box.blue {
         background: linear-gradient(135deg, #2563eb, #1d4ed8);
         color: #ffffff;
-        box-shadow: 0 10px 20px -3px rgba(37, 99, 235, 0.35);
+        box-shadow: 0 8px 16px -2px rgba(37, 99, 235, 0.35);
     }
 
     .service-icon-box.green {
         background: linear-gradient(135deg, #10b981, #059669);
         color: #ffffff;
-        box-shadow: 0 10px 20px -3px rgba(16, 185, 129, 0.35);
+        box-shadow: 0 8px 16px -2px rgba(16, 185, 129, 0.35);
     }
 
     .service-icon-box.amber {
         background: linear-gradient(135deg, #f59e0b, #d97706);
         color: #ffffff;
-        box-shadow: 0 10px 20px -3px rgba(245, 158, 11, 0.35);
+        box-shadow: 0 8px 16px -2px rgba(245, 158, 11, 0.35);
+    }
+
+    .service-icon-box.purple {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        color: #ffffff;
+        box-shadow: 0 8px 16px -2px rgba(124, 58, 237, 0.35);
     }
 
     .service-title-box {
-        margin-bottom: 18px;
+        margin-bottom: 14px;
     }
 
     .service-name {
-        font-size: 1.35rem;
+        font-size: 1.15rem;
         font-weight: 800;
         color: #0f172a;
         font-family: 'Plus Jakarta Sans', sans-serif;
-        margin-bottom: 6px;
-        line-height: 1.3;
+        margin-bottom: 4px;
+        line-height: 1.25;
     }
 
     .service-subtitle {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         color: #64748b;
         font-weight: 500;
-        line-height: 1.4;
+        line-height: 1.35;
+        min-height: 34px;
     }
 
     .service-features-list {
         display: flex;
         flex-direction: column;
         gap: 8px;
-        margin-bottom: 24px;
+        margin-bottom: 20px;
     }
 
     .service-feature-item {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         gap: 8px;
-        font-size: 0.88rem;
+        font-size: 0.78rem;
+        line-height: 1.35;
         color: #334155;
+    }
+
+    .service-feature-item svg {
+        flex-shrink: 0;
+        margin-top: 2px;
+        width: 14px;
+        height: 14px;
     }
 
     .service-card-footer {
         display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding-top: 18px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        padding-top: 14px;
         border-top: 1px solid #f1f5f9;
+    }
+
+    .service-card-footer > span:first-child {
+        font-size: 0.74rem !important;
+        color: #94a3b8 !important;
+        font-weight: 600;
     }
 
     .service-launch-link {
         font-weight: 700;
-        font-size: 0.95rem;
+        font-size: 0.88rem;
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         transition: gap 0.2s ease;
     }
 
     .service-showcase-card:hover .service-launch-link {
-        gap: 12px;
+        gap: 10px;
     }
 
 
     .service-launch-link.blue { color: #2563eb; }
     .service-launch-link.amber { color: #d97706; }
     .service-launch-link.green { color: #059669; }
+    .service-launch-link.purple { color: #7c3aed; }
 
     /* Recent Generations Section */
     .recent-activity-card {
@@ -594,7 +628,8 @@
             grid-template-columns: repeat(2, 1fr);
         }
         .services-showcase-grid {
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
         }
     }
 
@@ -935,6 +970,48 @@
         </div>
     </div>
 
+    <!-- Universal Auto Card Cropper (Voter, e-Shram, PAN, DL) -->
+    <div class="service-showcase-card card-crop" onclick="window.location.href='/generator?type=crop'">
+        <div>
+            <div class="service-card-top">
+                <div class="service-icon-box purple">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+                </div>
+                <div class="service-badges-wrap">
+                    <span class="service-badge-pill" style="background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe;">Hot ✂️</span>
+                    <span class="service-price-pill" style="background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe;">₹0.95 / card</span>
+                </div>
+            </div>
+
+            <div class="service-title-box">
+                <h3 class="service-name">Auto Card Cropper</h3>
+                <p class="service-subtitle">Voter ID, e-Shram, PAN, Driving Licence & Custom IDs</p>
+            </div>
+            
+            <div class="service-features-list">
+                <div class="service-feature-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Instant Auto-Detection & 1-Click Smart Presets</span>
+                </div>
+                <div class="service-feature-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>CR80 Edge-to-Edge Cut (No Extra White Margins)</span>
+                </div>
+                <div class="service-feature-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Interactive Crop Adjuster + 1-Page A4 Duplex Print</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="service-card-footer">
+            <span style="font-size: 0.82rem; color: #64748b; font-weight: 600;">Universal Card Cutter</span>
+            <span class="service-launch-link purple">
+                Crop & Generate Card &rarr;
+            </span>
+        </div>
+    </div>
+
 </div>
 
 
@@ -1164,8 +1241,8 @@
                                 return `
                                     <tr>
                                         <td>
-                                            <strong style="color: ${docType === 'AYUSHMAN' ? '#059669' : '#2563eb'};">
-                                                ${docType === 'AYUSHMAN' ? '🏥 Ayushman Card' : '🪪 Aadhaar Card'}
+                                            <strong style="color: ${docType.includes('AYUSHMAN') ? '#059669' : (docType.includes('CROP') ? '#7c3aed' : (docType.includes('COLOUR') ? '#d97706' : '#2563eb'))};">
+                                                ${docType.includes('AYUSHMAN') ? '🏥 Ayushman Card' : (docType.includes('CROP') ? '✂️ ' + (item.document_type || 'Auto Crop') : (docType.includes('COLOUR') ? '🎨 Aadhaar (Colour)' : '🪪 Aadhaar Card'))}
                                             </strong>
                                         </td>
                                         <td style="font-family: monospace; font-size: 0.82rem; color: #64748b;">
