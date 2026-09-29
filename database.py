@@ -93,6 +93,7 @@ def ensure_database_schema(engine):
                 ('amount', 'FLOAT DEFAULT 0.0'),
                 ('currency', "VARCHAR(10) DEFAULT 'USD'"),
                 ('status', "VARCHAR(50) DEFAULT 'pending'"),
+                ('gateway', "VARCHAR(50) DEFAULT 'payu'"),
                 ('created_at', 'TIMESTAMP'),
                 ('updated_at', 'TIMESTAMP'),
             ],

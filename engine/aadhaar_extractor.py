@@ -153,11 +153,11 @@ def extract_portrait_photo_from_pdf(pdf_path: str, password: Optional[str] = Non
                     if not base_image or not isinstance(base_image, dict):
                         continue
                     img_bytes = base_image.get("image")
-                    if not img_bytes:
+                    if not isinstance(img_bytes, bytes):
                         continue
 
-                    def _classify_portrait():
-                        pil_img = Image.open(io.BytesIO(img_bytes))
+                    def _classify_portrait(data: bytes = img_bytes):
+                        pil_img = Image.open(io.BytesIO(data))
                         w, h = pil_img.size
                         aspect = w / h if h else 0
                         return w, h, aspect, pil_img.mode
@@ -182,14 +182,14 @@ def extract_portrait_photo_from_pdf(pdf_path: str, password: Optional[str] = Non
                             best_area = area
                             best_img_bytes = img_bytes
 
-            if best_img_bytes is None:
+            if not isinstance(best_img_bytes, bytes):
                 if trace is not None:
                     trace.append("No portrait photo found directly in PDF.")
                 return None
 
             # Convert to PNG
-            def _to_png():
-                pil_img = Image.open(io.BytesIO(best_img_bytes)).convert("RGB")
+            def _to_png(data: bytes = best_img_bytes):
+                pil_img = Image.open(io.BytesIO(data)).convert("RGB")
                 buf = io.BytesIO()
                 pil_img.save(buf, format="PNG")
                 return buf.getvalue()
@@ -788,7 +788,7 @@ def extract_via_text_layer(pdf_path: str, password: Optional[str] = None) -> Aad
         try:
             if doc.needs_pass and password:
                 doc.authenticate(password)
-            return "\n".join(page.get_text("text") for page in doc[:2])
+            return "\n".join(str(page.get_text("text") or "") for page in doc[:2])
         finally:
             doc.close()
 
@@ -863,11 +863,11 @@ def extract_aadhaar_data(pdf_path: str, password: Optional[str] = None) -> Aadha
                         if not base_image or not isinstance(base_image, dict):
                             continue
                         img_bytes = base_image.get("image")
-                        if not img_bytes:
+                        if not isinstance(img_bytes, bytes):
                             continue
 
-                        def _classify_dims():
-                            pil_img = Image.open(io.BytesIO(img_bytes))
+                        def _classify_dims(data: bytes = img_bytes):
+                            pil_img = Image.open(io.BytesIO(data))
                             w, h = pil_img.size
                             aspect = w / h if h else 0
                             return w, h, aspect

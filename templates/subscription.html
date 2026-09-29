@@ -860,6 +860,57 @@
             </div>
         </div>
 
+        <!-- Payment Gateway Selector -->
+        <div style="margin-bottom: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 0.78rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Choose Payment Partner:</span>
+                <span style="font-size: 0.7rem; font-weight: 700; color: #059669; background: #ecfdf5; padding: 2px 8px; border-radius: 6px; border: 1px solid #a7f3d0;">✓ 100% Certified & Instant</span>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <!-- Cashfree Gateway Option -->
+                <div id="gw-opt-cashfree" onclick="selectPaymentGateway('cashfree')" style="
+                    border: 2px solid #2563eb;
+                    background: #f0f7ff;
+                    border-radius: 14px;
+                    padding: 12px 14px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    position: relative;
+                ">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                        <span style="font-size: 0.92rem; font-weight: 800; color: #1e40af; display: flex; align-items: center; gap: 5px;">
+                            ⚡ Cashfree
+                        </span>
+                        <span style="font-size: 0.6rem; font-weight: 800; background: #2563eb; color: #fff; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;">RECOMMENDED</span>
+                    </div>
+                    <div style="font-size: 0.7rem; color: #475569; font-weight: 500; line-height: 1.3;">
+                        UPI QR • GPay • PhonePe • Paytm • Cards
+                    </div>
+                </div>
+
+                <!-- PayU Gateway Option -->
+                <div id="gw-opt-payu" onclick="selectPaymentGateway('payu')" style="
+                    border: 1.5px solid #e2e8f0;
+                    background: #ffffff;
+                    border-radius: 14px;
+                    padding: 12px 14px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    position: relative;
+                ">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                        <span style="font-size: 0.92rem; font-weight: 800; color: #334155; display: flex; align-items: center; gap: 5px;">
+                            🛡️ PayU
+                        </span>
+                    </div>
+                    <div style="font-size: 0.7rem; color: #64748b; font-weight: 500; line-height: 1.3;">
+                        NetBanking • Cards • UPI Hosted Checkout
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div style="font-size: 0.76rem; color: #64748b; margin-top: -6px; margin-bottom: 18px; text-align: center; line-height: 1.4;">
             By proceeding, you agree to our <a href="/terms" target="_blank" style="color: #2563eb; font-weight: 600; text-decoration: none;">Terms</a> & <a href="/refund-policy" target="_blank" style="color: #2563eb; font-weight: 600; text-decoration: none;">Refund Policy</a>.
         </div>
@@ -885,7 +936,7 @@
             " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 14px 30px -4px rgba(37, 99, 235, 0.55), 0 6px 16px -2px rgba(79, 70, 229, 0.35)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px -3px rgba(37, 99, 235, 0.42), 0 4px 12px -2px rgba(79, 70, 229, 0.25)';">
                 <div style="display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.08rem; font-weight: 800; letter-spacing: -0.2px;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                    <span>Proceed to Pay <span id="modal-btn-amount" style="background: rgba(255,255,255,0.22); padding: 2px 9px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-weight: 800;">₹20</span></span>
+                    <span>Proceed with <span id="modal-btn-gw-name">Cashfree</span> • <span id="modal-btn-amount" style="background: rgba(255,255,255,0.22); padding: 2px 9px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-weight: 800;">₹20</span></span>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </div>
                 <div style="font-size: 0.72rem; color: rgba(255, 255, 255, 0.88); font-weight: 600; letter-spacing: 0.3px; display: flex; align-items: center; gap: 6px;">
@@ -897,7 +948,7 @@
             <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.72rem; color: #64748b; font-weight: 600; padding: 2px 0;">
                 <span style="display: inline-flex; align-items: center; gap: 4px; color: #059669;">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                    PayU Verified Gateway
+                    Cashfree & PayU Verified
                 </span>
                 <span style="color: #cbd5e1;">•</span>
                 <span style="display: inline-flex; align-items: center; gap: 4px; color: #475569;">
@@ -919,8 +970,12 @@
 {% endblock %}
 
 {% block extra_scripts %}
+<!-- Cashfree JS SDK v3 -->
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+
 <script>
     let currentSelectedPlanId = null;
+    let currentSelectedGateway = 'cashfree'; // 'cashfree' or 'payu'
 
     // Load initial wallet balance
     function refreshBalance() {
@@ -941,12 +996,24 @@
 
     refreshBalance();
 
-    // Check URL parameters for PayU redirect status on load
+    // Fetch gateway default configuration from server
+    (function initGatewayConfig() {
+        fetch('/api/payment/gateways')
+            .then(res => res.json())
+            .then(gwData => {
+                if (gwData && gwData.default_gateway) {
+                    selectPaymentGateway(gwData.default_gateway);
+                }
+            })
+            .catch(() => {});
+    })();
+
+    // Check URL parameters for Payment redirect status on load (PayU / Cashfree)
     (function handlePaymentCallback() {
         const urlParams = new URLSearchParams(window.location.search);
         const paymentStatus = urlParams.get('payment');
         const amount = urlParams.get('amount');
-        const txnid = urlParams.get('txnid');
+        const txnid = urlParams.get('txnid') || urlParams.get('order_id');
         const message = urlParams.get('message');
 
         if (paymentStatus === 'success') {
@@ -959,6 +1026,14 @@
             refreshBalance();
             // Clean URL query parameters smoothly
             window.history.replaceState({}, document.title, window.location.pathname);
+        } else if (paymentStatus === 'pending') {
+            const pendMsg = `⏳ Payment in progress: ${message || 'Transaction is being confirmed. Balance will update shortly.'}`;
+            if (window.showToast) {
+                window.showToast(pendMsg, 'info');
+            } else {
+                alert(pendMsg);
+            }
+            window.history.replaceState({}, document.title, window.location.pathname);
         } else if (paymentStatus === 'failed' || paymentStatus === 'error') {
             const failMsg = `⚠️ Payment ${paymentStatus === 'error' ? 'Verification Error' : 'Unsuccessful'}: ${message || 'Transaction could not be completed.'}`;
             if (window.showToast) {
@@ -969,6 +1044,39 @@
             window.history.replaceState({}, document.title, window.location.pathname);
         }
     })();
+
+    function selectPaymentGateway(gw) {
+        currentSelectedGateway = gw;
+        const cfCard = document.getElementById('gw-opt-cashfree');
+        const payuCard = document.getElementById('gw-opt-payu');
+        const btnGwName = document.getElementById('modal-btn-gw-name');
+        
+        if (gw === 'cashfree') {
+            if (cfCard) {
+                cfCard.style.borderColor = '#2563eb';
+                cfCard.style.background = '#f0f7ff';
+                cfCard.style.boxShadow = '0 4px 14px rgba(37, 99, 235, 0.15)';
+            }
+            if (payuCard) {
+                payuCard.style.borderColor = '#e2e8f0';
+                payuCard.style.background = '#ffffff';
+                payuCard.style.boxShadow = 'none';
+            }
+            if (btnGwName) btnGwName.textContent = 'Cashfree';
+        } else {
+            if (payuCard) {
+                payuCard.style.borderColor = '#2563eb';
+                payuCard.style.background = '#f0f7ff';
+                payuCard.style.boxShadow = '0 4px 14px rgba(37, 99, 235, 0.15)';
+            }
+            if (cfCard) {
+                cfCard.style.borderColor = '#e2e8f0';
+                cfCard.style.background = '#ffffff';
+                cfCard.style.boxShadow = 'none';
+            }
+            if (btnGwName) btnGwName.textContent = 'PayU';
+        }
+    }
 
     function handleSelectPlan(planId, name, price, cards, costPerCard) {
         currentSelectedPlanId = planId;
@@ -990,7 +1098,7 @@
         currentSelectedPlanId = null;
     }
 
-    // Process wallet recharge via PayU Hosted Checkout
+    // Process wallet recharge dynamically via Cashfree or PayU
     async function processRecharge() {
         if (!currentSelectedPlanId) return;
         
@@ -999,14 +1107,61 @@
         btn.disabled = true;
         btn.style.opacity = '0.9';
         btn.style.pointerEvents = 'none';
+
+        const gwTitle = currentSelectedGateway === 'cashfree' ? 'Cashfree' : 'PayU';
         btn.innerHTML = `
             <div style="display: flex; align-items: center; justify-content: center; gap: 9px; font-size: 1.05rem; font-weight: 700;">
                 <svg style="animation: spin 1s linear infinite; width: 20px; height: 20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path></svg>
-                <span>Connecting to PayU Gateway...</span>
+                <span>Connecting to ${gwTitle} Gateway...</span>
             </div>
             <div style="font-size: 0.72rem; color: rgba(255,255,255,0.85); font-weight: 500;">Please do not refresh or close this tab</div>
         `;
         
+        // -------------------------
+        // GATEWAY A: CASHFREE
+        // -------------------------
+        if (currentSelectedGateway === 'cashfree') {
+            try {
+                const res = await fetch('/api/payment/cashfree/initiate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ plan_id: currentSelectedPlanId })
+                });
+                
+                const result = await res.json();
+                
+                if (res.ok && result.success && result.payment_session_id) {
+                    if (typeof Cashfree !== 'undefined') {
+                        const cashfree = Cashfree({ mode: result.cf_env || 'production' });
+                        cashfree.checkout({
+                            paymentSessionId: result.payment_session_id,
+                            redirectTarget: '_self'
+                        });
+                    } else {
+                        // In case Cashfree SDK is blocked by browser extensions, fall back to verification URL
+                        window.location.href = `/api/payment/cashfree/return?order_id=${result.order_id}`;
+                    }
+                } else {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                    btn.innerHTML = originalContent;
+                    alert(result.error || result.detail || 'Unable to initiate Cashfree checkout. Please check gateway configuration or select PayU.');
+                }
+            } catch (err) {
+                console.error(err);
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+                btn.innerHTML = originalContent;
+                alert('Network connection error with Cashfree. Please try again or switch to PayU.');
+            }
+            return;
+        }
+
+        // -------------------------
+        // GATEWAY B: PAYU MONEY
+        // -------------------------
         try {
             const res = await fetch('/api/payment/payu/initiate', {
                 method: 'POST',
@@ -1017,7 +1172,6 @@
             const result = await res.json();
             
             if (res.ok && result.action && result.params) {
-                // Dynamically build and submit hidden form to PayU Hosted Checkout
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = result.action;
@@ -1046,7 +1200,7 @@
             btn.style.opacity = '1';
             btn.style.pointerEvents = 'auto';
             btn.innerHTML = originalContent;
-            alert('Payment network error. Please try again.');
+            alert('Payment network error with PayU. Please try again.');
         }
     }
 </script>

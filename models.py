@@ -73,6 +73,7 @@ class Order(Base):
     amount = Column(Float)
     currency = Column(String, default="USD")
     status = Column(String, default="pending") # pending, paid, failed, cancelled, refunded
+    gateway = Column(String, default="payu") # 'payu', 'cashfree', 'stripe'
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 

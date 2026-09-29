@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 def get_smtp_config():
     try:
-        load_dotenv(override=True)
+        load_dotenv(override=False)
     except Exception:
         pass
     
@@ -272,18 +272,26 @@ def send_payment_invoice_email(
     plan_name: str,
     new_wallet_balance: float,
     cost_per_card: float = 0.95,
-    mihpayid: str = None
+    mihpayid: str = None,
+    gateway: str = "PayU",
+    gateway_ref: str = None
 ) -> tuple[bool, str]:
     """
     Sends a beautifully formatted Tax Invoice & Payment Receipt email to the user
-    after successful PayU recharge, and also notifies the admin.
+    after successful recharge (PayU or Cashfree), and also notifies the admin.
     """
     import datetime
     config = get_smtp_config()
     display_name = user_name or "Valued Partner"
     current_time_str = datetime.datetime.now().strftime("%d %b %Y, %I:%M %p IST")
     inv_number = f"INV-{txnid[-8:].upper()}" if txnid else f"INV-{datetime.datetime.now().strftime('%Y%m%d%H%M')}"
-    payu_ref = mihpayid or "N/A"
+    
+    gw_clean = (gateway or "PayU").strip()
+    is_cashfree = gw_clean.lower() == "cashfree"
+    gw_name = "Cashfree Payments" if is_cashfree else "PayU India"
+    gw_ref = gateway_ref or mihpayid or "N/A"
+    gw_label = "Cashfree Payment Ref:" if is_cashfree else "PayU Payment Ref:"
+    gw_mode_desc = "Cashfree Payments (UPI / QR / NetBanking / Cards)" if is_cashfree else "PayU India (UPI / QR / NetBanking / Cards)"
 
     subject = f"Payment Receipt: ₹{amount:.2f} for {plan_name} - Rapid PVC Pro"
 
@@ -293,7 +301,8 @@ RAPID PVC CARD PRO - PAYMENT RECEIPT & INVOICE
 ============================================================
 Invoice Number: {inv_number}
 Transaction ID: {txnid}
-PayU Reference ID: {payu_ref}
+{gw_label} {gw_ref}
+Payment Gateway: {gw_name}
 Date: {current_time_str}
 
 Billed To:
@@ -310,7 +319,7 @@ ITEM DETAILS:
 - Unlocked Rate: Rs. {cost_per_card:.2f} / PVC Card
 - Amount Paid: Rs. {amount:.2f}
 - Current Wallet Balance: Rs. {new_wallet_balance:.2f}
-- Status: SUCCESS / PAID (Via PayU India)
+- Status: SUCCESS / PAID (Via {gw_name})
 
 Thank you for choosing Rapid PVC Card Pro!
 Start printing PVC cards: https://rapidpvc.online/generator
@@ -522,8 +531,8 @@ Start printing PVC cards: https://rapidpvc.online/generator
                         <div class="meta-value" style="color: #4f46e5; font-family: monospace;">{inv_number}</div>
                         <div style="margin-top: 6px;" class="meta-label">Txn / Order ID:</div>
                         <div class="meta-value" style="font-family: monospace; font-size: 11px;">{txnid}</div>
-                        <div style="margin-top: 6px;" class="meta-label">PayU Payment Ref:</div>
-                        <div class="meta-value" style="font-family: monospace; font-size: 11px;">{payu_ref}</div>
+                        <div style="margin-top: 6px;" class="meta-label">{gw_label}</div>
+                        <div class="meta-value" style="font-family: monospace; font-size: 11px;">{gw_ref}</div>
                     </div>
                 </div>
 
@@ -560,7 +569,7 @@ Start printing PVC cards: https://rapidpvc.online/generator
                     </div>
                     <div class="summary-row">
                         <span>Payment Mode:</span>
-                        <span>PayU India (UPI / QR / NetBanking / Cards)</span>
+                        <span>{gw_mode_desc}</span>
                     </div>
                     <div class="summary-row">
                         <span>Applicable Taxes:</span>

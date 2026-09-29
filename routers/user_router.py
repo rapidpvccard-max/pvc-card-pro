@@ -21,6 +21,15 @@ def get_user_recharge_data(user_id: int, db: Session):
         pname = o.plan.name if o.plan else "Wallet Recharge"
         order_ref = o.provider_order_id or o.id
         seen_refs.add(order_ref)
+        
+        gw = getattr(o, "gateway", None)
+        if gw == "cashfree" or str(order_ref).startswith("cf_"):
+            mode = "Cashfree / UPI"
+        elif gw == "stripe" or str(order_ref).startswith("cs_"):
+            mode = "Stripe"
+        else:
+            mode = "PayU / UPI"
+
         recharges.append({
             "id": str(o.id),
             "order_id": str(order_ref),
@@ -28,7 +37,7 @@ def get_user_recharge_data(user_id: int, db: Session):
             "amount": float(o.amount or 0.0),
             "status": "paid",
             "created_at": o.created_at,
-            "payment_mode": "PayU / UPI"
+            "payment_mode": mode
         })
 
     purchase_txs = db.query(models.CreditTransaction)\

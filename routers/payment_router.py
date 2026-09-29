@@ -4,6 +4,7 @@ import os
 import uuid
 import hashlib
 import hmac
+import base64
 from typing import Any, cast
 import stripe
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
@@ -567,3 +568,408 @@ async def payu_webhook(request: Request, db: Session = Depends(database.get_db))
 
     success, txnid, amount = _process_payu_payment_success(data, db)
     return {"status": "success" if success else "failed", "txnid": txnid, "amount": amount}
+
+
+# ==========================================
+# Cashfree Payment Gateway Integration (PG)
+# ==========================================
+
+CASHFREE_APP_ID = os.environ.get("CASHFREE_APP_ID", "")
+CASHFREE_SECRET_KEY = os.environ.get("CASHFREE_SECRET_KEY", "")
+CASHFREE_ENV = os.environ.get("CASHFREE_ENV", "production").strip().lower()  # 'sandbox' or 'production'
+CASHFREE_API_VERSION = os.environ.get("CASHFREE_API_VERSION", "2023-08-01").strip()
+DEFAULT_PAYMENT_GATEWAY = os.environ.get("DEFAULT_PAYMENT_GATEWAY", "cashfree").strip().lower()
+
+
+def get_cashfree_base_url() -> str:
+    env = os.environ.get("CASHFREE_ENV", CASHFREE_ENV).strip().lower()
+    if env == "sandbox":
+        return "https://sandbox.cashfree.com/pg"
+    return "https://api.cashfree.com/pg"
+
+
+def get_cashfree_headers() -> dict:
+    app_id = os.environ.get("CASHFREE_APP_ID", CASHFREE_APP_ID).strip()
+    secret_key = os.environ.get("CASHFREE_SECRET_KEY", CASHFREE_SECRET_KEY).strip()
+    api_version = os.environ.get("CASHFREE_API_VERSION", CASHFREE_API_VERSION).strip() or "2023-08-01"
+    return {
+        "x-client-id": app_id,
+        "x-client-secret": secret_key,
+        "x-api-version": api_version,
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    }
+
+
+def verify_cashfree_signature(raw_body: str, timestamp: str, signature: str, secret_key: str = None) -> bool:
+    """
+    Verify cryptographic Cashfree Webhook HMAC-SHA256 signature according to Cashfree standard:
+    base64(hmac_sha256(timestamp + raw_body, secret_key))
+    """
+    if not secret_key:
+        secret_key = os.environ.get("CASHFREE_SECRET_KEY", CASHFREE_SECRET_KEY).strip()
+    if not secret_key or not signature or not timestamp:
+        return False
+    try:
+        message = str(timestamp) + str(raw_body)
+        hash_object = hmac.new(
+            secret_key.encode("utf-8"),
+            message.encode("utf-8"),
+            hashlib.sha256
+        )
+        expected_sig = base64.b64encode(hash_object.digest()).decode("utf-8")
+        return hmac.compare_digest(expected_sig.strip(), signature.strip())
+    except Exception as e:
+        print(f"[Cashfree Signature Verify Error] {e}")
+        return False
+
+
+def _process_cashfree_payment_success(
+    order: models.Order,
+    cf_payment_id: str,
+    payment_amount: float,
+    db: Session
+) -> tuple[bool, str, float]:
+    """
+    Atomically mark Cashfree order as paid and credit user's wallet.
+    Guaranteed idempotent!
+    """
+    if order.status == "paid":
+        return True, str(order.provider_order_id), float(order.amount)
+
+    order.status = "paid"
+    order.gateway = "cashfree"
+    order.provider_payment_id = str(cf_payment_id) if cf_payment_id else f"cf_pay_{uuid.uuid4().hex[:12]}"
+
+    user_credits: Any = db.query(models.UserCredits).filter(models.UserCredits.user_id == order.user_id).first()
+    if not user_credits:
+        user_credits = models.UserCredits(user_id=order.user_id, wallet_balance=0.0, total_generated=0, cost_per_card=0.95)
+        db.add(user_credits)
+
+    recharge_amount = float(order.amount)
+    user_credits.wallet_balance = float(user_credits.wallet_balance or 0.0) + recharge_amount
+
+    # Update per-card rate: ₹2.00 for Trial Pack, ₹0.95 for all standard packs
+    plan: Any = db.query(models.Plan).filter(models.Plan.id == order.plan_id).first()
+    if plan and (plan.id == 1 or "trial" in str(plan.name).lower()):
+        user_credits.cost_per_card = 2.00
+    else:
+        user_credits.cost_per_card = 0.95
+
+    tx = models.CreditTransaction(
+        user_id=order.user_id,
+        amount=recharge_amount,
+        transaction_type="purchase",
+        reference_id=str(order.provider_order_id),
+        balance_after=user_credits.wallet_balance
+    )
+    db.add(tx)
+    db.commit()
+
+    # Dispatch Payment Receipt & Tax Invoice Email
+    try:
+        from services.email_service import send_payment_invoice_email
+        paid_user: Any = db.query(models.User).filter(models.User.id == order.user_id).first()
+        if paid_user and paid_user.email:
+            plan_name_val = plan.name if plan and getattr(plan, 'name', None) else f"Plan #{order.plan_id}"
+            send_payment_invoice_email(
+                to_email=str(paid_user.email),
+                user_name=str(paid_user.name or "Operator"),
+                txnid=str(order.provider_order_id),
+                amount=float(recharge_amount),
+                plan_name=str(plan_name_val),
+                new_wallet_balance=float(user_credits.wallet_balance or 0.0),
+                cost_per_card=float(user_credits.cost_per_card or 0.95),
+                gateway="Cashfree",
+                gateway_ref=str(order.provider_payment_id)
+            )
+    except Exception as email_err:
+        print(f"[Cashfree Invoice Email Dispatch Error] {email_err}")
+
+    return True, str(order.provider_order_id), recharge_amount
+
+
+@router.get("/gateways")
+def get_payment_gateways():
+    """
+    Returns configured payment gateways and active default gateway.
+    """
+    cf_app_id = os.environ.get("CASHFREE_APP_ID", CASHFREE_APP_ID).strip()
+    cf_secret = os.environ.get("CASHFREE_SECRET_KEY", CASHFREE_SECRET_KEY).strip()
+    cf_configured = bool(cf_app_id and cf_secret and cf_app_id != "your_cashfree_app_id")
+
+    payu_key = os.environ.get("PAYU_MERCHANT_KEY", PAYU_MERCHANT_KEY).strip()
+    payu_salt = os.environ.get("PAYU_MERCHANT_SALT", PAYU_MERCHANT_SALT).strip()
+    payu_configured = bool(payu_key and payu_salt)
+
+    default_gw = os.environ.get("DEFAULT_PAYMENT_GATEWAY", DEFAULT_PAYMENT_GATEWAY).strip().lower()
+    cf_env = os.environ.get("CASHFREE_ENV", CASHFREE_ENV).strip().lower()
+
+    return {
+        "default_gateway": default_gw if default_gw in ("cashfree", "payu") else "cashfree",
+        "cashfree": {
+            "enabled": True,
+            "configured": cf_configured,
+            "environment": cf_env if cf_env in ("sandbox", "production") else "production"
+        },
+        "payu": {
+            "enabled": True,
+            "configured": payu_configured
+        }
+    }
+
+
+@router.post("/cashfree/initiate")
+def initiate_cashfree_payment(
+    order_data: schemas.OrderCreate,
+    request: Request,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    """
+    Creates an order on Cashfree and returns payment_session_id for Cashfree JS Checkout.
+    """
+    plan = db.query(models.Plan).filter(models.Plan.id == order_data.plan_id).first()
+    if not plan:
+        default_plans = {
+            1: {"name": "Trial Pack", "price": 20.0, "credits": 20.0, "cost_per_card": 2.00},
+            2: {"name": "Starter Pack", "price": 100.0, "credits": 100.0, "cost_per_card": 0.95},
+            3: {"name": "Pro Pack", "price": 200.0, "credits": 200.0, "cost_per_card": 0.95},
+            4: {"name": "Business Pack", "price": 300.0, "credits": 300.0, "cost_per_card": 0.95},
+            5: {"name": "Enterprise Pack", "price": 1000.0, "credits": 1000.0, "cost_per_card": 0.95}
+        }
+        if order_data.plan_id in default_plans:
+            pinfo = default_plans[order_data.plan_id]
+            plan = models.Plan(
+                id=order_data.plan_id,
+                name=pinfo["name"],
+                price=pinfo["price"],
+                credits=int(pinfo["credits"]),
+                active=True
+            )
+            db.add(plan)
+            db.commit()
+            db.refresh(plan)
+        else:
+            raise HTTPException(status_code=404, detail="Plan not found")
+
+    app_id = os.environ.get("CASHFREE_APP_ID", CASHFREE_APP_ID).strip()
+    secret_key = os.environ.get("CASHFREE_SECRET_KEY", CASHFREE_SECRET_KEY).strip()
+    if not app_id or not secret_key or app_id == "your_cashfree_app_id":
+        raise HTTPException(
+            status_code=400,
+            detail="Cashfree Payment Gateway is not configured. Please set CASHFREE_APP_ID and CASHFREE_SECRET_KEY in server environment."
+        )
+
+    # Determine Base URL
+    env_base_url = os.environ.get("BASE_URL", "https://rapidpvc.online").rstrip("/")
+    req_base_url = str(request.base_url).rstrip("/")
+    if "localhost" in req_base_url or "127.0.0.1" in req_base_url:
+        base_url = req_base_url
+    elif env_base_url:
+        base_url = env_base_url
+    else:
+        base_url = "https://rapidpvc.online"
+
+    # Unique Cashfree Order ID (alphanumeric up to 45 chars)
+    cf_order_id = f"cf_{uuid.uuid4().hex[:16]}"
+    amount_val = round(float(plan.price), 2)
+
+    raw_name = current_user.name or "Customer"
+    customer_name = "".join(c for c in raw_name if c.isalnum() or c.isspace()).strip() or "Customer"
+    customer_email = current_user.email or "rapidpvccard@gmail.com"
+    customer_phone = "7698390510"
+
+    cf_payload = {
+        "order_id": cf_order_id,
+        "order_amount": amount_val,
+        "order_currency": "INR",
+        "customer_details": {
+            "customer_id": f"cust_{current_user.id}",
+            "customer_name": customer_name,
+            "customer_email": customer_email,
+            "customer_phone": customer_phone
+        },
+        "order_meta": {
+            "return_url": f"{base_url}/api/payment/cashfree/return?order_id={{order_id}}"
+        },
+        "order_note": f"Recharge {plan.name} - Rapid PVC"
+    }
+
+    base_cf_url = get_cashfree_base_url()
+    headers = get_cashfree_headers()
+
+    import requests
+    try:
+        resp = requests.post(f"{base_cf_url}/orders", json=cf_payload, headers=headers, timeout=12)
+        resp_data = resp.json()
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Failed to communicate with Cashfree API: {str(e)}")
+
+    if resp.status_code not in (200, 201):
+        err_msg = resp_data.get("message") or resp_data.get("detail") or f"Cashfree HTTP {resp.status_code} Error"
+        raise HTTPException(status_code=resp.status_code if resp.status_code < 500 else 502, detail=err_msg)
+
+    payment_session_id = resp_data.get("payment_session_id")
+    if not payment_session_id:
+        raise HTTPException(status_code=502, detail="No payment_session_id returned by Cashfree")
+
+    # Record internal order in pending state
+    internal_order_id = str(uuid.uuid4())
+    new_order = models.Order(
+        id=internal_order_id,
+        user_id=current_user.id,
+        provider_order_id=cf_order_id,
+        plan_id=plan.id,
+        amount=amount_val,
+        currency="INR",
+        status="pending",
+        gateway="cashfree"
+    )
+    db.add(new_order)
+    db.commit()
+
+    cf_env = os.environ.get("CASHFREE_ENV", CASHFREE_ENV).strip().lower()
+    return {
+        "success": True,
+        "order_id": cf_order_id,
+        "payment_session_id": payment_session_id,
+        "cf_env": cf_env if cf_env in ("sandbox", "production") else "production"
+    }
+
+
+@router.get("/cashfree/return")
+def cashfree_return(
+    order_id: str = "",
+    db: Session = Depends(database.get_db)
+):
+    """
+    Return redirect URL configured in Cashfree Order Meta.
+    Verifies order status with Cashfree PG and safely credits wallet upon success.
+    """
+    if not order_id:
+        return RedirectResponse(
+            url="/subscription?payment=failed&message=Missing+order_id",
+            status_code=303
+        )
+
+    order = db.query(models.Order).filter(models.Order.provider_order_id == order_id).first()
+    if not order:
+        return RedirectResponse(
+            url="/subscription?payment=failed&message=Order+not+found",
+            status_code=303
+        )
+
+    # Idempotency: Already marked as paid via webhook
+    if order.status == "paid":
+        return RedirectResponse(
+            url=f"/subscription?payment=success&txnid={order.provider_order_id}&amount={order.amount:.2f}",
+            status_code=303
+        )
+
+    # Query Cashfree PG API directly for ground truth status
+    base_cf_url = get_cashfree_base_url()
+    headers = get_cashfree_headers()
+    import requests
+    try:
+        resp = requests.get(f"{base_cf_url}/orders/{order_id}", headers=headers, timeout=12)
+        cf_data = resp.json() if resp.status_code == 200 else {}
+    except Exception as e:
+        print(f"[Cashfree Status Check Exception] {e}")
+        cf_data = {}
+
+    order_status = str(cf_data.get("order_status", "")).upper()
+
+    if order_status == "PAID":
+        # Extract specific payment ID if present
+        cf_payment_id = None
+        try:
+            pay_resp = requests.get(f"{base_cf_url}/orders/{order_id}/payments", headers=headers, timeout=10)
+            if pay_resp.status_code == 200:
+                p_list = pay_resp.json()
+                if isinstance(p_list, list) and len(p_list) > 0:
+                    cf_payment_id = str(p_list[0].get("cf_payment_id") or "")
+        except Exception:
+            pass
+
+        success, txnid, amount = _process_cashfree_payment_success(order, cf_payment_id, float(order.amount), db)
+        return RedirectResponse(
+            url=f"/subscription?payment=success&txnid={txnid}&amount={amount:.2f}",
+            status_code=303
+        )
+    elif order_status == "ACTIVE":
+        return RedirectResponse(
+            url=f"/subscription?payment=pending&txnid={order_id}&message=Payment+in+progress.+Wallet+will+update+upon+confirmation.",
+            status_code=303
+        )
+    else:
+        order.status = "failed"
+        db.commit()
+        err_msg = cf_data.get("order_status") or "Payment cancelled or incomplete"
+        return RedirectResponse(
+            url=f"/subscription?payment=failed&message={err_msg}",
+            status_code=303
+        )
+
+
+@router.api_route("/cashfree/webhook", methods=["GET", "POST"])
+async def cashfree_webhook(
+    request: Request,
+    db: Session = Depends(database.get_db)
+):
+    """
+    Cashfree server-to-server webhook endpoint with HMAC-SHA256 signature verification.
+    Supports GET ping / dashboard test verification.
+    """
+    if request.method == "GET":
+        return {"status": "OK", "endpoint": "Cashfree Webhook Endpoint Active", "version": "2023-08-01"}
+
+    raw_body_bytes = await request.body()
+    raw_body_str = raw_body_bytes.decode("utf-8") if raw_body_bytes else ""
+
+    signature = request.headers.get("x-webhook-signature") or request.headers.get("X-Webhook-Signature") or ""
+    timestamp = request.headers.get("x-webhook-timestamp") or request.headers.get("X-Webhook-Timestamp") or ""
+
+    # Handle Cashfree Dashboard 'Test' Ping (which may not send a valid HMAC signature)
+    if not signature and (not raw_body_str or "test" in raw_body_str.lower() or "ping" in raw_body_str.lower()):
+        return {"status": "OK", "message": "Cashfree test webhook received successfully"}
+
+    secret_key = os.environ.get("CASHFREE_SECRET_KEY", CASHFREE_SECRET_KEY).strip()
+
+    if not verify_cashfree_signature(raw_body_str, timestamp, signature, secret_key):
+        raise HTTPException(status_code=400, detail="Invalid Cashfree webhook signature")
+
+    import json
+    try:
+        event_data = json.loads(raw_body_str)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON body")
+
+    data = event_data.get("data", {})
+    order_obj = data.get("order", {})
+    payment_obj = data.get("payment", {})
+
+    order_id = order_obj.get("order_id") or event_data.get("order_id")
+    event_type = str(event_data.get("type", "")).upper()
+    payment_status = str(payment_obj.get("payment_status", "")).upper()
+
+    if not order_id:
+        return {"status": "ignored - no order_id"}
+
+    order = db.query(models.Order).filter(models.Order.provider_order_id == order_id).first()
+    if not order:
+        return {"status": "ignored - order not found"}
+
+    if event_type == "PAYMENT_SUCCESS_WEBHOOK" or payment_status == "SUCCESS":
+        cf_payment_id = payment_obj.get("cf_payment_id")
+        amount = float(payment_obj.get("payment_amount") or order.amount)
+        _process_cashfree_payment_success(order, str(cf_payment_id) if cf_payment_id else None, amount, db)
+        return {"status": "OK", "order_id": order_id}
+    elif payment_status == "FAILED" or event_type == "PAYMENT_FAILED_WEBHOOK":
+        if order.status != "paid":
+            order.status = "failed"
+            db.commit()
+        return {"status": "OK", "order_id": order_id}
+
+    return {"status": "ignored", "event_type": event_type}
+
