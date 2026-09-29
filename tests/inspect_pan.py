@@ -4,7 +4,14 @@ import sys
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-doc = pymupdf.open('C:/Users/NANO/Downloads/SAGAR PATIL PAN CARD.pdf')
+import os
+
+pdf_path = os.path.join(os.environ.get("USERPROFILE", "C:/Users/NANO"), "Downloads", "SAGAR PATIL PAN CARD.pdf")
+if not os.path.exists(pdf_path):
+    print(f"Sample PAN card PDF not found at {pdf_path}, skipping inspection.")
+    sys.exit(0)
+
+doc = pymupdf.open(pdf_path)
 page = doc[0]
 pw, ph = page.rect.width, page.rect.height
 print(f"Page size: {pw} x {ph}")

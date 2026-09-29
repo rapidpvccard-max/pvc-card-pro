@@ -25,6 +25,10 @@ def test_pricing_deductions():
     res = client.post("/auth/register", json={"email": test_email, "password": "PassWord123!", "name": "Rate Tester"})
     assert res.status_code == 200
     user_id = res.json()["id"]
+    test_u = db.query(models.User).filter(models.User.id == user_id).first()
+    if test_u:
+        test_u.is_admin = True
+        db.commit()
     token = auth.create_access_token({"sub": str(user_id)})
     client.cookies.set("access_token", token)
 

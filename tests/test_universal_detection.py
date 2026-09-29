@@ -83,10 +83,21 @@ def universal_detect(pdf_path):
     for i, b in enumerate(clean):
         print(f"    [{i}] x={b['x']:.4f}, y={b['y']:.4f}, w={b['w']:.4f}, h={b['h']:.4f}, aspect={b['aspect']:.2f}, type={b['type']}")
 
+import os
+
 files = [
-    'C:/Users/NANO/Downloads/SAGAR PATIL PAN CARD.pdf',
-    'C:/Users/NANO/Downloads/uan-card.pdf',
-    'C:/Users/NANO/Downloads/881134207309171_signed_unlocked.pdf'
+    os.path.join(os.environ.get("USERPROFILE", "C:/Users/NANO"), "Downloads", "SAGAR PATIL PAN CARD.pdf"),
+    os.path.join(os.environ.get("USERPROFILE", "C:/Users/NANO"), "Downloads", "uan-card.pdf"),
+    os.path.join(os.environ.get("USERPROFILE", "C:/Users/NANO"), "Downloads", "881134207309171_signed_unlocked.pdf"),
 ]
+found_any = False
 for f in files:
-    universal_detect(f)
+    if os.path.exists(f):
+        found_any = True
+        universal_detect(f)
+
+if not found_any:
+    print("\n[INFO] Sample user files not found in Downloads. Falling back to test_ayushman.pdf...")
+    test_sample = os.path.join(os.path.dirname(__file__), "test_ayushman.pdf")
+    if os.path.exists(test_sample):
+        universal_detect(test_sample)

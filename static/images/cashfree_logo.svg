@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+<defs>
+<linearGradient id="teal-green" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1.266625" y2="0" gradientTransform="matrix(0, 77.089344, 76.137624, 0, -72.187006, 14.4)">
+<stop offset="0" stop-color="#00ADA1"/>
+<stop offset="0.25" stop-color="#00AD80"/>
+<stop offset="0.5" stop-color="#00AD5F"/>
+<stop offset="0.5625" stop-color="#00AD5B"/>
+<stop offset="1" stop-color="#00AD5B"/>
+</linearGradient>
+<linearGradient id="orange-pink" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1" y2="0" gradientTransform="matrix(0, 39.961066, 39.467719, 0, -16.453058, 33.662499)">
+<stop offset="0" stop-color="#FBB016"/>
+<stop offset="0.125" stop-color="#FCAA31"/>
+<stop offset="0.25" stop-color="#FCA44C"/>
+<stop offset="0.5" stop-color="#FE9782"/>
+<stop offset="0.672" stop-color="#FF8FA6"/>
+<stop offset="1" stop-color="#FF8FA7"/>
+</linearGradient>
+</defs>
+<path fill="url(#teal-green)" d="M 72.364198 14.4 C 76.506172 14.4 80.450617 15.762499 83.641976 18.23125 L 83.648149 18.225 C 84.148148 18.65625 84.666667 19.062499 85.141975 19.51875 L 105.574074 37.23125 L 105.580247 37.237501 C 110.185184 40.925 112.487655 46.837501 111.561728 52.66875 L 111.537037 52.83125 L 100.376543 112.04375 L 90.487655 102.075 L 100.376543 50.875 C 100.648148 49.087501 99.932098 47.237501 98.512346 46.09375 L 90.030864 38.875 L 80.333334 91.487501 L 70.555556 81.63125 L 79.314814 34.11875 C 79.691359 32.075 79.123456 29.925 77.802469 28.337501 C 76.444444 26.712499 74.481481 25.80625 72.364198 25.80625 L 15.277778 25.80625 L 3.950617 14.4 Z M 72.364198 14.4"/>
+<path fill="url(#orange-pink)" d="M 68.438272 42.125 L 62.623456 73.625 L 52.845679 63.762499 L 52.845679 63.575 L 54.956791 52.16875 L 56.277777 45.06875 L 34.339507 45.06875 L 23.012346 33.662499 L 61.376544 33.662499 C 62.382715 33.662499 64.333334 33.662499 66.111112 33.662499 C 68.055555 33.662499 69.543209 35.425 69.228395 37.36875 C 68.938272 39.15 68.617284 41.11875 68.438272 42.125 Z M 68.438272 42.125"/>
+</svg>

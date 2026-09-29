@@ -10,7 +10,9 @@ from unittest.mock import patch, MagicMock
 # Ensure project root is in path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 try:
-    sys.stdout.reconfigure(encoding='utf-8')
+    reconfig = getattr(sys.stdout, "reconfigure", None)
+    if callable(reconfig):
+        reconfig(encoding='utf-8')
 except Exception:
     pass
 
@@ -33,7 +35,7 @@ TEST_CF_SECRET_KEY = "cf_test_secret_key_abcdef123456"
 
 
 def generate_test_cf_signature(raw_body: str, timestamp: str, secret_key: str) -> str:
-    message = str(timestamp) + str(raw_body)
+    message = f"{timestamp}{raw_body}"
     hash_obj = hmac.new(secret_key.encode("utf-8"), message.encode("utf-8"), hashlib.sha256)
     return base64.b64encode(hash_obj.digest()).decode("utf-8")
 
@@ -233,7 +235,7 @@ def run_cashfree_audit():
         # Bad signature test
         res_bad_sig = client.post(
             "/api/payment/cashfree/webhook",
-            data=wh_raw_body,
+            content=wh_raw_body,
             headers={
                 "Content-Type": "application/json",
                 "x-webhook-signature": "tampered_sig",
@@ -245,7 +247,7 @@ def run_cashfree_audit():
         # Valid signature test
         res_wh = client.post(
             "/api/payment/cashfree/webhook",
-            data=wh_raw_body,
+            content=wh_raw_body,
             headers={
                 "Content-Type": "application/json",
                 "x-webhook-signature": wh_sig,
@@ -263,7 +265,7 @@ def run_cashfree_audit():
         # Duplicate Webhook Idempotency Check
         res_wh_dup = client.post(
             "/api/payment/cashfree/webhook",
-            data=wh_raw_body,
+            content=wh_raw_body,
             headers={
                 "Content-Type": "application/json",
                 "x-webhook-signature": wh_sig,

@@ -32,6 +32,13 @@ def recharge_plan(
     current_user: models.User = Depends(auth.get_current_user), 
     db: Session = Depends(database.get_db)
 ):
+    is_admin = getattr(current_user, "is_admin", False) or auth.is_admin_email(current_user.email)
+    is_prod = os.environ.get("ENVIRONMENT", "").strip().lower() == "production"
+    if is_prod and not is_admin:
+        raise HTTPException(
+            status_code=403,
+            detail="Direct plan recharge is restricted to administrators in production. Please use Cashfree or PayU checkout."
+        )
     plan = db.query(models.Plan).filter(models.Plan.id == order_data.plan_id).first()
     if not plan:
         # Fallback plan lookup by ID

@@ -31,4 +31,5 @@ tests_output/
 cloudflared.exe
 LIVE_LINK.txt
 *.zip
+scratch/
 
