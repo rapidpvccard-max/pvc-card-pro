@@ -1,5 +1,6 @@
 import sys
 import os
+os.environ["TESTING"] = "1"
 import uuid
 import hmac
 import hashlib

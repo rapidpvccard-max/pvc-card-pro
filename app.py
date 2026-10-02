@@ -84,10 +84,13 @@ try:
         detect_card_boxes_in_page,
         smart_detect_card_layout,
         process_crop_and_print,
-        open_pdf_document
+        open_pdf_document,
+        check_disallowed_in_cropper
     )
 except (ImportError, FileNotFoundError) as e:
     err_msg = str(e)
+    def check_disallowed_in_cropper(file_path, original_filename=None, password=None):
+        return False, None, None
     def extract_aadhaar_data(pdf_path, password=None):
         class DummyAadhaarData:
             def __init__(self):
@@ -338,9 +341,13 @@ def format_extraction_error(engine_data: dict) -> tuple[str, str]:
     errors = engine_data.get("errors", [])
     err_str = " ".join(str(e) for e in errors)
     err_lower = err_str.lower()
-    if "incorrect pdf password" in err_lower or "password invalid" in err_lower or "authenticate" in err_lower:
+    if "unlocked_aadhaar_not_allowed" in err_lower or "unlocked pdf" in err_lower or "unlocked" in err_lower:
+        return "Unlocked PDF allow nahi hai. Kripya UIDAI website se directly download kiya hua original password-protected e-Aadhaar PDF upload karein aur uska password dalein.", "UNLOCKED_AADHAAR_NOT_ALLOWED"
+    if "not_original_aadhaar" in err_lower or "not an original aadhaar" in err_lower or "original uidai" in err_lower or "uidai website" in err_lower:
+        return "Yeh original UIDAI e-Aadhaar PDF nahi hai. Sirf official UIDAI website se download kiya gaya original e-Aadhaar PDF hi accept kiya jayega (Dusre documents ya fake/edited PDFs allow nahi hain).", "NOT_ORIGINAL_AADHAAR"
+    if "incorrect pdf password" in err_lower or "password invalid" in err_lower or "authenticate" in err_lower or "incorrect_password" in err_lower:
         return "Incorrect PDF password. Please enter the correct password.", "INCORRECT_PASSWORD"
-    if "password protected" in err_lower or "supply the password" in err_lower or "requires password" in err_lower:
+    if "password protected" in err_lower or "supply the password" in err_lower or "requires password" in err_lower or "password_required" in err_lower:
         return "This PDF is password protected. Please enter the password.", "PASSWORD_REQUIRED"
     if errors:
         return f"Extraction failed: {errors[0]}", "EXTRACTION_FAILED"
@@ -417,8 +424,9 @@ async def generate_pipeline(
     current_user: models.User = Depends(auth.get_current_user),
     db: Session = Depends(database.get_db)
 ):
-    user_rate = float(getattr(current_user.credits, 'cost_per_card', 0.95) or 0.95)
-    if current_user.credits.wallet_balance < user_rate:
+    user_rate = float(getattr(current_user.credits, 'cost_per_card', 0.95) or 0.95) if current_user.credits else 0.95
+    wallet_balance = float(getattr(current_user.credits, 'wallet_balance', 0.0) or 0.0) if current_user.credits else 0.0
+    if wallet_balance < user_rate:
         return JSONResponse(
             status_code=402,
             content={"success": False, "error": f"Insufficient wallet balance to generate a card. Required: ₹{user_rate:.2f}"}
@@ -585,6 +593,23 @@ async def crop_upload_preview(
         return JSONResponse(status_code=500, content={"success": False, "error": "Could not save uploaded file."})
 
     try:
+        # Strictly reject Aadhaar and Ayushman in Card Cropper
+        is_disallowed, card_category, disallow_msg = check_disallowed_in_cropper(
+            filepath, original_filename=file.filename, password=password
+        )
+        if is_disallowed:
+            try: os.remove(filepath)
+            except: pass
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "success": False,
+                    "error": disallow_msg,
+                    "code": f"{card_category.upper()}_NOT_ALLOWED_IN_CROPPER",
+                    "card_category": card_category
+                }
+            )
+
         if is_pdf:
             try:
                 doc = open_pdf_document(filepath, password)
@@ -598,6 +623,24 @@ async def crop_upload_preview(
                 try: os.remove(filepath)
                 except: pass
                 return JSONResponse(status_code=400, content={"success": False, "error": err_text, "code": code})
+
+            # Secondary check once PDF is unlocked with user-supplied password
+            if password:
+                is_disallowed_pw, card_cat_pw, disallow_msg_pw = check_disallowed_in_cropper(
+                    filepath, original_filename=file.filename, password=password
+                )
+                if is_disallowed_pw:
+                    try: os.remove(filepath)
+                    except: pass
+                    return JSONResponse(
+                        status_code=400,
+                        content={
+                            "success": False,
+                            "error": disallow_msg_pw,
+                            "code": f"{card_cat_pw.upper()}_NOT_ALLOWED_IN_CROPPER",
+                            "card_category": card_cat_pw
+                        }
+                    )
                 
             preview_img, orig_w, orig_h = generate_page_preview(filepath, page_number=0, password=password, target_width=900)
             detect_res = smart_detect_card_layout(filepath, page_number=0, password=password)
@@ -679,6 +722,21 @@ async def crop_generate(
     filepath = os.path.join(UPLOAD_DIR, f"crop_{temp_id}{file_ext}")
     if not os.path.exists(filepath):
         return JSONResponse(status_code=404, content={"success": False, "error": "Uploaded file session expired or not found. Please upload again."})
+
+    # Strictly reject Aadhaar and Ayushman in crop_generate
+    is_disallowed, card_category, disallow_msg = check_disallowed_in_cropper(filepath, password=password)
+    if is_disallowed:
+        try: os.remove(filepath)
+        except: pass
+        return JSONResponse(
+            status_code=400,
+            content={
+                "success": False,
+                "error": disallow_msg,
+                "code": f"{card_category.upper()}_NOT_ALLOWED_IN_CROPPER",
+                "card_category": card_category
+            }
+        )
 
     try:
         f_box = json.loads(front_box) if isinstance(front_box, str) else front_box

@@ -113,6 +113,97 @@ PRESETS: Dict[str, Dict[str, Any]] = {
 }
 
 
+def check_disallowed_in_cropper(
+    file_path: str,
+    original_filename: Optional[str] = None,
+    password: Optional[str] = None
+) -> Tuple[bool, Optional[str], Optional[str]]:
+    """
+    Checks if an uploaded document for the card cropper is an Aadhaar card or Ayushman card.
+    Cropper is strictly reserved for Voter, e-Shram, PAN, DL, Kisan, Ration, and custom cards.
+    Aadhaar and Ayushman cards MUST use their dedicated high-precision vector engines.
+    
+    Returns:
+        (is_disallowed, card_category, message)
+    """
+    fname = (original_filename or os.path.basename(file_path)).lower()
+    
+    # 1. Quick Filename Check
+    if 'eaadhaar' in fname or (('aadhaar' in fname or 'aadhar' in fname) and 'pan' not in fname):
+        return True, 'aadhaar', 'Aadhaar card PDF ko yahan crop nahi kiya ja sakta. Kripya upar diye gaye dedicated "Aadhaar Card" option ka upayog karein jahan HD 300 DPI layout ready hota hai.'
+        
+    if 'ayushman' in fname or 'pmjay' in fname:
+        return True, 'ayushman', 'Ayushman card PDF ko yahan crop nahi kiya ja sakta. Kripya upar diye gaye dedicated "Ayushman PMJAY" option ka upayog karein jahan 1-click me perfect PVC print banta hai.'
+
+    ext = os.path.splitext(file_path)[1].lower()
+    
+    # 2. PDF Content & Signature Inspection
+    if ext == '.pdf':
+        try:
+            doc = pymupdf.open(file_path)
+            
+            # Check internal signatures/certificates
+            try:
+                max_xref = min(doc.xref_length(), 1500)
+                for i in range(1, max_xref):
+                    obj_str = doc.xref_object(i)
+                    if 'UNIQUE IDENTIFICATION AUTHORITY OF INDIA' in obj_str or 'DS UNIQUE IDENTIFICATION' in obj_str:
+                        doc.close()
+                        return True, 'aadhaar', 'Aadhaar card PDF ko yahan crop nahi kiya ja sakta. Kripya upar diye gaye dedicated "Aadhaar Card" option ka upayog karein jahan HD 300 DPI layout ready hota hai.'
+            except Exception:
+                pass
+
+            if doc.is_encrypted and password:
+                doc.authenticate(password)
+
+            if not doc.is_encrypted or (doc.is_encrypted and not doc.needs_pass):
+                full_text = '\n'.join([page.get_text() for page in doc]).lower()
+                doc.close()
+
+                # Aadhaar check
+                if any(k in full_text for k in [
+                    'unique identification authority of india', 'uidai', 'भारतीय विशिष्ट पहचान प्राधिकरण',
+                    'help@uidai.gov.in', 'www.uidai.gov.in', 'myaadhaar.uidai.gov.in', 'eaadhaar.uidai.gov.in',
+                    'मेरा आधार, मेरी पहचान', 'my aadhaar, my identity', 'माझे आधार, माझी ओळख',
+                    'ભારતીય વિશિષ્ટ ઓળખ પ્રાધિકરણ', 'இந்திய தனித்துவ அடையாள ஆணையம்',
+                    'భారత విశిష్ట గుర్తింపు ప్రాధికార సంస్థ', 'ಭಾರತೀಯ ವಿಶಿಷ್ಟ ಗುರುತಿನ ಪ್ರಾಧಿಕಾರ'
+                ]):
+                    return True, 'aadhaar', 'Aadhaar card PDF ko yahan crop nahi kiya ja sakta. Kripya upar diye gaye dedicated "Aadhaar Card" option ka upayog karein jahan HD 300 DPI layout ready hota hai.'
+
+                import re
+                if bool(re.search(r'\b\d{4}\s\d{4}\s\d{4}\b', full_text)) and any(k in full_text for k in ['aadhaar', 'aadhar', 'आधार', 'uidai']):
+                    return True, 'aadhaar', 'Aadhaar card PDF ko yahan crop nahi kiya ja sakta. Kripya upar diye gaye dedicated "Aadhaar Card" option ka upayog karein jahan HD 300 DPI layout ready hota hai.'
+
+                # Ayushman check
+                if any(k in full_text for k in [
+                    'pradhan mantri jan arogya yojana', 'प्रधानमंत्री जन आरोग्य योजना',
+                    'pm-jay', 'pmjay', 'ab-pmjay', 'ab pm-jay', 'pmjay.gov.in',
+                    'ayushman card', 'आयुष्मान कार्ड', 'ayushman bharat pradhan mantri'
+                ]):
+                    return True, 'ayushman', 'Ayushman card PDF ko yahan crop nahi kiya ja sakta. Kripya upar diye gaye dedicated "Ayushman PMJAY" option ka upayog karein jahan 1-click me perfect PVC print banta hai.'
+            else:
+                doc.close()
+        except Exception:
+            pass
+
+    # 3. Image QR Code Inspection
+    elif ext in ['.png', '.jpg', '.jpeg', '.webp']:
+        try:
+            from pyzbar.pyzbar import decode as zbar_decode
+            with Image.open(file_path) as img:
+                decoded = zbar_decode(img.convert('L'))
+                for d in decoded:
+                    raw_data = d.data
+                    if b'pmjay' in raw_data.lower() or b'pmjay.gov.in' in raw_data.lower():
+                        return True, 'ayushman', 'Ayushman card image ko yahan crop nahi kiya ja sakta. Kripya dedicated "Ayushman PMJAY" option ka upayog karein.'
+                    if b'\xff' in raw_data or b'PrintLetterBarcodeData' in raw_data or b'uidai' in raw_data.lower():
+                        return True, 'aadhaar', 'Aadhaar card image ko yahan crop nahi kiya ja sakta. Kripya dedicated "Aadhaar Card" option ka upayog karein.'
+        except Exception:
+            pass
+
+    return False, None, None
+
+
 def open_pdf_document(pdf_path: str, password: Optional[str] = None) -> pymupdf.Document:
     """Opens and authenticates a PDF document with optional password."""
     doc = pymupdf.open(pdf_path)

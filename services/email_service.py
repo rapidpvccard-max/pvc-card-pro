@@ -34,6 +34,11 @@ def send_password_reset_email(to_email: str, user_name: str, reset_url: str) -> 
     Sends a professional password reset email.
     If SMTP credentials are not configured, prints the link to server console for testing.
     """
+    dummy_patterns = ["@example.com", "@test.com", "@rapidpvc.online", "cf_tester_", "payu_test_", "tester@"]
+    if any(pat in (to_email or "").lower() for pat in dummy_patterns) or os.environ.get("TESTING") == "1":
+        print(f"[Email Service] Skipped password reset dispatch for test recipient: {to_email}")
+        return True, "Test password reset email simulated."
+
     config = get_smtp_config()
     display_name = user_name or "Valued Operator"
     
@@ -280,6 +285,11 @@ def send_payment_invoice_email(
     Sends a beautifully formatted Tax Invoice & Payment Receipt email to the user
     after successful recharge (PayU or Cashfree), and also notifies the admin.
     """
+    dummy_patterns = ["@example.com", "@test.com", "@rapidpvc.online", "cf_tester_", "payu_test_", "tester@"]
+    if any(pat in (to_email or "").lower() for pat in dummy_patterns) or os.environ.get("TESTING") == "1":
+        print(f"[Email Service] Skipped payment invoice dispatch for test recipient: {to_email}")
+        return True, "Test payment invoice dispatch simulated."
+
     import datetime
     config = get_smtp_config()
     display_name = user_name or "Valued Partner"

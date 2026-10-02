@@ -91,15 +91,107 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 120);
     };
 
+    window.showUnlockedError = function(customMessage = null) {
+        if (!passwordErrorBox) return;
+        if (passwordErrorTitle) passwordErrorTitle.textContent = '⚠️ Unlocked PDF Allow Nahi Hai!';
+        if (passwordErrorDesc) passwordErrorDesc.textContent = customMessage || 'Aapne unlocked ya unencrypted PDF upload kiya hai. System me sirf UIDAI website se directly download kiya hua password-protected e-Aadhaar PDF hi accept hota hai.';
+        if (passwordHintGuide) {
+            passwordHintGuide.innerHTML = '💡 <strong>Kripya Dhyan Dein:</strong> Third-party tool ya print-to-pdf se unlock kiya hua PDF accept nahi kiya jayega.<br><span style="display: inline-block; margin-top: 4px;">Official UIDAI portal (<strong>myaadhaar.uidai.gov.in</strong>) se naya e-Aadhaar download karein aur uska original password enter karein.</span>';
+        }
+        passwordErrorBox.style.display = 'block';
+        if (pdfPasswordInput) pdfPasswordInput.classList.add('is-invalid');
+        passwordErrorBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        if (passwordGroupContainer) {
+            passwordGroupContainer.classList.remove('shake-animation');
+            void passwordGroupContainer.offsetWidth;
+            passwordGroupContainer.classList.add('shake-animation');
+        }
+        setTimeout(() => {
+            if (pdfPasswordInput) {
+                pdfPasswordInput.focus();
+                pdfPasswordInput.select();
+            }
+        }, 120);
+    };
+
+    window.showNotOriginalError = function(customMessage = null) {
+        if (!passwordErrorBox) return;
+        if (passwordErrorTitle) passwordErrorTitle.textContent = '🚫 Original UIDAI e-Aadhaar Required!';
+        if (passwordErrorDesc) passwordErrorDesc.textContent = customMessage || 'Yeh file official UIDAI e-Aadhaar PDF nahi hai. Dusre documents (jaise Voter, PAN, Ayushman, Bill ya edited fake PDF) yahan accept nahi honge.';
+        if (passwordHintGuide) {
+            passwordHintGuide.innerHTML = '💡 <strong>Official Portal:</strong> Kripya UIDAI website (<strong>myaadhaar.uidai.gov.in</strong>) se download kiya gaya original e-Aadhaar PDF hi upload karein.';
+        }
+        passwordErrorBox.style.display = 'block';
+        if (pdfPasswordInput) pdfPasswordInput.classList.add('is-invalid');
+        passwordErrorBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        if (passwordGroupContainer) {
+            passwordGroupContainer.classList.remove('shake-animation');
+            void passwordGroupContainer.offsetWidth;
+            passwordGroupContainer.classList.add('shake-animation');
+        }
+        setTimeout(() => {
+            if (pdfPasswordInput) {
+                pdfPasswordInput.focus();
+                pdfPasswordInput.select();
+            }
+        }, 120);
+    };
+
     window.clearPasswordError = function() {
         if (passwordErrorBox) passwordErrorBox.style.display = 'none';
         if (pdfPasswordInput) pdfPasswordInput.classList.remove('is-invalid');
         if (passwordGroupContainer) passwordGroupContainer.classList.remove('shake-animation');
     };
 
+    window.showCropperDisallowedError = function(cardType = 'aadhaar', customMessage = null) {
+        const box = document.getElementById('cropper-disallowed-box');
+        const title = document.getElementById('cropper-disallowed-title');
+        const desc = document.getElementById('cropper-disallowed-desc');
+        const btnText = document.getElementById('btn-redirect-generator-text');
+        const btn = document.getElementById('btn-redirect-generator');
+
+        if (!box) return;
+
+        const isAyushman = (cardType && cardType.toLowerCase().includes('ayushman'));
+
+        if (title) {
+            title.innerHTML = isAyushman 
+                ? '🚫 Ayushman Card Cropper Me Allowed Nahi Hai!'
+                : '🚫 Aadhaar Card Cropper Me Allowed Nahi Hai!';
+        }
+
+        if (desc) {
+            desc.textContent = customMessage || (isAyushman
+                ? 'Ayushman card PDF ko yahan crop nahi kiya ja sakta. Kripya upar diye gaye dedicated "Ayushman PMJAY" option ka upayog karein jahan 1-click me perfect layout banta hai.'
+                : 'Aadhaar card PDF ko yahan crop nahi kiya ja sakta. Kripya upar diye gaye dedicated "Aadhaar Card" option ka upayog karein jahan 300 DPI high-definition layout aur digital QR verification hoti hai.');
+        }
+
+        if (btnText) {
+            btnText.textContent = isAyushman ? '👉 Go to Ayushman Card Generator' : '👉 Go to Aadhaar Card Generator';
+        }
+
+        if (btn) {
+            btn.onclick = function() {
+                box.style.display = 'none';
+                window.setDocumentType(isAyushman ? 'ayushman' : 'aadhaar');
+                const dropArea = document.getElementById('file-drop-area');
+                if (dropArea) dropArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            };
+        }
+
+        box.style.display = 'block';
+        box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    };
+
+    window.clearCropperDisallowedError = function() {
+        const box = document.getElementById('cropper-disallowed-box');
+        if (box) box.style.display = 'none';
+    };
+
     if (pdfPasswordInput) {
         pdfPasswordInput.addEventListener('input', () => {
             window.clearPasswordError();
+            window.clearCropperDisallowedError();
         });
     }
 
@@ -123,6 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const pwDesc = document.getElementById('password-desc');
         
         window.clearPasswordError();
+        window.clearCropperDisallowedError();
 
         // Reset all active classes
         if (btnAadhaar) btnAadhaar.classList.remove('active');
@@ -136,14 +229,23 @@ document.addEventListener('DOMContentLoaded', () => {
             instantCropContainer.style.display = (type === 'crop') ? 'block' : 'none';
         }
 
+        const uploadLimit = document.getElementById('upload-zone-limit');
+        const pwLabel = document.getElementById('password-field-label');
+
         if (type === 'crop') {
             if (inputDoc) inputDoc.value = 'crop';
             if (inputStyle) inputStyle.value = 'default';
             if (btnCrop) btnCrop.classList.add('active');
-            if (uploadText) uploadText.textContent = 'Upload Voter, e-Shram, PAN, or DL PDF/Image';
+            if (uploadText) uploadText.textContent = 'Upload Voter, PAN, e-Shram, DL, Kisan, Ration Card';
+            if (uploadLimit) uploadLimit.textContent = 'Voter, PAN, e-Shram, DL, Kisan, Ration (Note: Aadhaar & Ayushman card yahan allow nahi hai)';
             if (heroTitle) heroTitle.textContent = 'Auto Card Cropper (CR80 Edge-to-Edge)';
-            if (heroDesc) heroDesc.textContent = 'Upload any document with existing PVC cards (Voter ID, e-Shram, PAN, DL). Auto-crops to exact CR80 size with 100% precision.';
+            if (heroDesc) heroDesc.textContent = 'Upload official Voter ID, e-Shram, PAN, DL, Kisan, or Ration card. Auto-crops to exact CR80 size with 100% precision.';
             if (pwDesc) pwDesc.textContent = 'Enter PDF password if document is locked.';
+            if (pwLabel) pwLabel.innerHTML = 'Document Password <span style="color: #64748b; font-weight: 500;">(Optional)</span>';
+            if (pdfPasswordInput) {
+                pdfPasswordInput.placeholder = 'Enter password if document is locked';
+                pdfPasswordInput.required = false;
+            }
             if (passwordHintPill) {
                 passwordHintPill.textContent = 'Document Password (if locked)';
                 passwordHintPill.style.color = '#5b21b6';
@@ -156,9 +258,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (inputStyle) inputStyle.value = 'default';
             if (btnAyushman) btnAyushman.classList.add('active');
             if (uploadText) uploadText.textContent = 'Upload Ayushman PDF';
+            if (uploadLimit) uploadLimit.textContent = 'Supports Ayushman PMJAY Cards (Max: 10MB)';
             if (heroTitle) heroTitle.textContent = 'Create Professional Ayushman PVC Cards';
             if (heroDesc) heroDesc.textContent = 'Upload your Ayushman / PM-JAY PDF and PVC Card Pro will extract the required details and generate print-ready files.';
             if (pwDesc) pwDesc.textContent = 'Enter the PDF password if your Ayushman PDF is protected.';
+            if (pwLabel) pwLabel.innerHTML = 'PDF Password <span style="color: #64748b; font-weight: 500;">(Optional)</span>';
+            if (pdfPasswordInput) {
+                pdfPasswordInput.placeholder = 'Enter password if document is protected';
+                pdfPasswordInput.required = false;
+            }
             if (passwordHintPill) {
                 passwordHintPill.textContent = 'Ayushman Password (if locked)';
                 passwordHintPill.style.color = '#065f46';
@@ -171,9 +279,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (inputStyle) inputStyle.value = 'color';
             if (btnAadhaarColor) btnAadhaarColor.classList.add('active');
             if (uploadText) uploadText.textContent = 'Upload Aadhaar PDF (Colourful HD Card)';
+            if (uploadLimit) uploadLimit.textContent = 'Sirf official UIDAI website se downloaded password-protected e-Aadhaar PDF (Max: 10MB)';
             if (heroTitle) heroTitle.textContent = 'Create Vibrant Colourful Aadhaar Cards';
             if (heroDesc) heroDesc.textContent = 'Upload your Aadhaar PDF and PVC Card Pro will generate a stunning multicolor HD background layout ready for duplex print.';
-            if (pwDesc) pwDesc.textContent = 'Some Aadhaar PDFs are protected. Enter the PDF password if required.';
+            if (pwDesc) pwDesc.textContent = 'Sirf UIDAI website se downloaded original password-protected PDF hi accept hoga. Password enter karein.';
+            if (pwLabel) pwLabel.innerHTML = 'Aadhaar PDF Password <span style="color: #ef4444; font-weight: 800;">(Required / अनिवार्य)</span>';
+            if (pdfPasswordInput) {
+                pdfPasswordInput.placeholder = 'Enter 8-digit password (e.g. SURE1995)';
+                pdfPasswordInput.required = true;
+            }
             if (passwordHintPill) {
                 passwordHintPill.textContent = 'Aadhaar Hint: NAME4 + YOB (e.g. SURE1995)';
                 passwordHintPill.style.color = '#92400e';
@@ -186,9 +300,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (inputStyle) inputStyle.value = 'default';
             if (btnAadhaar) btnAadhaar.classList.add('active');
             if (uploadText) uploadText.textContent = 'Upload Aadhaar PDF (Standard White)';
+            if (uploadLimit) uploadLimit.textContent = 'Sirf official UIDAI website se downloaded password-protected e-Aadhaar PDF (Max: 10MB)';
             if (heroTitle) heroTitle.textContent = 'Create Professional PVC Cards in Seconds';
             if (heroDesc) heroDesc.textContent = 'Upload your Aadhaar PDF and PVC Card Pro will securely extract the required details, prepare the card design and generate print-ready files.';
-            if (pwDesc) pwDesc.textContent = 'Some Aadhaar PDFs are protected. Enter the PDF password if required.';
+            if (pwDesc) pwDesc.textContent = 'Sirf UIDAI website se downloaded original password-protected PDF hi accept hoga. Password enter karein.';
+            if (pwLabel) pwLabel.innerHTML = 'Aadhaar PDF Password <span style="color: #ef4444; font-weight: 800;">(Required / अनिवार्य)</span>';
+            if (pdfPasswordInput) {
+                pdfPasswordInput.placeholder = 'Enter 8-digit password (e.g. SURE1995)';
+                pdfPasswordInput.required = true;
+            }
             if (passwordHintPill) {
                 passwordHintPill.textContent = 'Aadhaar Hint: NAME4 + YOB (e.g. SURE1995)';
                 passwordHintPill.style.color = '#1e40af';
@@ -467,7 +587,15 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         
         if (fileInput.files.length === 0) {
-            window.showToast('Please select an Aadhaar PDF.', 'warning');
+            window.showToast('Please select a PDF file.', 'warning');
+            return;
+        }
+
+        const docType = (document.getElementById('selected-document-type')?.value || 'aadhaar').toLowerCase();
+        const enteredPw = (pdfPasswordInput ? pdfPasswordInput.value : '').trim();
+        if ((docType === 'aadhaar' || docType === 'aadhaar_color') && !enteredPw) {
+            window.showPasswordError('required', 'Aadhaar PVC ke liye PDF password enter karna anivarya hai (e.g. SURE1995). Unlocked PDF allow nahi hai.');
+            window.showToast('Please enter the Aadhaar PDF password.', 'warning');
             return;
         }
 
@@ -517,11 +645,26 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok || !data.success) {
                 const errCode = data.code || '';
                 const rawErr = (data.error || '').toLowerCase();
+
+                if (errCode === 'UNLOCKED_AADHAAR_NOT_ALLOWED' || rawErr.includes('unlocked pdf') || rawErr.includes('unlocked aadhaar') || rawErr.includes('unlocked')) {
+                    const err = new Error(data.error || 'Unlocked PDF allow nahi hai. Kripya UIDAI website se directly download kiya hua original password-protected e-Aadhaar PDF upload karein aur uska password dalein.');
+                    err.isUnlockedError = true;
+                    throw err;
+                }
+
+                if (errCode === 'NOT_ORIGINAL_AADHAAR' || rawErr.includes('not an original aadhaar') || rawErr.includes('original uidai') || rawErr.includes('uidai website')) {
+                    const err = new Error(data.error || 'Yeh original UIDAI e-Aadhaar PDF nahi hai. Sirf official UIDAI website se download kiya gaya original e-Aadhaar PDF hi accept kiya jayega.');
+                    err.isNotOriginalError = true;
+                    throw err;
+                }
+
                 const isPwError = errCode === 'INCORRECT_PASSWORD' || 
                                   errCode === 'PASSWORD_REQUIRED' || 
-                                  rawErr.includes('password') || 
-                                  rawErr.includes('authenticate') ||
-                                  rawErr.includes('unlock');
+                                  rawErr.includes('password protected') || 
+                                  rawErr.includes('password required') || 
+                                  rawErr.includes('incorrect pdf password') || 
+                                  rawErr.includes('galat password') || 
+                                  rawErr.includes('incorrect password');
 
                 if (isPwError) {
                     const pwType = (errCode === 'PASSWORD_REQUIRED' || rawErr.includes('protected') || rawErr.includes('supply')) ? 'required' : 'incorrect';
@@ -577,6 +720,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (error.isPasswordError) {
                 window.showPasswordError(error.passwordType, error.message);
+                window.showToast(error.message, 'error');
+            } else if (error.isUnlockedError) {
+                window.showUnlockedError(error.message);
+                window.showToast(error.message, 'error');
+            } else if (error.isNotOriginalError) {
+                window.showNotOriginalError(error.message);
                 window.showToast(error.message, 'error');
             } else {
                 window.showToast(error.message, 'error');
@@ -730,6 +879,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function getFriendlyErrorMsg(rawError) {
         if (!rawError) return 'Unable to generate PVC card. Please try again.';
         const lower = rawError.toLowerCase();
+        if (lower.includes('unlocked') || lower.includes('original uidai') || lower.includes('uidai website')) {
+            return rawError;
+        }
         if (lower.includes('credit')) {
             return rawError;
         }
@@ -741,6 +893,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (lower.includes('size')) {
             return 'File size must be 10 MB or less.';
+        }
+        if (rawError && rawError.length > 5 && !lower.includes('internal error')) {
+            return rawError;
         }
         return 'Unable to generate PVC card. Please try again.';
     }
@@ -1144,7 +1299,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!resp.ok || !data.success) {
                 if (processingSection) processingSection.style.display = 'none';
                 uploadSection.style.display = 'block';
-                if (data.code === 'PASSWORD_REQUIRED' || data.code === 'INCORRECT_PASSWORD') {
+                if (data.code === 'AADHAAR_NOT_ALLOWED_IN_CROPPER' || data.code === 'AYUSHMAN_NOT_ALLOWED_IN_CROPPER') {
+                    const cardType = (data.card_category || (data.code.includes('AYUSHMAN') ? 'ayushman' : 'aadhaar'));
+                    window.showCropperDisallowedError(cardType, data.error);
+                    window.showToast(data.error, 'error');
+                } else if (data.code === 'PASSWORD_REQUIRED' || data.code === 'INCORRECT_PASSWORD') {
                     window.showPasswordError(data.code === 'PASSWORD_REQUIRED' ? 'required' : 'incorrect', data.error);
                 } else {
                     window.showToast(data.error || 'Failed to load document preview.', 'error');
@@ -1264,6 +1423,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!resp.ok || !res.success) {
                     if (processingSection) processingSection.style.display = 'none';
                     if (cropEditorSection) cropEditorSection.style.display = 'block';
+                    if (res.code === 'AADHAAR_NOT_ALLOWED_IN_CROPPER' || res.code === 'AYUSHMAN_NOT_ALLOWED_IN_CROPPER') {
+                        const cardType = (res.card_category || (res.code.includes('AYUSHMAN') ? 'ayushman' : 'aadhaar'));
+                        window.showCropperDisallowedError(cardType, res.error);
+                    }
                     window.showToast(res.error || 'Crop generation failed.', 'error');
                     return;
                 }

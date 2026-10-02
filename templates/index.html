@@ -870,7 +870,7 @@
                     </div>
                     <div class="dropzone-title" id="upload-zone-text">Upload Aadhaar PDF</div>
                     <div class="dropzone-subtitle">Drag & drop your PDF file here or <span style="color: #2563eb; font-weight: 700;">Browse Files</span></div>
-                    <div class="dropzone-limit">Supports standard e-Aadhaar, Enrolment slips & Ayushman PMJAY (Max: 10MB)</div>
+                    <div class="dropzone-limit" id="upload-zone-limit">Sirf official UIDAI website se downloaded password-protected e-Aadhaar PDF (Max: 10MB)</div>
                     <input type="file" id="pdf-file" class="form-input" name="file" accept="application/pdf" required style="display:none;">
                 </label>
 
@@ -889,6 +889,31 @@
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                         Remove
                     </button>
+                </div>
+
+                <!-- High-Visibility Cropper Disallowed Card Warning Box -->
+                <div id="cropper-disallowed-box" class="cropper-disallowed-card" style="display: none; margin-top: 20px; margin-bottom: 14px; background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%); border: 2px solid #f43f5e; border-radius: 16px; padding: 18px 20px; box-shadow: 0 10px 25px -5px rgba(244, 63, 94, 0.18);">
+                    <div style="display: flex; align-items: flex-start; gap: 14px;">
+                        <div style="flex-shrink: 0; width: 44px; height: 44px; border-radius: 12px; background: #ffe4e6; border: 1.5px solid #fecdd3; display: flex; align-items: center; justify-content: center; color: #e11d48; margin-top: 2px;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                        </div>
+                        <div style="flex: 1;">
+                            <div id="cropper-disallowed-title" style="font-weight: 800; font-size: 1.05rem; color: #9f1239; margin-bottom: 5px;">
+                                🚫 Card Cropper Me Aadhaar / Ayushman Allowed Nahi Hai!
+                            </div>
+                            <div id="cropper-disallowed-desc" style="font-size: 0.88rem; color: #881337; line-height: 1.5; font-weight: 500;">
+                                Aadhaar aur Ayushman cards ke liye dedicated automated generators bane hue hain jahan 300 DPI HD layout aur digital QR verification automatically hota hai. Kripya niche diye gaye button par click karke direct generator use karein.
+                            </div>
+                            <div style="margin-top: 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                <button type="button" id="btn-redirect-generator" style="background: linear-gradient(135deg, #e11d48 0%, #be123c 100%); color: #ffffff; border: none; border-radius: 10px; padding: 10px 20px; font-size: 0.88rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.35); transition: all 0.2s;">
+                                    <span id="btn-redirect-generator-text">👉 Open Aadhaar Card Generator</span>
+                                </button>
+                                <button type="button" onclick="document.getElementById('cropper-disallowed-box').style.display='none'" style="background: #ffffff; color: #9f1239; border: 1.5px solid #fecdd3; border-radius: 10px; padding: 10px 14px; font-size: 0.84rem; font-weight: 700; cursor: pointer;">
+                                    Dismiss
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- High-Visibility Password Error Box -->
@@ -915,13 +940,13 @@
                 <!-- Password Input Box -->
                 <div class="password-card-container" id="password-group-container">
                     <div class="password-label-row">
-                        <label class="form-label" id="password-field-label" style="text-transform: none; font-size: 0.88rem; margin-bottom: 0; font-weight: 700; color: #0f172a;">PDF Password (Optional)</label>
+                        <label class="form-label" id="password-field-label" style="text-transform: none; font-size: 0.88rem; margin-bottom: 0; font-weight: 700; color: #0f172a;">Aadhaar PDF Password <span style="color: #ef4444; font-weight: 800;">(Required / अनिवार्य)</span></label>
                         <span id="password-hint-pill" style="font-size: 0.73rem; color: #1e40af; background: #eff6ff; border: 1px solid #bfdbfe; padding: 3px 10px; border-radius: 12px; font-weight: 600;">
                             Aadhaar Hint: NAME4 + YOB (e.g. SURE1995)
                         </span>
                     </div>
                     <div style="position: relative;" id="password-input-wrapper">
-                        <input type="password" id="pdf-password" name="password" class="password-input-field" placeholder="Enter password if document is protected">
+                        <input type="password" id="pdf-password" name="password" class="password-input-field" placeholder="Enter password (e.g. SURE1995)">
                         <span onclick="togglePassword()" style="position: absolute; right: 14px; top: 12px; cursor: pointer; color: #94a3b8; user-select: none;" id="pw-toggle-btn" title="Toggle password view">
                             <svg id="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         </span>

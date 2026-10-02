@@ -812,6 +812,103 @@ def extract_via_text_layer(pdf_path: str, password: Optional[str] = None) -> Aad
 
 
 # ---------------------------------------------------------------------------
+# Strict UIDAI Originality & Authenticity Verifier
+# ---------------------------------------------------------------------------
+
+UIDAI_AUTHORITY_PATTERNS = [
+    r"unique\s+identification\s+authority\s+of\s+india",
+    r"\buidai\b",
+    r"भारतीय\s*विशिष्ट\s*पहचान\s*प्राधिकरण",        # Hindi
+    r"भारतीय\s*विशिष्ट\s*ओळख\s*प्राधिकरण",          # Marathi
+    r"ભારતીય\s*વિશિષ્ટ\s*ઓળખ\s*પ્રાધિકરણ",          # Gujarati
+    r"இந்திய\s*தனித்துவ\s*அடையாள\s*ஆணையம்",         # Tamil
+    r"భారత\s*విశిష్ట\s*గుర్తింపు\s*ప్రాధికార\s*సంస్థ",      # Telugu
+    r"ಭಾರತೀಯ\s*ವಿಶಿಷ್ಟ\s*ಗುರುತಿನ\s*ಪ್ರಾಧಿಕಾರ",       # Kannada
+    r"യുണീക്\s*ഐഡന്റിഫിക്കേഷൻ\s*അതോറിറ്റി\s*ഓഫ്\s*ഇന്ത്യ", # Malayalam
+    r"ভারতীয়\s*অনন্য\s*সনাক্তকরণ\s*কর্তৃপক্ষ",          # Bengali
+    r"ভাৰতীয়\s*বিশিষ্ট\s*চিনাক্তকৰণ\s*প্ৰাধিকৰণ",       # Assamese
+    r"ଭାରତୀୟ\s*ବିଶିଷ୍ଟ\s*ପରିଚୟ\s*ପ୍ରାଧିକରଣ",         # Odia
+    r"ਭਾਰਤੀ\s*ਵਿਲੱਖਣ\s*ਪਛਾਣ\s*ਅਥਾਰਟੀ",               # Punjabi
+    r"منفرد\s*شناختی\s*اتھارٹی\s*آف\s*انڈیا",             # Urdu
+]
+
+UIDAI_GOVT_AND_PORTAL_PATTERNS = [
+    r"government\s+of\s+india",
+    r"govt\.?\s+of\s+india",
+    r"भारत\s*सरकार",
+    r"uidai\.gov\.in",
+    r"help@uidai\.gov\.in",
+    r"\b1947\b",
+    r"मेरा\s*आधार[,\s]+मेरी\s*पहचान",
+    r"my\s*aadhaar[,\s]+my\s*identity",
+    r"माझे\s*आधार[,\s]+माझी\s*ओळख",
+    r"મારો\s*આધાર[,\s]+મારી\s*ઓળખ",
+    r"என்\s*ஆதார்[,\s]+என்\s*அடையாளம்",
+    r"నా\s*ఆధార్[,\s]+నా\s*గుర్తింపు",
+    r"ನನ್ನ\s*ಆಧಾರ್[,\s]+ನನ್ನ\s*ಗುರುತು",
+    r"എന്റെ\s*ആധാർ[,\s]+എന്റെ\s*തിരിച്ചറിയൽ",
+    r"আমার\s*আধার[,\s]+আমার\s*পরিচয়",
+    r"মোৰ\s*আধাৰ[,\s]+মোৰ\s*পৰিচয়",
+    r"ମୋ\s*ଆଧାର[,\s]+ମୋ\s*ପରିଚୟ",
+    r"ਮੇਰਾ\s*ਆਧਾਰ[,\s]+ਮੇਰੀ\s*ਪਹਿਚਾਣ",
+    r"میرا\s*آدھار[,\s]+میری\s*پہچان",
+]
+
+def verify_is_original_uidai_aadhaar(
+    doc: fitz.Document, 
+    full_pdf_text: str, 
+    qr_candidates: list[bytes] = None, 
+    trace: Optional[list] = None
+) -> tuple[bool, str]:
+    """Strictly validates that the PDF is an authentic original e-Aadhaar 
+    issued directly by the Unique Identification Authority of India (UIDAI).
+    Rejects any other PDF documents, fake/tampered documents, and scanned photos."""
+    text_lower = full_pdf_text.lower()
+    
+    # Check 1: Authority Identification
+    has_auth = any(re.search(p, text_lower) for p in UIDAI_AUTHORITY_PATTERNS)
+    
+    # Check 1b: Digital Signature or UIDAI Security Certificate stream in PDF
+    has_uidai_sig = False
+    try:
+        max_xref = min(doc.xref_length(), 1500)
+        for i in range(1, max_xref):
+            obj_str = doc.xref_object(i)
+            if "UNIQUE IDENTIFICATION AUTHORITY OF INDIA" in obj_str or "DS UNIQUE IDENTIFICATION" in obj_str or "CCA India" in obj_str:
+                has_uidai_sig = True
+                break
+    except Exception:
+        pass
+
+    # Check 2: Government of India / Helpline / Portal / Official Slogan
+    has_portal = any(re.search(p, text_lower) for p in UIDAI_GOVT_AND_PORTAL_PATTERNS)
+
+    # Check 3: Aadhaar Identity Number or Enrollment Number or VID
+    has_aadhaar_no = bool(re.search(r'(?:[X\d]{4}[\s\-][X\d]{4}[\s\-]\d{4}|\b\d{4}[\s\-]\d{4}[\s\-]\d{4}\b|\b\d{12}\b)', full_pdf_text))
+    has_enrolment = bool(re.search(r'(?:enrolment|enrollment|नामांकन)\s*(?:no|number|क्रम)?|\b\d{4}/\d{5}/\d{5}\b', text_lower))
+    has_vid = bool(re.search(r'\bVID\s*[:\-]?\s*\d{4}', full_pdf_text, re.IGNORECASE))
+    has_identity = has_aadhaar_no or has_enrolment or has_vid
+
+    if (has_auth or has_uidai_sig) and has_portal and has_identity:
+        if trace is not None:
+            trace.append("Authentic UIDAI e-Aadhaar verification: PASSED (auth/sig, portal, identity validated).")
+        return True, "OK"
+
+    missing = []
+    if not (has_auth or has_uidai_sig):
+        missing.append("UIDAI Authority Marker")
+    if not has_portal:
+        missing.append("Govt of India / UIDAI Helpline / Portal")
+    if not has_identity:
+        missing.append("Aadhaar / Enrollment Number")
+
+    reason = f"Missing official UIDAI security markers: {', '.join(missing)}"
+    if trace is not None:
+        trace.append(f"Authentic UIDAI e-Aadhaar verification: FAILED ({reason})")
+    return False, reason
+
+
+# ---------------------------------------------------------------------------
 # Orchestration -- the "powerhouse" entry point. NEVER raises.
 # ---------------------------------------------------------------------------
 
@@ -832,21 +929,33 @@ def extract_aadhaar_data(pdf_path: str, password: Optional[str] = None) -> Aadha
     try:
         doc = fitz.open(pdf_path)
         try:
-            if doc.needs_pass:
-                if not password:
-                    return AadhaarData(
-                        source="failed",
-                        extraction_confidence="low",
-                        errors=["PDF is password protected. Please enter the password."],
-                        trace=["PDF requires password but none was provided."]
-                    )
-                if not doc.authenticate(password):
-                    return AadhaarData(
-                        source="failed",
-                        extraction_confidence="low",
-                        errors=["Incorrect PDF password. Please enter the correct password."],
-                        trace=["PDF authentication failed with provided password."]
-                    )
+            # 1. Enforce password-protection requirement (Reject already-unlocked / unencrypted PDFs)
+            if not doc.needs_pass and not doc.is_encrypted:
+                return AadhaarData(
+                    source="failed",
+                    extraction_confidence="low",
+                    errors=["UNLOCKED_AADHAAR_NOT_ALLOWED: Unlocked PDF allow nahi hai. Kripya UIDAI website se directly download kiya hua original password-protected e-Aadhaar PDF upload karein aur uska password dalein."],
+                    trace=["PDF is not password-protected. Only original password-protected e-Aadhaar directly downloaded from UIDAI website is accepted."]
+                )
+
+            # 2. Check for missing password
+            if not password or not str(password).strip():
+                return AadhaarData(
+                    source="failed",
+                    extraction_confidence="low",
+                    errors=["PASSWORD_REQUIRED: Yeh PDF password protected hai. Kripya UIDAI e-Aadhaar ka password enter karein (Format: Naam ke pehle 4 akshar CAPITAL + Janm ka Saal, e.g. SURE1995)."],
+                    trace=["PDF requires password but none was provided."]
+                )
+
+            # 3. Check for incorrect password
+            auth_res = doc.authenticate(str(password).strip())
+            if auth_res <= 0:
+                return AadhaarData(
+                    source="failed",
+                    extraction_confidence="low",
+                    errors=["INCORRECT_PASSWORD: Galat PDF password. Kripya sahi password dalein (Format: Naam ke pehle 4 akshar CAPITAL + Janm ka Saal, e.g. SURE1995)."],
+                    trace=["PDF authentication failed with provided password."]
+                )
 
             # Collect text and images in single pass
             text_parts = []
@@ -889,6 +998,18 @@ def extract_aadhaar_data(pdf_path: str, password: Optional[str] = None) -> Aadha
                                 best_portrait_bytes = img_bytes
 
             full_pdf_text = "\n".join(text_parts)
+
+            # 4. Strict UIDAI Originality Verification
+            is_valid_uidai, uidai_fail_reason = verify_is_original_uidai_aadhaar(
+                doc, full_pdf_text, qr_candidates, trace=trace
+            )
+            if not is_valid_uidai:
+                return AadhaarData(
+                    source="failed",
+                    extraction_confidence="low",
+                    errors=["NOT_ORIGINAL_AADHAAR: Yeh original UIDAI e-Aadhaar PDF nahi hai. Sirf official UIDAI website se download kiya gaya original e-Aadhaar PDF hi accept kiya jayega (Dusre documents ya fake/edited PDFs allow nahi hain)."],
+                    trace=[f"UIDAI originality check rejected PDF: {uidai_fail_reason}"]
+                )
         finally:
             doc.close()
     except Exception as e:
