@@ -390,6 +390,9 @@ def smart_detect_card_layout(
         elif any(k in page_text for k in ["driving licence", "transport department", "dl no", "form 7", "parivahan"]) or "dl" in filename_hint:
             detected_type = "dl"
             card_label = "Driving Licence"
+        elif any(k in page_text for k in ["mahasarathi", "maha sarathi", "sarathi"]) or "mahasarathi" in filename_hint or "sarathi" in filename_hint:
+            detected_type = "custom"
+            card_label = "MahaSarathi Card (Front & Back)"
         elif any(k in page_text for k in ["pmjay", "ayushman", "pm-jay", "आयुष्मान"]) or "ayushman" in filename_hint:
             detected_type = "ayushman"
             card_label = "Ayushman / Health Card"

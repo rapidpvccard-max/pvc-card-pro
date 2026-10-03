@@ -67,6 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (passwordHintGuide) {
             if (docType === 'ayushman') {
                 passwordHintGuide.innerHTML = '💡 <strong>Ayushman PDF:</strong> Agar aapka PDF password protected hai to sahi password enter karein.';
+            } else if (docType === 'crop') {
+                passwordHintGuide.innerHTML = '💡 <strong>Document Password:</strong> Is document ko unlock karne ke liye password enter karein (e.g. MahaSarathi, Voter, PAN) aur "Generate PVC Card" par click karein.';
             } else {
                 passwordHintGuide.innerHTML = '💡 <strong>Aadhaar Password Format:</strong> Naam ke pehle 4 Akshar CAPITAL me + Janm ka Saal (YYYY).<br><span style="display: inline-block; margin-top: 3px;">Udaharan: <em>SURESH (1995) &rarr;</em> <strong style="font-family: monospace; letter-spacing: 1px; background: #fee2e2; padding: 2px 6px; border-radius: 4px; color: #b91c1c; border: 1px solid #fca5a5;">SURE1995</strong></span>';
             }
@@ -592,6 +594,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const docType = (document.getElementById('selected-document-type')?.value || 'aadhaar').toLowerCase();
+
+        // Auto Card Cropper: Route directly to launchCropPreview with current file & password
+        if (docType === 'crop') {
+            window.clearPasswordError();
+            window.clearCropperDisallowedError();
+            if (fileInput.files.length > 0) {
+                launchCropPreview(fileInput.files[0]);
+            } else {
+                window.showToast('Please select a card document to crop.', 'warning');
+            }
+            return;
+        }
+
         const enteredPw = (pdfPasswordInput ? pdfPasswordInput.value : '').trim();
         if ((docType === 'aadhaar' || docType === 'aadhaar_color') && !enteredPw) {
             window.showPasswordError('required', 'Aadhaar PVC ke liye PDF password enter karna anivarya hai (e.g. SURE1995). Unlocked PDF allow nahi hai.');

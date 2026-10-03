@@ -394,6 +394,18 @@ async def extract_pdf(
                 err_msg, err_code = format_extraction_error(data)
                 return JSONResponse(status_code=400, content={"success": False, "error": err_msg, "code": err_code, "details": data})
             mapped_data = map_ayushman_data(data)
+        elif doc_type == "crop":
+            is_disallowed, card_category, disallow_msg = check_disallowed_in_cropper(
+                filepath, original_filename=file.filename, password=password
+            )
+            if is_disallowed:
+                try: os.remove(filepath)
+                except: pass
+                return JSONResponse(status_code=400, content={"success": False, "error": disallow_msg, "code": f"{card_category.upper()}_NOT_ALLOWED_IN_CROPPER"})
+            detect_res = smart_detect_card_layout(filepath, password=password)
+            try: os.remove(filepath)
+            except: pass
+            return {"success": True, "detect_res": detect_res, "document_type": "crop"}
         else:
             result = extract_aadhaar_data(filepath, password=password)
             data = result.to_json_safe_dict()
@@ -485,6 +497,74 @@ async def generate_pipeline(
                 err_msg, err_code = format_extraction_error(engine_data)
                 return JSONResponse(status_code=400, content={"success": False, "error": err_msg, "code": err_code, "details": engine_data})
             mapped_data = map_ayushman_data(engine_data)
+        elif doc_type == "crop":
+            # Auto Card Cropper Direct Pipeline Fallback
+            is_disallowed, card_category, disallow_msg = check_disallowed_in_cropper(
+                filepath, original_filename=file.filename, password=password
+            )
+            if is_disallowed:
+                history.status = "failed"
+                history.completed_at = datetime.datetime.utcnow()
+                db.commit()
+                try: os.remove(filepath)
+                except: pass
+                return JSONResponse(
+                    status_code=400,
+                    content={
+                        "success": False,
+                        "error": disallow_msg,
+                        "code": f"{card_category.upper()}_NOT_ALLOWED_IN_CROPPER",
+                        "card_category": card_category
+                    }
+                )
+
+            detect_res = smart_detect_card_layout(filepath, password=password)
+            front_box = detect_res.get("front_box") or {"x": 0.048, "y": 0.019, "w": 0.55, "h": 0.25}
+            back_box = detect_res.get("back_box")
+
+            output_dir = os.path.join("static", "renders", run_id)
+            os.makedirs(output_dir, exist_ok=True)
+
+            crop_res = await run_in_threadpool(
+                process_crop_and_print,
+                filepath,
+                front_box,
+                back_box,
+                output_dir,
+                0,
+                password
+            )
+            try: os.remove(filepath)
+            except: pass
+
+            # Deduct credit on successful generation
+            current_user.credits.wallet_balance -= user_rate
+            current_user.credits.total_generated += 1
+            history.status = "success"
+            history.completed_at = datetime.datetime.utcnow()
+            history.output_file = crop_res["front_path"]
+            history.front_image = crop_res["front_path"]
+            history.back_image = crop_res.get("back_path")
+
+            tx = models.CreditTransaction(
+                user_id=current_user.id,
+                amount=-user_rate,
+                transaction_type="generation_usage",
+                reference_id=run_id,
+                balance_after=current_user.credits.wallet_balance
+            )
+            db.add(tx)
+            db.commit()
+
+            return {
+                "success": True,
+                "run_id": run_id,
+                "front_url": f"/download-card/{run_id}/front",
+                "back_url": f"/download-card/{run_id}/back" if crop_res.get("has_back") else None,
+                "pdf_url": f"/download-pdf/{run_id}",
+                "has_back": bool(crop_res.get("has_back")),
+                "wallet_balance": current_user.credits.wallet_balance if current_user.credits else 0.0
+            }
         else:
             result = extract_aadhaar_data(filepath, password=password)
             engine_data = result.to_json_safe_dict()
