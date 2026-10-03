@@ -709,11 +709,10 @@ def get_payment_gateways():
     payu_salt = os.environ.get("PAYU_MERCHANT_SALT", PAYU_MERCHANT_SALT).strip()
     payu_configured = bool(payu_key and payu_salt)
 
-    default_gw = os.environ.get("DEFAULT_PAYMENT_GATEWAY", DEFAULT_PAYMENT_GATEWAY).strip().lower()
     cf_env = os.environ.get("CASHFREE_ENV", CASHFREE_ENV).strip().lower()
 
     return {
-        "default_gateway": default_gw if default_gw in ("cashfree", "payu") else "payu",
+        "default_gateway": "payu",
         "cashfree": {
             "enabled": True,
             "configured": cf_configured,

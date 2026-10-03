@@ -997,16 +997,9 @@
 
     refreshBalance();
 
-    // Fetch gateway default configuration from server
+    // Ensure PayU is always default selected
     (function initGatewayConfig() {
-        fetch('/api/payment/gateways')
-            .then(res => res.json())
-            .then(gwData => {
-                if (gwData && gwData.default_gateway) {
-                    selectPaymentGateway(gwData.default_gateway);
-                }
-            })
-            .catch(() => {});
+        selectPaymentGateway('payu');
     })();
 
     // Check URL parameters for Payment redirect status on load (PayU / Cashfree)
@@ -1093,6 +1086,7 @@
 
     function handleSelectPlan(planId, name, price, cards, costPerCard) {
         currentSelectedPlanId = planId;
+        selectPaymentGateway('payu'); // Keep PayU active by default
         document.getElementById('modal-plan-name').textContent = name;
         document.getElementById('modal-plan-title').textContent = name;
         document.getElementById('modal-cards-count').textContent = (planId === 1 ? '10 Cards Limit' : `~${cards} Cards`);
