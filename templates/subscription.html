@@ -868,10 +868,11 @@
             </div>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <!-- Cashfree Gateway Option -->
-                <div id="gw-opt-cashfree" onclick="selectPaymentGateway('cashfree')" style="
+                <!-- PayU Gateway Option (RECOMMENDED) -->
+                <div id="gw-opt-payu" onclick="selectPaymentGateway('payu')" style="
                     border: 2px solid #2563eb;
                     background: #f0f7ff;
+                    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.15);
                     border-radius: 14px;
                     padding: 12px 14px;
                     cursor: pointer;
@@ -879,18 +880,18 @@
                     position: relative;
                 ">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
-                        <span style="font-size: 0.92rem; font-weight: 800; color: #1e40af; display: flex; align-items: center; gap: 5px;">
-                            ⚡ Cashfree
+                        <span id="gw-title-payu" style="font-size: 0.92rem; font-weight: 800; color: #1e40af; display: flex; align-items: center; gap: 5px;">
+                            🛡️ PayU
                         </span>
                         <span style="font-size: 0.6rem; font-weight: 800; background: #2563eb; color: #fff; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;">RECOMMENDED</span>
                     </div>
-                    <div style="font-size: 0.7rem; color: #475569; font-weight: 500; line-height: 1.3;">
-                        UPI QR • GPay • PhonePe • Paytm • Cards
+                    <div id="gw-desc-payu" style="font-size: 0.7rem; color: #475569; font-weight: 500; line-height: 1.3;">
+                        UPI (GPay / PhonePe / Paytm / QR) • Cards • NetBanking
                     </div>
                 </div>
 
-                <!-- PayU Gateway Option -->
-                <div id="gw-opt-payu" onclick="selectPaymentGateway('payu')" style="
+                <!-- Cashfree Gateway Option -->
+                <div id="gw-opt-cashfree" onclick="selectPaymentGateway('cashfree')" style="
                     border: 1.5px solid #e2e8f0;
                     background: #ffffff;
                     border-radius: 14px;
@@ -900,12 +901,12 @@
                     position: relative;
                 ">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
-                        <span style="font-size: 0.92rem; font-weight: 800; color: #334155; display: flex; align-items: center; gap: 5px;">
-                            🛡️ PayU
+                        <span id="gw-title-cf" style="font-size: 0.92rem; font-weight: 800; color: #334155; display: flex; align-items: center; gap: 5px;">
+                            ⚡ Cashfree
                         </span>
                     </div>
-                    <div style="font-size: 0.7rem; color: #64748b; font-weight: 500; line-height: 1.3;">
-                        NetBanking • Cards • UPI Hosted Checkout
+                    <div id="gw-desc-cf" style="font-size: 0.7rem; color: #64748b; font-weight: 500; line-height: 1.3;">
+                        UPI QR • GPay • PhonePe • Paytm • Cards
                     </div>
                 </div>
             </div>
@@ -936,7 +937,7 @@
             " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 14px 30px -4px rgba(37, 99, 235, 0.55), 0 6px 16px -2px rgba(79, 70, 229, 0.35)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px -3px rgba(37, 99, 235, 0.42), 0 4px 12px -2px rgba(79, 70, 229, 0.25)';">
                 <div style="display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.08rem; font-weight: 800; letter-spacing: -0.2px;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                    <span>Proceed with <span id="modal-btn-gw-name">Cashfree</span> • <span id="modal-btn-amount" style="background: rgba(255,255,255,0.22); padding: 2px 9px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-weight: 800;">₹20</span></span>
+                    <span>Proceed with <span id="modal-btn-gw-name">PayU</span> • <span id="modal-btn-amount" style="background: rgba(255,255,255,0.22); padding: 2px 9px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-weight: 800;">₹20</span></span>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 </div>
                 <div style="font-size: 0.72rem; color: rgba(255, 255, 255, 0.88); font-weight: 600; letter-spacing: 0.3px; display: flex; align-items: center; gap: 6px;">
@@ -975,7 +976,7 @@
 
 <script>
     let currentSelectedPlanId = null;
-    let currentSelectedGateway = 'cashfree'; // 'cashfree' or 'payu'
+    let currentSelectedGateway = 'payu'; // 'payu' or 'cashfree'
 
     // Load initial wallet balance
     function refreshBalance() {
@@ -1050,20 +1051,12 @@
         const cfCard = document.getElementById('gw-opt-cashfree');
         const payuCard = document.getElementById('gw-opt-payu');
         const btnGwName = document.getElementById('modal-btn-gw-name');
+        const titlePayu = document.getElementById('gw-title-payu');
+        const titleCf = document.getElementById('gw-title-cf');
+        const descPayu = document.getElementById('gw-desc-payu');
+        const descCf = document.getElementById('gw-desc-cf');
         
-        if (gw === 'cashfree') {
-            if (cfCard) {
-                cfCard.style.borderColor = '#2563eb';
-                cfCard.style.background = '#f0f7ff';
-                cfCard.style.boxShadow = '0 4px 14px rgba(37, 99, 235, 0.15)';
-            }
-            if (payuCard) {
-                payuCard.style.borderColor = '#e2e8f0';
-                payuCard.style.background = '#ffffff';
-                payuCard.style.boxShadow = 'none';
-            }
-            if (btnGwName) btnGwName.textContent = 'Cashfree';
-        } else {
+        if (gw === 'payu') {
             if (payuCard) {
                 payuCard.style.borderColor = '#2563eb';
                 payuCard.style.background = '#f0f7ff';
@@ -1074,7 +1067,27 @@
                 cfCard.style.background = '#ffffff';
                 cfCard.style.boxShadow = 'none';
             }
+            if (titlePayu) titlePayu.style.color = '#1e40af';
+            if (titleCf) titleCf.style.color = '#334155';
+            if (descPayu) descPayu.style.color = '#475569';
+            if (descCf) descCf.style.color = '#64748b';
             if (btnGwName) btnGwName.textContent = 'PayU';
+        } else {
+            if (cfCard) {
+                cfCard.style.borderColor = '#2563eb';
+                cfCard.style.background = '#f0f7ff';
+                cfCard.style.boxShadow = '0 4px 14px rgba(37, 99, 235, 0.15)';
+            }
+            if (payuCard) {
+                payuCard.style.borderColor = '#e2e8f0';
+                payuCard.style.background = '#ffffff';
+                payuCard.style.boxShadow = 'none';
+            }
+            if (titleCf) titleCf.style.color = '#1e40af';
+            if (titlePayu) titlePayu.style.color = '#334155';
+            if (descCf) descCf.style.color = '#475569';
+            if (descPayu) descPayu.style.color = '#64748b';
+            if (btnGwName) btnGwName.textContent = 'Cashfree';
         }
     }
 

@@ -585,7 +585,7 @@ CASHFREE_APP_ID = os.environ.get("CASHFREE_APP_ID", "")
 CASHFREE_SECRET_KEY = os.environ.get("CASHFREE_SECRET_KEY", "")
 CASHFREE_ENV = os.environ.get("CASHFREE_ENV", "production").strip().lower()  # 'sandbox' or 'production'
 CASHFREE_API_VERSION = os.environ.get("CASHFREE_API_VERSION", "2023-08-01").strip()
-DEFAULT_PAYMENT_GATEWAY = os.environ.get("DEFAULT_PAYMENT_GATEWAY", "cashfree").strip().lower()
+DEFAULT_PAYMENT_GATEWAY = os.environ.get("DEFAULT_PAYMENT_GATEWAY", "payu").strip().lower()
 
 
 def get_cashfree_base_url() -> str:
@@ -713,7 +713,7 @@ def get_payment_gateways():
     cf_env = os.environ.get("CASHFREE_ENV", CASHFREE_ENV).strip().lower()
 
     return {
-        "default_gateway": default_gw if default_gw in ("cashfree", "payu") else "cashfree",
+        "default_gateway": default_gw if default_gw in ("cashfree", "payu") else "payu",
         "cashfree": {
             "enabled": True,
             "configured": cf_configured,
