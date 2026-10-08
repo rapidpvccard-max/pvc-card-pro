@@ -251,7 +251,7 @@ async def get_ads_txt():
     if os.path.exists(ads_file):
         with open(ads_file, "r", encoding="utf-8") as f:
             return f.read()
-    return "google.com, pub-7359691130707617, DIRECT, f08c47fec0942fa0\n"
+    return "google.com, pub-8126878101341745, DIRECT, f08c47fec0942fa0\n"
 
 class ContactMessageSchema(BaseModel):
     name: str
