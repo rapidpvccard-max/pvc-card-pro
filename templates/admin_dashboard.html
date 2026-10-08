@@ -2746,11 +2746,24 @@
                             </div>
                         </td>
                         <td>
-                            ${statusBadge}
+                            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                ${statusBadge}
+                                ${st === 'pending' ? `<button class="table-btn success" style="padding: 3px 8px; font-size: 0.72rem;" onclick="adminMarkOrderPaid('${p.id}', '${escapeHtml(p.txnid)}', ${amt}, '${escapeHtml(p.user_name)}')" title="Mark order as Paid">✓ Mark Paid</button>` : ''}
+                            </div>
                         </td>
                     </tr>
                 `;
             }).join('');
+        }
+
+        async function adminMarkOrderPaid(orderId, txnid, amount, userName) {
+            const doCredit = confirm(`Order #${txnid} (₹${amount} - ${userName})\n\nPress "OK" if you want to also credit ₹${amount} to the user's wallet.\nPress "Cancel" if you already gave them credits manually (will only update order status to Paid).`);
+
+            const res = await apiCall(`/api/admin/orders/${orderId}/mark-paid?credit_wallet=${doCredit}`, 'POST', {});
+            if (res && res.status === 'success') {
+                showToast(res.message, 'success');
+                await Promise.all([loadPayments(), loadDashboard(), loadAuditLogs()]);
+            }
         }
 
         function exportPaymentsCSV() {

@@ -306,37 +306,31 @@ def send_contact_inquiry(sender_name: str, sender_email: str, category: str, mes
     if not config["is_configured"]:
         return True, "Inquiry recorded in server logs (SMTP not configured)."
 
-    try:
-        msg = MIMEMultipart("alternative")
-        msg["Subject"] = f"[Rapid PVC Support] {category} from {sender_name}"
-        msg["From"] = f"{config['from_name']} <{config['from_email']}>"
-        msg["To"] = admin_recipient
-        msg["Reply-To"] = sender_email
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = f"[Rapid PVC Support] {category} from {sender_name}"
+    msg["From"] = f"{config['from_name']} <{config['from_email']}>"
+    msg["To"] = admin_recipient
+    msg["Reply-To"] = sender_email
 
-        plain_text = f"Contact Inquiry Received:\nName: {sender_name}\nEmail: {sender_email}\nCategory: {category}\nMessage:\n{message}\n"
-        html_content = f"""
-        <div style="font-family: sans-serif; padding: 20px; color: #0f172a; max-width: 600px; border: 1px solid #e2e8f0; border-radius: 10px;">
-            <h2 style="color: #2563eb; margin-top: 0;">New Support Ticket Received</h2>
-            <p><strong>From:</strong> {sender_name} (&lt;{sender_email}&gt;)</p>
-            <p><strong>Category:</strong> {category}</p>
-            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 15px 0;">
-            <p><strong>Message:</strong></p>
-            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; white-space: pre-wrap;">{message}</div>
-        </div>
-        """
-        msg.attach(MIMEText(plain_text, "plain"))
-        msg.attach(MIMEText(html_content, "html"))
+    plain_text = f"Contact Inquiry Received:\nName: {sender_name}\nEmail: {sender_email}\nCategory: {category}\nMessage:\n{message}\n"
+    html_content = f"""
+    <div style="font-family: sans-serif; padding: 20px; color: #0f172a; max-width: 600px; border: 1px solid #e2e8f0; border-radius: 10px;">
+        <h2 style="color: #2563eb; margin-top: 0;">New Support Ticket Received</h2>
+        <p><strong>From:</strong> {sender_name} (&lt;{sender_email}&gt;)</p>
+        <p><strong>Category:</strong> {category}</p>
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 15px 0;">
+        <p><strong>Message:</strong></p>
+        <div style="background: #f8fafc; padding: 15px; border-radius: 8px; white-space: pre-wrap;">{message}</div>
+    </div>
+    """
+    msg.attach(MIMEText(plain_text, "plain"))
+    msg.attach(MIMEText(html_content, "html"))
 
-        server = smtplib.SMTP(config["host"], config["port"], timeout=10)
-        server.ehlo()
-        server.starttls()
-        server.ehlo()
-        server.login(config["user"], config["password"])
-        server.sendmail(config["from_email"], [admin_recipient], msg.as_string())
-        server.quit()
+    success, msg_str = _dispatch_smtp_message(msg, [admin_recipient], config)
+    if success:
         return True, "Support email dispatched successfully to admin."
-    except Exception as e:
-        print(f"[Contact Email Error] Could not dispatch to admin: {str(e)}")
+    else:
+        print(f"[Contact Email Error] Could not dispatch to admin: {msg_str}")
         return True, "Inquiry saved to server log."
 
 
@@ -356,7 +350,7 @@ def send_payment_invoice_email(
     Sends a beautifully formatted Tax Invoice & Payment Receipt email to the user
     after successful recharge (PayU or Cashfree), and also notifies the admin.
     """
-    dummy_patterns = ["@example.com", "@test.com", "@rapidpvc.online", "cf_tester_", "payu_test_", "tester@"]
+    dummy_patterns = ["@example.com", "@test.com", "cf_tester_", "payu_test_"]
     if any(pat in (to_email or "").lower() for pat in dummy_patterns) or os.environ.get("TESTING") == "1":
         print(f"[Email Service] Skipped payment invoice dispatch for test recipient: {to_email}")
         return True, "Test payment invoice dispatch simulated."
@@ -701,32 +695,25 @@ Start printing PVC cards: https://rapidpvc.online/generator
     if not config["is_configured"]:
         return False, "SMTP credentials not configured."
 
-    try:
-        msg = MIMEMultipart("alternative")
-        msg["Subject"] = subject
-        msg["From"] = f"{config['from_name']} <{config['from_email']}>"
-        msg["To"] = to_email
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = f"{config['from_name']} <{config['from_email']}>"
+    msg["To"] = to_email
 
-        # Also BCC admin for real-time sales visibility
-        admin_email = os.environ.get("ADMIN_EMAILS", "rapidpvccard@gmail.com").split(",")[0].strip() or "rapidpvccard@gmail.com"
-        recipients = [to_email]
-        if admin_email and admin_email.lower() != to_email.lower():
-            recipients.append(admin_email)
+    # Also BCC admin for real-time sales visibility
+    admin_email = os.environ.get("ADMIN_EMAILS", "rapidpvccard@gmail.com").split(",")[0].strip() or "rapidpvccard@gmail.com"
+    recipients = [to_email]
+    if admin_email and admin_email.lower() != to_email.lower():
+        recipients.append(admin_email)
 
-        msg.attach(MIMEText(plain_text, "plain"))
-        msg.attach(MIMEText(html_content, "html"))
+    msg.attach(MIMEText(plain_text, "plain"))
+    msg.attach(MIMEText(html_content, "html"))
 
-        server = smtplib.SMTP(config["host"], config["port"], timeout=10)
-        server.ehlo()
-        server.starttls()
-        server.ehlo()
-        server.login(config["user"], config["password"])
-        server.sendmail(config["from_email"], recipients, msg.as_string())
-        server.quit()
-
-        print(f"[Email Service] Payment Invoice successfully delivered to {to_email}")
+    success, msg_str = _dispatch_smtp_message(msg, recipients, config)
+    if success:
+        print(f"[Email Service] Payment Invoice successfully delivered to {to_email} ({msg_str})")
         return True, "Payment invoice email sent successfully."
-    except Exception as e:
-        print(f"[Email Service Error] Failed to send payment invoice to {to_email}: {str(e)}")
-        return False, f"SMTP delivery failed: {str(e)}"
+    else:
+        print(f"[Email Service Error] Failed to send payment invoice to {to_email}: {msg_str}")
+        return False, msg_str
 

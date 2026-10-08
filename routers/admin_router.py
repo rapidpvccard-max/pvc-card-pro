@@ -403,6 +403,67 @@ def admin_test_smtp(
         "target_email": target
     }
 
+@router.post("/orders/{order_id}/mark-paid")
+def mark_order_paid(
+    order_id: str,
+    credit_wallet: bool = False,
+    current_admin: models.User = Depends(auth.get_current_admin),
+    db: Session = Depends(database.get_db)
+):
+    order = db.query(models.Order).filter((models.Order.id == order_id) | (models.Order.provider_order_id == order_id)).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+        
+    old_status = order.status
+    order.status = "paid"
+    
+    credited_amount = 0.0
+    if credit_wallet:
+        user_credits = db.query(models.UserCredits).filter(models.UserCredits.user_id == order.user_id).first()
+        if not user_credits:
+            user_credits = models.UserCredits(user_id=order.user_id, wallet_balance=0.0, total_generated=0, cost_per_card=0.95)
+            db.add(user_credits)
+        credited_amount = float(order.amount)
+        user_credits.wallet_balance = float(user_credits.wallet_balance or 0.0) + credited_amount
+        
+        plan = db.query(models.Plan).filter(models.Plan.id == order.plan_id).first()
+        if plan and (plan.id == 1 or "trial" in str(plan.name).lower()):
+            user_credits.cost_per_card = 2.00
+        else:
+            user_credits.cost_per_card = 0.95
+            
+        tx = models.CreditTransaction(
+            user_id=order.user_id,
+            amount=credited_amount,
+            transaction_type="purchase",
+            reference_id=str(order.provider_order_id or order.id),
+            balance_after=user_credits.wallet_balance
+        )
+        db.add(tx)
+        
+    log_admin_action(
+        db,
+        current_admin.id,
+        "admin_mark_order_paid",
+        order.user_id,
+        json.dumps({
+            "order_id": order.id,
+            "txnid": order.provider_order_id,
+            "old_status": old_status,
+            "new_status": "paid",
+            "credited_wallet": credit_wallet,
+            "amount": order.amount
+        })
+    )
+    db.commit()
+    
+    return {
+        "status": "success",
+        "message": f"Order #{order.provider_order_id or order.id[:8]} marked as Paid successfully",
+        "new_status": "paid",
+        "credited_wallet": credit_wallet
+    }
+
 @router.get("/audit", response_model=list[schemas.AdminAuditLogResponse])
 def get_audit_logs(
     current_admin: models.User = Depends(auth.get_current_admin), 
