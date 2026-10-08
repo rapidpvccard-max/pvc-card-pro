@@ -1657,11 +1657,137 @@
                 <div id="inspect-subtab-txs-content" style="display: none;"></div>
             </div>
 
-            <div class="modal-actions" style="margin-top: 16px; border-top: 1px solid var(--border-subtle); padding-top: 12px;">
+            <div class="modal-actions" style="margin-top: 16px; border-top: 1px solid var(--border-subtle); padding-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
                 <button class="btn-modal secondary" onclick="closeInspectModal()">Close</button>
+                <button class="btn-modal" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);" onclick="openSupportFromInspect()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    Password / WhatsApp
+                </button>
                 <button id="inspect-topup-btn" class="btn-modal primary" onclick="openCreditFromInspect()">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
                     Top Up Credits
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Password & Access Support Modal -->
+    <div id="user-support-modal" class="modal-backdrop">
+        <div class="modal-window" style="max-width: 600px;">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(245, 158, 11, 0.15); color: #f59e0b; display: flex; align-items: center; justify-content: center;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                    <div>
+                        <div class="modal-title" style="font-size: 1.15rem;">Operator Access & Password Support</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">Quickly reset password, share WhatsApp reset link, or dispatch email</div>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeUserSupportModal()">✕</button>
+            </div>
+
+            <!-- Target User Header Info -->
+            <div style="margin: 16px 0; padding: 12px 16px; background: rgba(255,255,255,0.03); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <div>
+                    <div style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;" id="support-target-name">Operator Name</div>
+                    <div style="color: #a5b4fc; font-family: monospace; font-size: 0.84rem;" id="support-target-email">operator@gmail.com</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span id="support-target-auth" class="tag-pill cyan">Email Account</span>
+                    <span id="support-target-id" style="font-size: 0.75rem; color: var(--text-dark); font-family: monospace;">ID #1</span>
+                </div>
+            </div>
+
+            <!-- Subtab Navigation -->
+            <div style="display: flex; gap: 8px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px; margin-bottom: 16px;">
+                <button class="filter-chip active" id="btn-supptab-manual" onclick="switchSupportTab('manual')">1. Direct Set Password</button>
+                <button class="filter-chip" id="btn-supptab-link" onclick="switchSupportTab('link')">2. WhatsApp Reset Link</button>
+                <button class="filter-chip" id="btn-supptab-email" onclick="switchSupportTab('email')">3. Send Reset Email</button>
+            </div>
+
+            <!-- TAB 1: Direct Set Password -->
+            <div id="supptab-content-manual">
+                <div style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
+                    Directly assign a new password for this operator. They can immediately log in with this new password without needing any email.
+                </div>
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label class="form-label" style="display: flex; justify-content: space-between;">
+                        <span>New Password (Min 6 chars)</span>
+                        <a href="javascript:void(0)" onclick="generateRandomPassword()" style="font-size: 0.75rem; color: #818cf8; text-decoration: none; font-weight: 700;">🎲 Suggest Strong Password</a>
+                    </label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="support-new-password" class="form-control" placeholder="e.g. Rapid@2026" style="font-family: monospace;">
+                        <button class="table-btn" onclick="copyDirectPassword()" title="Copy Password">Copy</button>
+                    </div>
+                </div>
+                <button class="btn-modal primary" style="width: 100%; justify-content: center; padding: 10px;" onclick="submitDirectPasswordChange()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Update & Set Password Now</span>
+                </button>
+            </div>
+
+            <!-- TAB 2: WhatsApp Reset Link -->
+            <div id="supptab-content-link" style="display: none;">
+                <div style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
+                    Generate a secure, single-use reset URL valid for <strong>15 minutes</strong>. You can copy it or share it directly with the operator on WhatsApp.
+                </div>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label class="form-label">Single-Use Reset URL</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="support-reset-url" class="form-control" readonly placeholder="Click Generate Link..." style="font-family: monospace; font-size: 0.78rem; background: rgba(0,0,0,0.2);">
+                        <button class="table-btn" onclick="copySupportResetUrl()">📋 Copy</button>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-modal primary" style="flex: 1; justify-content: center;" onclick="generateInstantResetLink()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                        <span>Generate Fresh Link</span>
+                    </button>
+                    <button class="btn-modal" id="btn-share-wa" style="background: #25D366; color: white; border: none; flex: 1; justify-content: center;" onclick="shareResetOnWhatsApp()">
+                        <span>💬 Share on WhatsApp</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 3: Send Reset Email via SMTP -->
+            <div id="supptab-content-email" style="display: none;">
+                <div style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.5;">
+                    Dispatch a professional password reset email directly to <strong><span id="support-email-preview">-</span></strong> via Gmail SMTP server.
+                </div>
+                <div id="support-email-status-box" style="display: none; padding: 12px; border-radius: var(--radius-sm); margin-bottom: 14px; font-size: 0.84rem;"></div>
+                <button class="btn-modal primary" id="btn-send-support-email" style="width: 100%; justify-content: center; padding: 11px;" onclick="sendResetEmailFromSupport()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    <span>Dispatch Password Reset Email</span>
+                </button>
+            </div>
+
+            <div class="modal-actions" style="margin-top: 16px; border-top: 1px solid var(--border-subtle); padding-top: 12px;">
+                <button class="btn-modal secondary" onclick="closeUserSupportModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live SMTP Test Modal -->
+    <div id="smtp-test-modal" class="modal-backdrop">
+        <div class="modal-window" style="max-width: 480px;">
+            <div class="modal-header">
+                <div class="modal-title">Live SMTP Email Diagnostic</div>
+                <button class="modal-close" onclick="closeEmailTestModal()">✕</button>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">
+                Send a real-time verification email to ensure Gmail SMTP delivery is active and reaching user inboxes without issues.
+            </p>
+            <div class="form-group" style="margin-bottom: 16px;">
+                <label class="form-label">Recipient Email Address</label>
+                <input type="email" id="smtp-test-recipient" class="form-control" value="rapidpvccard@gmail.com" placeholder="name@example.com">
+            </div>
+            <div id="smtp-test-feedback" style="display: none; padding: 12px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 0.85rem;"></div>
+            <div class="modal-actions">
+                <button class="btn-modal secondary" onclick="closeEmailTestModal()">Close</button>
+                <button class="btn-modal primary" id="btn-run-smtp-test" onclick="executeSmtpTest()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    <span>Send Diagnostic Email</span>
                 </button>
             </div>
         </div>
@@ -1809,6 +1935,12 @@
                         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
                     </svg>
                     <span id="theme-text">Day Mode</span>
+                </button>
+
+                <!-- SMTP Live Diagnostic Button -->
+                <button class="btn-refresh" onclick="openEmailTestModal()" title="Verify live Gmail SMTP delivery" style="border-color: rgba(99, 102, 241, 0.35); color: #818cf8; background: rgba(99, 102, 241, 0.08); gap: 6px;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    <span>Test Mail</span>
                 </button>
 
                 <button class="btn-refresh" id="refresh-btn" onclick="refreshCurrentTab()" title="Reload Data">
@@ -2753,6 +2885,10 @@
                                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
                                     <span>Wallet</span>
                                 </button>
+                                <button class="table-btn" style="background: rgba(245, 158, 11, 0.12); color: #f59e0b; border-color: rgba(245, 158, 11, 0.3);" onclick="openUserSupportModal(${user.id}, '${escapeHtml(user.email)}', '${escapeHtml(user.name || '')}', '${user.auth_provider}')" title="Direct reset password, WhatsApp link, or send email">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                    <span>Password</span>
+                                </button>
                                 ${toggleBtn}
                             </div>
                         </td>
@@ -3398,11 +3534,228 @@
             }
         }
 
+        // -------------------------------------------------------------
+        // Operator Password & Access Support Logic
+        // -------------------------------------------------------------
+        let currentSupportUser = null;
+        let currentSupportResetUrl = '';
+
+        function openUserSupportModal(userId, email, name, authProvider) {
+            currentSupportUser = { id: userId, email, name, authProvider };
+            currentSupportResetUrl = '';
+
+            document.getElementById('support-target-name').textContent = name || 'Anonymous Operator';
+            document.getElementById('support-target-email').textContent = email;
+            document.getElementById('support-target-id').textContent = `ID #${userId}`;
+            document.getElementById('support-email-preview').textContent = email;
+
+            const authSpan = document.getElementById('support-target-auth');
+            if (authSpan) {
+                authSpan.textContent = authProvider === 'google' ? 'Google 1-Click' : 'Email/Password';
+                authSpan.className = authProvider === 'google' ? 'tag-pill cyan' : 'tag-pill info';
+            }
+
+            document.getElementById('support-new-password').value = '';
+            document.getElementById('support-reset-url').value = '';
+            const statusBox = document.getElementById('support-email-status-box');
+            if (statusBox) statusBox.style.display = 'none';
+
+            switchSupportTab('manual');
+            document.getElementById('user-support-modal').classList.add('active');
+        }
+
+        function closeUserSupportModal() {
+            document.getElementById('user-support-modal').classList.remove('active');
+            currentSupportUser = null;
+        }
+
+        function openSupportFromInspect() {
+            if (!inspectingUserDetail || !inspectingUserDetail.user) return;
+            const u = inspectingUserDetail.user;
+            closeInspectModal();
+            openUserSupportModal(u.id, u.email, u.name, u.auth_provider);
+        }
+
+        function switchSupportTab(tab) {
+            ['manual', 'link', 'email'].forEach(t => {
+                const btn = document.getElementById(`btn-supptab-${t}`);
+                const content = document.getElementById(`supptab-content-${t}`);
+                if (btn) {
+                    if (t === tab) btn.classList.add('active');
+                    else btn.classList.remove('active');
+                }
+                if (content) {
+                    content.style.display = (t === tab) ? 'block' : 'none';
+                }
+            });
+            if (tab === 'link' && !currentSupportResetUrl) {
+                generateInstantResetLink();
+            }
+        }
+
+        function generateRandomPassword() {
+            let rand = 'Rapid@';
+            for (let i = 0; i < 4; i++) {
+                rand += Math.floor(Math.random() * 10);
+            }
+            document.getElementById('support-new-password').value = rand;
+        }
+
+        function copyDirectPassword() {
+            const pwd = document.getElementById('support-new-password').value.trim();
+            if (!pwd) {
+                showToast('Please enter or generate a password first', 'error');
+                return;
+            }
+            navigator.clipboard.writeText(pwd).then(() => {
+                showToast('Password copied to clipboard!', 'success');
+            }).catch(() => {
+                showToast('Password copied!', 'success');
+            });
+        }
+
+        async function submitDirectPasswordChange() {
+            if (!currentSupportUser) return;
+            const pwd = document.getElementById('support-new-password').value.trim();
+            if (!pwd || pwd.length < 6) {
+                showToast('Password must be at least 6 characters long', 'error');
+                return;
+            }
+            const res = await apiCall(`/api/admin/users/${currentSupportUser.id}/reset-password`, 'POST', {
+                new_password: pwd
+            });
+            if (res && res.status === 'success') {
+                showToast(`✓ Password updated successfully for ${currentSupportUser.email}`, 'success');
+                closeUserSupportModal();
+                await loadAuditLogs();
+            }
+        }
+
+        async function generateInstantResetLink() {
+            if (!currentSupportUser) return;
+            const input = document.getElementById('support-reset-url');
+            input.value = 'Generating secure reset link...';
+            const res = await apiCall(`/api/admin/users/${currentSupportUser.id}/generate-reset-link`, 'POST', {});
+            if (res && res.reset_url) {
+                currentSupportResetUrl = res.reset_url;
+                input.value = res.reset_url;
+                showToast('Instant reset link generated!', 'success');
+            } else {
+                input.value = '';
+            }
+        }
+
+        function copySupportResetUrl() {
+            const url = document.getElementById('support-reset-url').value.trim();
+            if (!url || url.includes('Generating')) {
+                showToast('Please generate the link first', 'error');
+                return;
+            }
+            navigator.clipboard.writeText(url).then(() => {
+                showToast('Reset URL copied to clipboard!', 'success');
+            }).catch(() => {
+                showToast('Link copied!', 'success');
+            });
+        }
+
+        function shareResetOnWhatsApp() {
+            if (!currentSupportResetUrl) {
+                showToast('Please generate link first', 'error');
+                return;
+            }
+            const userName = currentSupportUser ? (currentSupportUser.name || 'Operator') : 'Operator';
+            const msg = encodeURIComponent(`Hello ${userName},\nHere is your secure password reset link for Rapid PVC Card Pro:\n${currentSupportResetUrl}\n\nNote: This link is valid for 15 minutes.`);
+            window.open(`https://wa.me/?text=${msg}`, '_blank');
+        }
+
+        async function sendResetEmailFromSupport() {
+            if (!currentSupportUser) return;
+            const btn = document.getElementById('btn-send-support-email');
+            const statusBox = document.getElementById('support-email-status-box');
+
+            btn.disabled = true;
+            const origHtml = btn.innerHTML;
+            btn.innerHTML = 'Sending email via SMTP...';
+
+            const res = await apiCall(`/api/admin/users/${currentSupportUser.id}/send-reset-email`, 'POST', {});
+            btn.disabled = false;
+            btn.innerHTML = origHtml;
+
+            if (res && res.sent) {
+                statusBox.style.display = 'block';
+                statusBox.style.background = 'rgba(16, 185, 129, 0.15)';
+                statusBox.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+                statusBox.style.color = '#10b981';
+                statusBox.innerHTML = `<strong>✓ Email Dispatched Successfully!</strong><br>Delivered to: ${escapeHtml(currentSupportUser.email)}`;
+                showToast('Password reset email sent successfully!', 'success');
+                await loadAuditLogs();
+            } else {
+                statusBox.style.display = 'block';
+                statusBox.style.background = 'rgba(239, 68, 68, 0.15)';
+                statusBox.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+                statusBox.style.color = '#f87171';
+                statusBox.innerHTML = `<strong>✕ Delivery Failed:</strong> ${escapeHtml(res ? res.message : 'Unknown error')}<br><small>Tip: You can use Tab 2 to copy the WhatsApp link directly.</small>`;
+                showToast('Email delivery failed.', 'error');
+            }
+        }
+
+        // -------------------------------------------------------------
+        // SMTP Diagnostic Modal Logic
+        // -------------------------------------------------------------
+        function openEmailTestModal() {
+            const modal = document.getElementById('smtp-test-modal');
+            const feedback = document.getElementById('smtp-test-feedback');
+            if (feedback) feedback.style.display = 'none';
+            if (modal) modal.classList.add('active');
+        }
+
+        function closeEmailTestModal() {
+            const modal = document.getElementById('smtp-test-modal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        async function executeSmtpTest() {
+            const recipient = document.getElementById('smtp-test-recipient').value.trim();
+            if (!recipient) {
+                showToast('Please enter recipient email', 'error');
+                return;
+            }
+            const btn = document.getElementById('btn-run-smtp-test');
+            const feedback = document.getElementById('smtp-test-feedback');
+
+            btn.disabled = true;
+            const origHtml = btn.innerHTML;
+            btn.innerHTML = 'Testing SMTP Dispatch...';
+            feedback.style.display = 'none';
+
+            const res = await apiCall('/api/admin/test-smtp', 'POST', { target_email: recipient });
+            btn.disabled = false;
+            btn.innerHTML = origHtml;
+
+            if (res && res.sent) {
+                feedback.style.display = 'block';
+                feedback.style.background = 'rgba(16, 185, 129, 0.15)';
+                feedback.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+                feedback.style.color = '#10b981';
+                feedback.innerHTML = `<strong>✓ SMTP Operational!</strong><br>${escapeHtml(res.message)}<br><small>Check ${escapeHtml(recipient)} inbox.</small>`;
+                showToast('SMTP Test Email Delivered!', 'success');
+            } else {
+                feedback.style.display = 'block';
+                feedback.style.background = 'rgba(239, 68, 68, 0.15)';
+                feedback.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+                feedback.style.color = '#f87171';
+                feedback.innerHTML = `<strong>✕ SMTP Test Failed:</strong><br>${escapeHtml(res ? res.message : 'Connection failed')}`;
+                showToast('SMTP Test Failed', 'error');
+            }
+        }
+
         // Keyboard Shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeCreditModal();
                 closeConfirmModal();
+                closeUserSupportModal();
+                closeEmailTestModal();
             }
         });
     </script>

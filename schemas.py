@@ -163,3 +163,9 @@ class ForgotPasswordRequest(BaseModel):
 class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
+
+class AdminResetPasswordRequest(BaseModel):
+    new_password: str
+
+class AdminTestSmtpRequest(BaseModel):
+    target_email: Optional[str] = None

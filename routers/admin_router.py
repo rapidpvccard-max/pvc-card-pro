@@ -1,12 +1,14 @@
+import os
 import json
 import datetime
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 import database
 import models
 import schemas
 import auth
+from services.email_service import send_password_reset_email, send_test_email
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -275,6 +277,131 @@ def adjust_credits(
     db.commit()
     
     return {"status": "success", "balance_after": user_credits.wallet_balance}
+
+@router.post("/users/{user_id}/reset-password")
+def admin_reset_password(
+    user_id: int,
+    payload: schemas.AdminResetPasswordRequest,
+    current_admin: models.User = Depends(auth.get_current_admin),
+    db: Session = Depends(database.get_db)
+):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    new_password = payload.new_password.strip()
+    if len(new_password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters long")
+        
+    user.hashed_password = auth.get_password_hash(new_password)
+    db.commit()
+    
+    log_admin_action(
+        db,
+        current_admin.id,
+        "admin_password_change",
+        user.id,
+        json.dumps({"action": "Admin manually changed user password", "user_email": user.email})
+    )
+    
+    return {
+        "status": "success",
+        "message": f"Password updated successfully for {user.email}",
+        "user_id": user.id,
+        "email": user.email
+    }
+
+@router.post("/users/{user_id}/generate-reset-link")
+def admin_generate_reset_link(
+    user_id: int,
+    request: Request,
+    current_admin: models.User = Depends(auth.get_current_admin),
+    db: Session = Depends(database.get_db)
+):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    token = auth.create_password_reset_token(user)
+    env_base_url = os.environ.get("BASE_URL", "https://rapidpvc.online").rstrip("/")
+    req_base_url = str(request.base_url).rstrip("/")
+    if "localhost" in req_base_url or "127.0.0.1" in req_base_url:
+        base_url = req_base_url
+    elif env_base_url:
+        base_url = env_base_url
+    else:
+        base_url = "https://rapidpvc.online"
+    reset_url = f"{base_url}/reset-password?token={token}"
+    
+    log_admin_action(
+        db,
+        current_admin.id,
+        "admin_generate_reset_link",
+        user.id,
+        json.dumps({"action": "Generated instant reset link for operator", "user_email": user.email})
+    )
+    
+    return {
+        "status": "success",
+        "reset_url": reset_url,
+        "user_id": user.id,
+        "user_name": user.name or "Operator",
+        "user_email": user.email
+    }
+
+@router.post("/users/{user_id}/send-reset-email")
+def admin_send_reset_email(
+    user_id: int,
+    request: Request,
+    current_admin: models.User = Depends(auth.get_current_admin),
+    db: Session = Depends(database.get_db)
+):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    token = auth.create_password_reset_token(user)
+    env_base_url = os.environ.get("BASE_URL", "https://rapidpvc.online").rstrip("/")
+    req_base_url = str(request.base_url).rstrip("/")
+    if "localhost" in req_base_url or "127.0.0.1" in req_base_url:
+        base_url = req_base_url
+    elif env_base_url:
+        base_url = env_base_url
+    else:
+        base_url = "https://rapidpvc.online"
+    reset_url = f"{base_url}/reset-password?token={token}"
+    
+    sent, msg = send_password_reset_email(user.email, user.name, reset_url)
+    
+    log_admin_action(
+        db,
+        current_admin.id,
+        "admin_send_reset_email",
+        user.id,
+        json.dumps({"sent": sent, "message": msg, "user_email": user.email})
+    )
+    
+    return {
+        "status": "success" if sent else "error",
+        "sent": sent,
+        "message": msg,
+        "reset_url": reset_url,
+        "user_email": user.email
+    }
+
+@router.post("/test-smtp")
+def admin_test_smtp(
+    payload: schemas.AdminTestSmtpRequest,
+    current_admin: models.User = Depends(auth.get_current_admin)
+):
+    target = (payload.target_email or "").strip() or current_admin.email
+    sent, msg = send_test_email(target)
+    return {
+        "status": "success" if sent else "error",
+        "sent": sent,
+        "message": msg,
+        "target_email": target
+    }
 
 @router.get("/audit", response_model=list[schemas.AdminAuditLogResponse])
 def get_audit_logs(

@@ -11,13 +11,20 @@ def get_smtp_config():
     except Exception:
         pass
     
-    host = os.environ.get("SMTP_HOST", "").strip()
-    port_str = os.environ.get("SMTP_PORT", "587").strip()
-    port = int(port_str) if port_str.isdigit() else 587
-    user = os.environ.get("SMTP_USER", "").strip()
-    password = os.environ.get("SMTP_PASSWORD", "").strip()
-    from_email = os.environ.get("SMTP_FROM_EMAIL", "").strip() or user or "noreply@rapidpvc.com"
-    from_name = os.environ.get("SMTP_FROM_NAME", "").strip() or "Rapid PVC Support"
+    # Safe production defaults to ensure emails NEVER fail even if .env on VPS/EC2 lacks SMTP keys
+    DEFAULT_SMTP_HOST = "smtp.gmail.com"
+    DEFAULT_SMTP_PORT = 587
+    DEFAULT_SMTP_USER = "rapidpvccard@gmail.com"
+    DEFAULT_SMTP_PASSWORD = "nktm elgu ngkq alse"
+    DEFAULT_FROM_NAME = "Rapid PVC Card Pro"
+
+    host = os.environ.get("SMTP_HOST", "").strip() or DEFAULT_SMTP_HOST
+    port_str = os.environ.get("SMTP_PORT", "").strip()
+    port = int(port_str) if port_str.isdigit() else DEFAULT_SMTP_PORT
+    user = os.environ.get("SMTP_USER", "").strip() or DEFAULT_SMTP_USER
+    password = os.environ.get("SMTP_PASSWORD", "").strip() or DEFAULT_SMTP_PASSWORD
+    from_email = os.environ.get("SMTP_FROM_EMAIL", "").strip() or user or "rapidpvccard@gmail.com"
+    from_name = os.environ.get("SMTP_FROM_NAME", "").strip() or DEFAULT_FROM_NAME
     
     return {
         "host": host,
@@ -29,12 +36,83 @@ def get_smtp_config():
         "is_configured": bool(host and user and password)
     }
 
+def _dispatch_smtp_message(msg: MIMEMultipart, recipients: list[str], config: dict) -> tuple[bool, str]:
+    """
+    Resilient dual-port SMTP dispatcher:
+    1. Tries STARTTLS on configured port (e.g. 587)
+    2. Fallbacks automatically to SSL on port 465 if port 587 fails or is firewalled by host
+    3. Retries with and without spaces for Gmail App Passwords
+    """
+    if not config["is_configured"]:
+        return False, "SMTP credentials are not configured on server."
+
+    from_email = config["from_email"]
+    raw_pwd = config["password"]
+    passwords = [raw_pwd]
+    if " " in raw_pwd:
+        passwords.append(raw_pwd.replace(" ", ""))
+
+    last_error = ""
+
+    # Strategy 1: STARTTLS (Port 587)
+    for pwd in passwords:
+        try:
+            server = smtplib.SMTP(config["host"], config["port"], timeout=12)
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
+            server.login(config["user"], pwd)
+            server.sendmail(from_email, recipients, msg.as_string())
+            server.quit()
+            return True, f"Delivered via {config['host']}:{config['port']} (STARTTLS)"
+        except Exception as e:
+            last_error = str(e)
+
+    # Strategy 2: Direct SSL (Port 465)
+    for pwd in passwords:
+        try:
+            server = smtplib.SMTP_SSL(config["host"], 465, timeout=12)
+            server.login(config["user"], pwd)
+            server.sendmail(from_email, recipients, msg.as_string())
+            server.quit()
+            return True, f"Delivered via {config['host']}:465 (SSL Fallback)"
+        except Exception as e:
+            last_error = str(e)
+
+    return False, f"SMTP dispatch failed on both ports: {last_error}"
+
+def send_test_email(to_email: str) -> tuple[bool, str]:
+    """Sends a live verification email from admin console to verify SMTP connectivity."""
+    config = get_smtp_config()
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = "SMTP Diagnostic Test - Rapid PVC Pro"
+    msg["From"] = f"{config['from_name']} <{config['from_email']}>"
+    msg["To"] = to_email
+    msg["Date"] = formatdate(localtime=True)
+    msg["Message-ID"] = make_msgid(domain="rapidpvc.online")
+    
+    plain_text = f"This is an automated SMTP verification test dispatched from Rapid PVC Pro Admin Console to {to_email}."
+    html_content = f"""
+    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #10b981; border-radius: 8px; max-width: 500px; background: #ffffff;">
+        <h2 style="color: #10b981; margin-top: 0;">✓ SMTP Live Connection Verified</h2>
+        <p style="color: #1e293b; font-size: 14px;">Your Rapid PVC Pro email dispatch system is 100% operational and successfully delivering emails to recipient inboxes.</p>
+        <div style="background: #f8fafc; padding: 12px; border-radius: 6px; font-size: 12px; color: #64748b; margin-top: 15px;">
+            <strong>Recipient:</strong> {to_email}<br>
+            <strong>SMTP Host:</strong> {config['host']}<br>
+            <strong>Sender Identity:</strong> {config['from_name']} ({config['from_email']})
+        </div>
+    </div>
+    """
+    msg.attach(MIMEText(plain_text, "plain"))
+    msg.attach(MIMEText(html_content, "html"))
+    return _dispatch_smtp_message(msg, [to_email], config)
+
 def send_password_reset_email(to_email: str, user_name: str, reset_url: str) -> tuple[bool, str]:
     """
     Sends a professional password reset email.
     If SMTP credentials are not configured, prints the link to server console for testing.
     """
-    dummy_patterns = ["@example.com", "@test.com", "@rapidpvc.online", "cf_tester_", "payu_test_", "tester@"]
+    dummy_patterns = ["@example.com", "@test.com", "cf_tester_", "payu_test_"]
     if any(pat in (to_email or "").lower() for pat in dummy_patterns) or os.environ.get("TESTING") == "1":
         print(f"[Email Service] Skipped password reset dispatch for test recipient: {to_email}")
         return True, "Test password reset email simulated."
@@ -190,32 +268,25 @@ If you did not request this, please ignore this email.
         print(f"=======================================================\n")
         return False, "SMTP not configured on server. Check server console for test reset link."
         
-    try:
-        msg = MIMEMultipart("alternative")
-        msg["Subject"] = "Reset Your Password - Rapid PVC Card Pro"
-        msg["From"] = f"{config['from_name']} <{config['from_email']}>"
-        msg["To"] = to_email
-        msg["Reply-To"] = config["from_email"]
-        msg["Date"] = formatdate(localtime=True)
-        msg["Message-ID"] = make_msgid(domain="rapidpvc.online")
-        
-        msg.attach(MIMEText(plain_text, "plain"))
-        msg.attach(MIMEText(html_content, "html"))
-        
-        server = smtplib.SMTP(config["host"], config["port"], timeout=10)
-        server.ehlo()
-        server.starttls()
-        server.ehlo()
-        server.login(config["user"], config["password"])
-        server.sendmail(config["from_email"], [to_email], msg.as_string())
-        server.quit()
-        
-        print(f"[Email Service] Password reset email successfully delivered to {to_email}")
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = "Reset Your Password - Rapid PVC Card Pro"
+    msg["From"] = f"{config['from_name']} <{config['from_email']}>"
+    msg["To"] = to_email
+    msg["Reply-To"] = config["from_email"]
+    msg["Date"] = formatdate(localtime=True)
+    msg["Message-ID"] = make_msgid(domain="rapidpvc.online")
+    
+    msg.attach(MIMEText(plain_text, "plain"))
+    msg.attach(MIMEText(html_content, "html"))
+    
+    success, msg_str = _dispatch_smtp_message(msg, [to_email], config)
+    if success:
+        print(f"[Email Service] Password reset email successfully delivered to {to_email} ({msg_str})")
         return True, "Password reset email sent successfully."
-    except Exception as e:
-        print(f"[Email Service Error] Failed to send email to {to_email}: {str(e)}")
+    else:
+        print(f"[Email Service Error] Failed to send email to {to_email}: {msg_str}")
         print(f"Fallback Reset URL: {reset_url}")
-        return False, f"SMTP delivery failed: {str(e)}"
+        return False, msg_str
 
 def send_contact_inquiry(sender_name: str, sender_email: str, category: str, message: str) -> tuple[bool, str]:
     """
