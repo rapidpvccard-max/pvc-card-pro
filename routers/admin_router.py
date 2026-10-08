@@ -253,7 +253,8 @@ def adjust_credits(
         user_credits = models.UserCredits(user_id=user_id, wallet_balance=0.0, total_generated=0)
         db.add(user_credits)
         
-    user_credits.wallet_balance = float(user_credits.wallet_balance or 0.0) + float(request.amount)
+    new_bal = float(user_credits.wallet_balance or 0.0) + float(request.amount)
+    user_credits.wallet_balance = max(0.0, round(new_bal, 2))
     
     try:
         tx = models.CreditTransaction(
