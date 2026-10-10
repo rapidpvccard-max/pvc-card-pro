@@ -23,7 +23,7 @@ mapped_data = {
     },
     "photo": {"available": False},
     "qr": {"available": False},
-    "language": {"name": "Telugu", "code": "te"}
+    "language": {"name": "Kannada", "code": "kn"}
 }
 
 engine_data = {}
