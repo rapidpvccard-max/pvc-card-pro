@@ -1,8 +1,7 @@
 import os
-import math
 from typing import Dict, List, Optional, Tuple, Any
 import pymupdf  # PyMuPDF
-from PIL import Image, ImageOps, ImageFilter
+from PIL import Image
 from engine.a4_print import create_a4_print_pdf, CARD_WIDTH, CARD_HEIGHT
 
 # Standard CR80 Dimensions

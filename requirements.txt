@@ -17,3 +17,5 @@ psycopg2-binary
 python-dotenv
 numpy
 opencv-python-headless
+requests
+qrcode

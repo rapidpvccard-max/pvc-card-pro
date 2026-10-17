@@ -81,7 +81,6 @@ try:
     from engine.card_cropper import (
         PRESETS,
         generate_page_preview,
-        detect_card_boxes_in_page,
         smart_detect_card_layout,
         process_crop_and_print,
         open_pdf_document,

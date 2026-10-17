@@ -1,7 +1,6 @@
 import os
 import json
 import uuid
-import shutil
 from fastapi import UploadFile
 
 CONFIG_DIR = "config"

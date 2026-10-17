@@ -1,6 +1,5 @@
 import os
 import secrets
-import urllib.parse
 import requests
 from datetime import timedelta
 from dotenv import load_dotenv

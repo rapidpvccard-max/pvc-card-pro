@@ -18,7 +18,7 @@ import re
 import base64
 import logging
 from dataclasses import dataclass, asdict, field
-from typing import Optional, Any, List, Dict
+from typing import Optional, Any
 
 import fitz  # PyMuPDF
 from PIL import Image, ImageOps

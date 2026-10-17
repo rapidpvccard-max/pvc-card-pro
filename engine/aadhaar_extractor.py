@@ -38,7 +38,7 @@ import logging
 import re
 import zlib
 from dataclasses import dataclass, asdict, field
-from typing import Optional, Any, Callable, TypeVar, List, Dict, Union
+from typing import Optional, Any
 
 import fitz  # PyMuPDF
 from PIL import Image

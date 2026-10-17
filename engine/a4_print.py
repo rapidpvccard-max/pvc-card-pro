@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import Sequence
 from PIL import Image
 
 A4_WIDTH = 2480
@@ -12,7 +12,7 @@ GAP_X = 148
 MARGIN_Y = 53
 GAP_Y = 53
 
-def create_a4_print_pdf(front_images: List[str], back_images: List[str], output_path: str, mirror_columns_for_duplex: bool = False, side_by_side: bool = True) -> dict:
+def create_a4_print_pdf(front_images: Sequence[str], back_images: Sequence[str], output_path: str, mirror_columns_for_duplex: bool = False, side_by_side: bool = True) -> dict:
     """
     Takes lists of front and back PNG paths and generates a professional 300 DPI A4 print-ready PDF
     with exact CR80 1016x638 dimensions without scaling.
