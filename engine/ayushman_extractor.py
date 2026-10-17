@@ -21,7 +21,7 @@ from dataclasses import dataclass, asdict, field
 from typing import Optional, Any, List, Dict
 
 import fitz  # PyMuPDF
-from PIL import Image
+from PIL import Image, ImageOps
 from pyzbar.pyzbar import decode as zbar_decode
 
 try:
@@ -336,42 +336,77 @@ def _safe(fn: Any, *args: Any, default: Any = None, label: str = "", trace: Opti
 
 
 def extract_ayushman_photo(doc: fitz.Document, trace: Optional[list] = None) -> Optional[str]:
-    """Extracts the beneficiary portrait photo from Page 1 of the PDF."""
+    """
+    Extracts the beneficiary portrait photo from the Ayushman PDF.
+    Accurately discriminates between beneficiary photo, QR code, and full-card background templates.
+    """
     try:
         if len(doc) == 0:
             return None
-        page = doc[0]
-        images = _safe(page.get_images, full=True, default=[], label="ayushman_get_images", trace=trace) or []
-        
+
         candidates = []
-        for img in (images if isinstance(images, list) else []):
-            xref = img[0]
-            base_image = _safe(doc.extract_image, xref, default=None, label="extract_image", trace=trace)
-            if not base_image or not isinstance(base_image, dict):
-                continue
-            img_bytes = base_image.get("image")
-            if not img_bytes:
-                continue
-
-            try:
-                pil_img = Image.open(io.BytesIO(img_bytes))
-                w, h = pil_img.size
-                if w < 50 or h < 50:
+        for page_idx in range(min(len(doc), 2)):
+            page = doc[page_idx]
+            images = _safe(page.get_images, full=True, default=[], label=f"ayushman_get_images_p{page_idx}", trace=trace) or []
+            for img in (images if isinstance(images, list) else []):
+                xref = img[0]
+                base_image = _safe(doc.extract_image, xref, default=None, label="extract_image", trace=trace)
+                if not base_image or not isinstance(base_image, dict):
                     continue
-                aspect = w / h if h else 0
-                area = w * h
-                
-                # A portrait photo typically has aspect ratio between 0.60 and 0.95 (not square like QR ~1.0)
-                is_portrait = (0.60 <= aspect <= 0.95)
-                candidates.append((area, is_portrait, img_bytes))
-            except Exception:
-                continue
+                img_bytes = base_image.get("image")
+                if not img_bytes or not isinstance(img_bytes, bytes):
+                    continue
 
-        # Sort: portrait first, then largest area
-        candidates.sort(key=lambda c: (1 if c[1] else 0, c[0]), reverse=True)
+                try:
+                    pil_img = Image.open(io.BytesIO(img_bytes))
+                    pil_img = ImageOps.exif_transpose(pil_img)
+                    w, h = pil_img.size
+                    if w < 50 or h < 50:
+                        continue
+                    area = w * h
+                    if area < 3000:
+                        continue
+                    aspect = w / h if h else 0
+
+                    # 1. Exclude full card background templates (CR80 card aspect ~1.55, large area)
+                    # Card backgrounds are full-size high-res canvas (e.g. 1356x875, 677x436)
+                    if area > 180000 or (w >= 500 and h >= 300) or (1.40 <= aspect <= 1.70 and area >= 90000):
+                        continue
+
+                    # 2. Exclude QR code images
+                    is_qr = False
+                    try:
+                        qr_dec = zbar_decode(pil_img)
+                        if qr_dec:
+                            is_qr = True
+                    except Exception:
+                        pass
+
+                    if is_qr:
+                        continue
+
+                    # 3. Score candidate
+                    # Standard portrait photo: aspect between 0.55 and 0.95
+                    score = 0
+                    if 0.55 <= aspect <= 0.95:
+                        score = 100
+                    elif 1.15 <= aspect <= 1.50:  # 4:3 webcam photo (e.g. 300x225)
+                        score = 70
+                    elif 0.95 < aspect < 1.15:    # 1:1 square crop
+                        score = 40
+                    else:
+                        score = 20
+
+                    candidates.append((score, area, img_bytes))
+                except Exception:
+                    continue
+
+        # Sort: highest score first, then largest area among same score
+        candidates.sort(key=lambda c: (c[0], c[1]), reverse=True)
         if candidates:
             best_bytes = candidates[0][2]
-            pil_best = Image.open(io.BytesIO(best_bytes)).convert("RGB")
+            pil_best = Image.open(io.BytesIO(best_bytes))
+            pil_best = ImageOps.exif_transpose(pil_best).convert("RGB")
             buf = io.BytesIO()
             pil_best.save(buf, format="PNG")
             return base64.b64encode(buf.getvalue()).decode("ascii")
@@ -440,6 +475,8 @@ def parse_pmjay_qr_text(qr_raw_text: str) -> Dict[str, str]:
     for l in lines:
         if re.match(r'^(19\d\d|20\d\d)$', l):
             res['yob'] = l
+        elif re.match(r'^\d{2}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}$', l):
+            res['abha_number'] = l
         elif l.upper() in ['F', 'FEMALE', 'महिला', 'સ્ત્રી']:
             res['gender'] = 'FEMALE'
         elif l.upper() in ['M', 'MALE', 'पुरुष']:
@@ -459,7 +496,7 @@ def parse_pmjay_qr_text(qr_raw_text: str) -> Dict[str, str]:
             # Name: preceding non-ID, non-NA line
             for p in range(idx - 1, -1, -1):
                 prev_line = lines[p].strip()
-                if is_valid_ayushman_value(prev_line) and not re.match(r'^[A-Z0-9]{8,12}:?$', prev_line):
+                if is_valid_ayushman_value(prev_line) and not re.match(r'^[A-Z0-9]{8,12}:?$', prev_line) and not re.match(r'^\d{2}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}$', prev_line):
                     if re.match(r'^[A-Za-z\s\.\']{3,50}$', prev_line):
                         res['name'] = prev_line.title()
                         break
@@ -470,17 +507,17 @@ def parse_pmjay_qr_text(qr_raw_text: str) -> Dict[str, str]:
                 if is_valid_ayushman_value(dist_cand) and not dist_cand.isdigit():
                     res['district'] = dist_cand.title()
             
-            # Subdivision: line after district
+            # Village / Ward: line after district
             if idx + 2 < len(lines):
-                sub_cand = lines[idx + 2].strip()
-                if is_valid_ayushman_value(sub_cand) and not sub_cand.isdigit() and len(sub_cand) > 1:
-                    res['subdivision_town'] = sub_cand.title()
-            
-            # Village: line after subdivision
-            if idx + 3 < len(lines):
-                vil_cand = lines[idx + 3].strip()
+                vil_cand = lines[idx + 2].strip()
                 if is_valid_ayushman_value(vil_cand) and not vil_cand.isdigit() and len(vil_cand) > 1:
                     res['village_ward'] = vil_cand.title()
+            
+            # Subdivision / Town: line after village
+            if idx + 3 < len(lines):
+                sub_cand = lines[idx + 3].strip()
+                if is_valid_ayushman_value(sub_cand) and not sub_cand.isdigit() and len(sub_cand) > 1:
+                    res['subdivision_town'] = sub_cand.title()
             break
 
     return res
@@ -565,6 +602,8 @@ def extract_ayushman_data(pdf_path: str, password: Optional[str] = None) -> Ayus
                 data.mobile = qr_dict["mobile"]
             if qr_dict.get("ration_other_id"):
                 data.ration_other_id = qr_dict["ration_other_id"]
+            if qr_dict.get("abha_number"):
+                data.abha_number = qr_dict["abha_number"]
 
         # 3. Extract Text from Pages (supplement missing fields)
         page1_text = doc[0].get_text() if len(doc) > 0 else ""
@@ -671,6 +710,10 @@ def extract_ayushman_data(pdf_path: str, password: Optional[str] = None) -> Ayus
                 cand_abha = m_abha.group(1).strip()
                 if is_valid_ayushman_value(cand_abha):
                     data.abha_number = cand_abha
+            else:
+                m_raw_abha = re.search(r'\b(\d{2}-\d{4}-\d{4}-\d{4})\b', full_text)
+                if m_raw_abha:
+                    data.abha_number = m_raw_abha.group(1).strip()
 
         if not data.ration_other_id:
             m_ration = re.search(r'(?:Ration/Other\s*ID|Ration\s*ID|રાશન)\s*[:/]?\s*([A-Z0-9\-/]+)', full_text, re.IGNORECASE)
