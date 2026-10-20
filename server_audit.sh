@@ -230,7 +230,11 @@ if command -v nginx >/dev/null 2>&1; then
         log_fail "Nginx is NOT running!"
     fi
 
-    nginx_t_output=$(nginx -t 2>&1)
+    if command -v sudo >/dev/null 2>&1; then
+        nginx_t_output=$(sudo nginx -t 2>&1)
+    else
+        nginx_t_output=$(nginx -t 2>&1)
+    fi
     if [[ "$nginx_t_output" =~ "syntax is ok" ]]; then
         log_pass "Nginx configuration syntax is OK"
     else
@@ -299,7 +303,7 @@ if [ -f "$APP_DIR/.env" ]; then
     log_info ".env file permissions: $env_perms"
     
     # Check if real secrets are set (presence test, not displaying value)
-    has_secret=$(grep -E "^SECRET_KEY=" "$APP_DIR/.env" | cut -d'=' -f2)
+    has_secret=$(grep -E "^(SECRET_KEY|JWT_SECRET_KEY)=" "$APP_DIR/.env" | cut -d'=' -f2)
     has_google=$(grep -E "^GOOGLE_CLIENT_ID=" "$APP_DIR/.env" | cut -d'=' -f2)
     has_payu=$(grep -E "^PAYU_MERCHANT_KEY=" "$APP_DIR/.env" | cut -d'=' -f2)
     has_cashfree=$(grep -E "^CASHFREE_APP_ID=" "$APP_DIR/.env" | cut -d'=' -f2)

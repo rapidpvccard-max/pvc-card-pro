@@ -10,7 +10,7 @@ import models
 
 # Security Configuration
 # In production, securely load these from environment variables
-SECRET_KEY = os.environ.get("SECRET_KEY", "pvc-card-pro-super-secret-development-key")
+SECRET_KEY = os.environ.get("SECRET_KEY") or os.environ.get("JWT_SECRET_KEY") or "pvc-card-pro-super-secret-development-key"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 30 # 30 days
 
