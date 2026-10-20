@@ -162,6 +162,10 @@
         
         <div class="top-right-label {% if is_baal_aadhaar %}baal-top-right-label{% endif %}">{% if is_baal_aadhaar %}{{ baal_label }}{% else %}{{ label_aadhaar }}{% endif %}</div>
         
+        {% if identity.issue_date or issue_date %}
+        <div class="vertical-issue-info">Aadhaar no. issued: {{ identity.issue_date or issue_date }}</div>
+        {% endif %}
+        
         <div class="photo-area">
             {% if photo.available and photo_base64 %}
                 <img src="data:image/png;base64,{{ photo_base64 }}" class="photo">

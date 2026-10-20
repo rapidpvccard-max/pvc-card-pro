@@ -275,6 +275,8 @@ def render_card(mapped_data: dict, engine_data: dict, output_dir: str, document_
         "template_front_base64": template_front_base64,
         "template_back_base64": template_back_base64,
         "is_baal_aadhaar": mapped_data.get("is_baal_aadhaar", False),
+        "issue_date": mapped_data.get("identity", {}).get("issue_date") or mapped_data.get("issue_date", ""),
+        "details_date": mapped_data.get("identity", {}).get("details_date") or mapped_data.get("details_date", ""),
     }
 
     front_html = front_template.render(**context)

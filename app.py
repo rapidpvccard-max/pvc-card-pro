@@ -78,6 +78,7 @@ try:
     from engine.card_renderer import render_card
     from engine.qr_recovery import recover_qr_from_pdf
     from engine.a4_print import create_a4_print_pdf
+    from engine.watermark import apply_card_watermark
     from engine.card_cropper import (
         PRESETS,
         generate_page_preview,
@@ -88,6 +89,7 @@ try:
     )
 except (ImportError, FileNotFoundError) as e:
     err_msg = str(e)
+    def apply_card_watermark(img_path): return img_path
     def check_disallowed_in_cropper(file_path, original_filename=None, password=None):
         return False, None, None
     def extract_aadhaar_data(pdf_path, password=None):
@@ -108,6 +110,43 @@ except (ImportError, FileNotFoundError) as e:
 # Ensure directories exist
 for directory in ['uploads', 'output']:
     os.makedirs(directory, exist_ok=True)
+
+def is_service_sample_available(user_credits, category: str) -> bool:
+    """Check if the user has a free demo trial available for a specific card service category."""
+    if not user_credits:
+        return False
+    col_map = {
+        "aadhaar": "sample_aadhaar",
+        "aadhaar_color": "sample_aadhaar_color",
+        "ayushman": "sample_ayushman",
+        "crop": "sample_crop"
+    }
+    col_name = col_map.get(category)
+    if col_name and hasattr(user_credits, col_name):
+        return bool(getattr(user_credits, col_name, True))
+    return bool(getattr(user_credits, "free_sample_available", True))
+
+def consume_service_sample(user_credits, category: str):
+    """Mark the free demo trial for a specific card service category as consumed."""
+    if not user_credits:
+        return
+    col_map = {
+        "aadhaar": "sample_aadhaar",
+        "aadhaar_color": "sample_aadhaar_color",
+        "ayushman": "sample_ayushman",
+        "crop": "sample_crop"
+    }
+    col_name = col_map.get(category)
+    if col_name and hasattr(user_credits, col_name):
+        setattr(user_credits, col_name, False)
+    
+    # Check if any demo remains across all 4 services
+    has_remaining = any(
+        bool(getattr(user_credits, c, False))
+        for c in ["sample_aadhaar", "sample_aadhaar_color", "sample_ayushman", "sample_crop"]
+        if hasattr(user_credits, c)
+    )
+    user_credits.free_sample_available = has_remaining
 
 app = FastAPI(title="PVC Card Pro", version="1.0.0", lifespan=lifespan)
 
@@ -411,6 +450,8 @@ async def extract_pdf(
             if data.get("source") == "failed":
                 err_msg, err_code = format_extraction_error(data)
                 return JSONResponse(status_code=400, content={"success": False, "error": err_msg, "code": err_code, "details": data})
+            data["__pdf_path__"] = filepath
+            data["__pdf_password__"] = password
             mapped_data = map_aadhaar_data(data)
             qr_b64 = recover_qr_from_pdf(filepath, password, data.get("trace", []))
             if qr_b64:
@@ -435,13 +476,42 @@ async def generate_pipeline(
     current_user: models.User = Depends(auth.get_current_user),
     db: Session = Depends(database.get_db)
 ):
+    doc_type = (document_type or "aadhaar").lower().strip()
+    style = (template_style or "default").lower().strip()
+    if doc_type in ["aadhaar_color", "aadhaar-color", "aadhaar_colour", "colour_aadhaar", "color_aadhaar"]:
+        doc_type = "aadhaar"
+        style = "color"
+
+    # Determine service category for per-service demo tracking
+    if doc_type == "ayushman":
+        service_category = "ayushman"
+    elif doc_type == "crop":
+        service_category = "crop"
+    elif doc_type == "aadhaar" and style == "color":
+        service_category = "aadhaar_color"
+    else:
+        service_category = "aadhaar"
+
     user_rate = float(getattr(current_user.credits, 'cost_per_card', 0.95) or 0.95) if current_user.credits else 0.95
     wallet_balance = float(getattr(current_user.credits, 'wallet_balance', 0.0) or 0.0) if current_user.credits else 0.0
+    sample_available = is_service_sample_available(current_user.credits, service_category)
+
+    is_sample_generation = False
     if wallet_balance < user_rate:
-        return JSONResponse(
-            status_code=402,
-            content={"success": False, "error": f"Insufficient wallet balance to generate a card. Required: ₹{user_rate:.2f}"}
-        )
+        if sample_available:
+            is_sample_generation = True
+        else:
+            cat_display_names = {
+                "aadhaar": "Standard Aadhaar",
+                "aadhaar_color": "Colourful Aadhaar",
+                "ayushman": "Ayushman PVC Card",
+                "crop": "Auto Card Cropper"
+            }
+            c_name = cat_display_names.get(service_category, "this card")
+            return JSONResponse(
+                status_code=402,
+                content={"success": False, "error": f"Insufficient wallet balance to generate {c_name}. Required: ₹{user_rate:.2f} (Demo already used)."}
+            )
 
     if file.content_type != "application/pdf":
         return JSONResponse(status_code=400, content={"success": False, "error": "Only PDF files are allowed"})
@@ -453,23 +523,20 @@ async def generate_pipeline(
     if not content.startswith(b"%PDF-"):
         return JSONResponse(status_code=400, content={"success": False, "error": "File does not appear to be a valid PDF"})
 
-    doc_type = (document_type or "aadhaar").lower().strip()
-    style = (template_style or "default").lower().strip()
-    if doc_type in ["aadhaar_color", "aadhaar-color", "aadhaar_colour", "colour_aadhaar", "color_aadhaar"]:
-        doc_type = "aadhaar"
-        style = "color"
-
     run_id = str(uuid.uuid4())
     filename = f"{run_id}.pdf"
     filepath = os.path.join(UPLOAD_DIR, filename)
     
     # Initialize history record
     doc_label = f"aadhaar (colourful)" if (doc_type == "aadhaar" and style == "color") else doc_type
+    if is_sample_generation:
+        doc_label += " [SAMPLE DEMO]"
     history = models.GenerationHistory(
         id=run_id,
         user_id=current_user.id,
         run_id=run_id,
         document_type=doc_label,
+        is_sample=is_sample_generation,
         status="processing"
     )
     db.add(history)
@@ -536,24 +603,60 @@ async def generate_pipeline(
             try: os.remove(filepath)
             except: pass
 
-            # Deduct credit on successful generation
-            current_user.credits.wallet_balance -= user_rate
-            current_user.credits.total_generated += 1
-            history.status = "success"
-            history.completed_at = datetime.datetime.utcnow()
-            history.output_file = crop_res["front_path"]
-            history.front_image = crop_res["front_path"]
-            history.back_image = crop_res.get("back_path")
+            if is_sample_generation:
+                # Apply high-contrast Rapid PVC watermark to both sides of sample card
+                await run_in_threadpool(apply_card_watermark, crop_res["front_path"])
+                if crop_res.get("back_path"):
+                    await run_in_threadpool(apply_card_watermark, crop_res["back_path"])
 
-            tx = models.CreditTransaction(
-                user_id=current_user.id,
-                amount=-user_rate,
-                transaction_type="generation_usage",
-                reference_id=run_id,
-                balance_after=current_user.credits.wallet_balance
-            )
-            db.add(tx)
-            db.commit()
+                # Recreate A4 print PDF using the watermarked card images
+                backs = [crop_res["back_path"]] if crop_res.get("back_path") else [crop_res["front_path"]]
+                await run_in_threadpool(
+                    create_a4_print_pdf,
+                    [crop_res["front_path"]],
+                    backs,
+                    crop_res["pdf_path"],
+                    False,
+                    True
+                )
+
+                consume_service_sample(current_user.credits, service_category)
+                current_user.credits.total_generated += 1
+                history.status = "success"
+                history.is_sample = True
+                history.completed_at = datetime.datetime.utcnow()
+                history.output_file = crop_res["front_path"]
+                history.front_image = crop_res["front_path"]
+                history.back_image = crop_res.get("back_path")
+
+                tx = models.CreditTransaction(
+                    user_id=current_user.id,
+                    amount=0.0,
+                    transaction_type="free_sample",
+                    reference_id=run_id,
+                    balance_after=current_user.credits.wallet_balance
+                )
+                db.add(tx)
+                db.commit()
+            else:
+                # Deduct credit on successful generation
+                current_user.credits.wallet_balance -= user_rate
+                current_user.credits.total_generated += 1
+                history.status = "success"
+                history.completed_at = datetime.datetime.utcnow()
+                history.output_file = crop_res["front_path"]
+                history.front_image = crop_res["front_path"]
+                history.back_image = crop_res.get("back_path")
+
+                tx = models.CreditTransaction(
+                    user_id=current_user.id,
+                    amount=-user_rate,
+                    transaction_type="generation_usage",
+                    reference_id=run_id,
+                    balance_after=current_user.credits.wallet_balance
+                )
+                db.add(tx)
+                db.commit()
 
             return {
                 "success": True,
@@ -562,6 +665,7 @@ async def generate_pipeline(
                 "back_url": f"/download-card/{run_id}/back" if crop_res.get("has_back") else None,
                 "pdf_url": f"/download-pdf/{run_id}",
                 "has_back": bool(crop_res.get("has_back")),
+                "is_sample": is_sample_generation,
                 "wallet_balance": current_user.credits.wallet_balance if current_user.credits else 0.0
             }
         else:
@@ -593,29 +697,50 @@ async def generate_pipeline(
         # High-Speed Persistent Rendering Worker (Passes doc_type and template_style)
         front_path, back_path = await run_in_threadpool(render_card, mapped_data, engine_data, output_dir, doc_type, style)
         
-        # Pre-generate standard A4 print PDF in the same pass
+        if is_sample_generation:
+            # Apply high-contrast Rapid PVC watermark to both sides of sample card
+            await run_in_threadpool(apply_card_watermark, front_path)
+            await run_in_threadpool(apply_card_watermark, back_path)
+
+        # Pre-generate standard A4 print PDF in the same pass (uses watermarked cards if sample)
         pdf_path = os.path.join(output_dir, "a4_print.pdf")
         try:
             await run_in_threadpool(create_a4_print_pdf, [front_path], [back_path], pdf_path, False)
         except Exception as e:
             print(f"[A4 Pre-generation Warning] {e}")
 
-        # Deduct credit on successful generation
-        current_user.credits.wallet_balance -= user_rate
-        current_user.credits.total_generated += 1
-        history.status = "success"
-        history.completed_at = datetime.datetime.utcnow()
-        
-        tx = models.CreditTransaction(
-            user_id=current_user.id,
-            amount=-user_rate,
-            transaction_type="generation_usage",
-            reference_id=run_id,
-            balance_after=current_user.credits.wallet_balance
-        )
-        db.add(tx)
-        
-        db.commit()
+        if is_sample_generation:
+            consume_service_sample(current_user.credits, service_category)
+            current_user.credits.total_generated += 1
+            history.status = "success"
+            history.is_sample = True
+            history.completed_at = datetime.datetime.utcnow()
+            
+            tx = models.CreditTransaction(
+                user_id=current_user.id,
+                amount=0.0,
+                transaction_type="free_sample",
+                reference_id=run_id,
+                balance_after=current_user.credits.wallet_balance
+            )
+            db.add(tx)
+            db.commit()
+        else:
+            # Deduct credit on successful generation
+            current_user.credits.wallet_balance -= user_rate
+            current_user.credits.total_generated += 1
+            history.status = "success"
+            history.completed_at = datetime.datetime.utcnow()
+            
+            tx = models.CreditTransaction(
+                user_id=current_user.id,
+                amount=-user_rate,
+                transaction_type="generation_usage",
+                reference_id=run_id,
+                balance_after=current_user.credits.wallet_balance
+            )
+            db.add(tx)
+            db.commit()
         
         return {
             "success": True,
@@ -626,6 +751,7 @@ async def generate_pipeline(
             "front_url": f"/download-card/{run_id}/front",
             "back_url": f"/download-card/{run_id}/back",
             "pdf_url": f"/download-pdf/{run_id}",
+            "is_sample": is_sample_generation,
             "extraction_status": engine_data.get("extraction_confidence", "unknown"),
             "photo_available": mapped_data.get("photo", {}).get("available", False),
             "qr_available": mapped_data.get("qr", {}).get("available", False)
@@ -791,12 +917,19 @@ async def crop_generate(
     current_user: models.User = Depends(auth.get_current_user),
     db: Session = Depends(database.get_db)
 ):
-    user_rate = float(getattr(current_user.credits, 'cost_per_card', 0.95) or 0.95)
-    if current_user.credits.wallet_balance < user_rate:
-        return JSONResponse(
-            status_code=402,
-            content={"success": False, "error": f"Insufficient wallet balance. Required: ₹{user_rate:.2f}"}
-        )
+    user_rate = float(getattr(current_user.credits, 'cost_per_card', 0.95) or 0.95) if current_user.credits else 0.95
+    wallet_balance = float(getattr(current_user.credits, 'wallet_balance', 0.0) or 0.0) if current_user.credits else 0.0
+    sample_available = is_service_sample_available(current_user.credits, "crop")
+
+    is_sample_generation = False
+    if wallet_balance < user_rate:
+        if sample_available:
+            is_sample_generation = True
+        else:
+            return JSONResponse(
+                status_code=402,
+                content={"success": False, "error": f"Insufficient wallet balance to generate Auto Card Cropper. Required: ₹{user_rate:.2f} (Demo already used)."}
+            )
 
     filepath = os.path.join(UPLOAD_DIR, f"crop_{temp_id}{file_ext}")
     if not os.path.exists(filepath):
@@ -827,11 +960,14 @@ async def crop_generate(
 
     run_id = str(uuid.uuid4())
     doc_label = f"crop ({card_type.upper()})"
+    if is_sample_generation:
+        doc_label += " [SAMPLE DEMO]"
     history = models.GenerationHistory(
         id=run_id,
         user_id=current_user.id,
         run_id=run_id,
         document_type=doc_label,
+        is_sample=is_sample_generation,
         status="processing"
     )
     db.add(history)
@@ -855,20 +991,47 @@ async def crop_generate(
         try: os.remove(filepath)
         except: pass
 
-        current_user.credits.wallet_balance -= user_rate
-        current_user.credits.total_generated += 1
-        history.status = "success"
-        history.completed_at = datetime.datetime.utcnow()
+        if is_sample_generation:
+            front_p = os.path.join(output_dir, "front.png")
+            back_p = os.path.join(output_dir, "back.png")
+            if os.path.exists(front_p):
+                await run_in_threadpool(apply_card_watermark, front_p)
+            if os.path.exists(back_p):
+                await run_in_threadpool(apply_card_watermark, back_p)
+            pdf_path = os.path.join(output_dir, "a4_print.pdf")
+            backs = [back_p] if os.path.exists(back_p) and result.get("has_back") else [front_p]
+            await run_in_threadpool(create_a4_print_pdf, [front_p], backs, pdf_path, duplex_mode, not duplex_mode)
 
-        tx = models.CreditTransaction(
-            user_id=current_user.id,
-            amount=-user_rate,
-            transaction_type="generation_usage",
-            reference_id=run_id,
-            balance_after=current_user.credits.wallet_balance
-        )
-        db.add(tx)
-        db.commit()
+            consume_service_sample(current_user.credits, "crop")
+            current_user.credits.total_generated += 1
+            history.status = "success"
+            history.is_sample = True
+            history.completed_at = datetime.datetime.utcnow()
+
+            tx = models.CreditTransaction(
+                user_id=current_user.id,
+                amount=0.0,
+                transaction_type="free_sample",
+                reference_id=run_id,
+                balance_after=current_user.credits.wallet_balance
+            )
+            db.add(tx)
+            db.commit()
+        else:
+            current_user.credits.wallet_balance -= user_rate
+            current_user.credits.total_generated += 1
+            history.status = "success"
+            history.completed_at = datetime.datetime.utcnow()
+
+            tx = models.CreditTransaction(
+                user_id=current_user.id,
+                amount=-user_rate,
+                transaction_type="generation_usage",
+                reference_id=run_id,
+                balance_after=current_user.credits.wallet_balance
+            )
+            db.add(tx)
+            db.commit()
 
         return {
             "success": True,
@@ -878,6 +1041,7 @@ async def crop_generate(
             "back_url": f"/download-card/{run_id}/back" if result.get("has_back") else None,
             "has_back": result.get("has_back", False),
             "pdf_url": f"/download-pdf/{run_id}",
+            "is_sample": is_sample_generation,
             "wallet_balance": current_user.credits.wallet_balance
         }
     except Exception as e:

@@ -31,6 +31,11 @@ class UserCredits(Base):
     wallet_balance = Column(Float, default=0.0) # Default starting balance
     cost_per_card = Column(Float, default=0.95) # ₹2.00 for Trial Pack, ₹0.95 for Starter/Pro/Business
     total_generated = Column(Integer, default=0)
+    free_sample_available = Column(Boolean, default=True) # General flag
+    sample_aadhaar = Column(Boolean, default=True)        # 1 Free Demo for Aadhaar Standard (White)
+    sample_aadhaar_color = Column(Boolean, default=True)  # 1 Free Demo for Aadhaar Colourful HD
+    sample_ayushman = Column(Boolean, default=True)       # 1 Free Demo for Ayushman PMJAY Card
+    sample_crop = Column(Boolean, default=True)           # 1 Free Demo for Auto Card Cropper (Voter, PAN, e-Shram, DL)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
     user = relationship("User", back_populates="credits")
@@ -43,6 +48,7 @@ class GenerationHistory(Base):
     run_id = Column(String, index=True)
     document_type = Column(String, default="aadhaar")
     status = Column(String) # "processing", "success", "failed"
+    is_sample = Column(Boolean, default=False) # True if generated as free demo sample with watermark
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     completed_at = Column(DateTime, nullable=True)
     card_count = Column(Integer, default=1)

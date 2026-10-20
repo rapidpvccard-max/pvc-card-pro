@@ -735,7 +735,7 @@
                 <div class="doc-tab-title">Aadhaar (Standard)</div>
                 <div class="doc-tab-subtitle">Classic Official White</div>
             </div>
-            <span class="doc-tab-badge">₹0.95</span>
+            <span class="doc-tab-badge" id="badge-tab-aadhaar">₹0.95</span>
         </button>
 
         <button type="button" class="doc-type-btn aadhaar-color-tab" id="doc-btn-aadhaar-color" onclick="setDocumentType('aadhaar_color')">
@@ -746,7 +746,7 @@
                 <div class="doc-tab-title">Aadhaar (Colourful) 🎨</div>
                 <div class="doc-tab-subtitle">HD Vibrant Gradient</div>
             </div>
-            <span class="doc-tab-badge" style="background: #fef3c7; color: #b45309;">New ✨</span>
+            <span class="doc-tab-badge" id="badge-tab-aadhaar-color" style="background: #fef3c7; color: #b45309;">New ✨</span>
         </button>
 
         <button type="button" class="doc-type-btn ayushman-tab" id="doc-btn-ayushman" onclick="setDocumentType('ayushman')">
@@ -757,7 +757,7 @@
                 <div class="doc-tab-title">Ayushman PVC Card</div>
                 <div class="doc-tab-subtitle">PMJAY Golden Card Layout</div>
             </div>
-            <span class="doc-tab-badge">₹0.95</span>
+            <span class="doc-tab-badge" id="badge-tab-ayushman">₹0.95</span>
         </button>
 
         <button type="button" class="doc-type-btn crop-tab" id="doc-btn-crop" onclick="setDocumentType('crop')">
@@ -768,7 +768,7 @@
                 <div class="doc-tab-title">Auto Card Cropper ✂️</div>
                 <div class="doc-tab-subtitle">Voter, e-Shram, PAN, DL</div>
             </div>
-            <span class="doc-tab-badge" style="background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe;">Hot 🔥</span>
+            <span class="doc-tab-badge" id="badge-tab-crop" style="background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe;">Hot 🔥</span>
         </button>
     </div>
 </div>
@@ -859,6 +859,29 @@
         
         <!-- Upload Section -->
         <div id="upload-section">
+            <!-- Free Demo Sample Available Notice (Shown for new accounts) -->
+            <div id="free-sample-banner" style="display: none; margin-bottom: 22px; background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border: 1.5px solid #10b981; border-radius: 16px; padding: 16px 20px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.12);">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 42px; height: 42px; border-radius: 10px; background: #10b981; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+                            🎁
+                        </div>
+                        <div>
+                            <div id="sample-banner-title" style="font-size: 0.96rem; font-weight: 800; color: #065f46; display: flex; align-items: center; gap: 6px;">
+                                1 Free Demo Sample Card Available!
+                                <span style="background: #059669; color: #fff; font-size: 0.7rem; font-weight: 800; padding: 1px 7px; border-radius: 10px; text-transform: uppercase;">FREE TRIAL</span>
+                            </div>
+                            <div id="sample-banner-desc" style="font-size: 0.82rem; color: #047857; margin-top: 2px;">
+                                Aap bina kisi recharge ke 1 Sample Card bana kar print quality test kar sakte hain (Watermark included).
+                            </div>
+                        </div>
+                    </div>
+                    <div id="sample-banner-badge" style="font-size: 0.82rem; font-weight: 700; color: #065f46; background: rgba(255,255,255,0.7); padding: 4px 10px; border-radius: 8px; border: 1px solid #a7f3d0;">
+                        1 Free Trial
+                    </div>
+                </div>
+            </div>
+
             <form id="upload-form">
                 <input type="hidden" name="document_type" id="selected-document-type" value="aadhaar">
                 <input type="hidden" name="template_style" id="selected-template-style" value="default">
@@ -1143,6 +1166,32 @@
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     <span>Auto-delete in: <strong id="expiry-timer-text" style="font-variant-numeric: tabular-nums;">05:00</strong></span>
                     <span style="background: #dbeafe; color: #1d4ed8; padding: 2px 8px; border-radius: 10px; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;">Privacy Shield</span>
+                </div>
+            </div>
+
+            <!-- Free Demo Sample Notice (Shown only when generated as sample demo) -->
+            <div id="sample-card-notice" style="display: none; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 2px solid #f59e0b; border-radius: 18px; padding: 20px 24px; margin-bottom: 24px; text-align: left; box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.18);">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: flex-start; gap: 14px;">
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: #fef3c7; border: 1.5px solid #fde68a; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                            🎁
+                        </div>
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <h4 style="font-size: 1.15rem; font-weight: 800; color: #92400e; margin: 0; font-family: 'Plus Jakarta Sans', sans-serif;">
+                                    Free Demo Sample Card Ready!
+                                </h4>
+                                <span style="background: #f59e0b; color: #fff; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 12px; text-transform: uppercase;">Watermarked</span>
+                            </div>
+                            <p style="font-size: 0.88rem; color: #78350f; margin: 6px 0 0 0; line-height: 1.45;">
+                                Aapka sample card print quality test karne ke liye ready hai. <strong>Bina watermark ke 100% original clean PVC card</strong> banane ke liye apna wallet recharge karein!
+                            </p>
+                        </div>
+                    </div>
+                    <a href="/subscription" class="btn-primary" style="padding: 12px 22px; font-size: 0.92rem; font-weight: 800; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); border: none; border-radius: 12px; box-shadow: 0 6px 16px rgba(217, 119, 6, 0.35); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; color: #ffffff;">
+                        <span>⚡ Recharge Now (From ₹20)</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                    </a>
                 </div>
             </div>
 

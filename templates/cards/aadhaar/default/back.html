@@ -91,6 +91,10 @@
         <div class="back-header-eng">Unique Identification Authority of India</div>
 
         <div class="top-right-label top-right-label-back {% if is_baal_aadhaar %}baal-top-right-label{% endif %}">{% if is_baal_aadhaar %}{{ baal_label }}{% else %}{{ label_aadhaar }}{% endif %}</div>
+        
+        {% if identity.details_date or details_date %}
+        <div class="vertical-details-info">Details as on: {{ identity.details_date or details_date }}</div>
+        {% endif %}
 
         <div class="address-area">
             <div class="address-label">{{ label_addr }}: / Address:</div>

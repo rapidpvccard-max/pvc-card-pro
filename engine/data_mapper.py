@@ -154,6 +154,8 @@ def map_aadhaar_data(engine_data: dict) -> dict:
     aadhaar_number = get_str("masked_number")  # may be "XXXX XXXX 4112" — partial
     vid_number = get_str("reference_id")
     mobile_number = ""
+    issue_date = get_str("issue_date")
+    details_date = get_str("details_date")
     _text_layer_address = ""  # fallback address from PDF text layer (original order preserved)
 
     pdf_path = engine_data.get("__pdf_path__", "")
@@ -224,6 +226,31 @@ def map_aadhaar_data(engine_data: dict) -> dict:
                     _text_layer_address = raw_addr
 
 
+            # --- Issue Date: "Aadhaar no. issued: DD/MM/YYYY" ---
+            if not issue_date:
+                m_issue = re.search(
+                    r'(?:Aadhaar\s*no\.?\s*(?:\n|\r|\s)*issued|Issue\s*Date|Date\s*of\s*Issue)\s*[:\-]?\s*(\d{2}[\/\-]\d{2}[\/\-]\d{4})',
+                    pdf_text, re.IGNORECASE
+                ) or re.search(
+                    r'Enroll?ment\s*(?:No\.?)?\s*[:\-]?\s*\d+\s*/\s*\d+\s*/\s*\d+\s+(\d{2}[\/\-]\d{2}[\/\-]\d{4})',
+                    pdf_text, re.IGNORECASE
+                )
+                if m_issue:
+                    issue_date = m_issue.group(1).replace("-", "/").strip()
+
+            # --- Details Date: "Details as on: DD/MM/YYYY" ---
+            if not details_date:
+                m_details = re.search(
+                    r'(?:Details\s+as\s+on|Download\s+Date|Generation\s+Date|Generated\s+on)\s*[:\-]?\s*(\d{2}[\/\-]\d{2}[\/\-]\d{4})',
+                    pdf_text, re.IGNORECASE
+                )
+                if m_details:
+                    details_date = m_details.group(1).replace("-", "/").strip()
+
+    # Fallback details_date to today if not found in PDF
+    if not details_date:
+        details_date = date.today().strftime("%d/%m/%Y")
+
     # --- Apply text-layer address fallback if QR fields were empty ---
     # When QR decode fails, house/vtc/location etc. are all empty, so full_address_html is "".
     # In that case, use the address extracted directly from the PDF text layer.
@@ -266,7 +293,9 @@ def map_aadhaar_data(engine_data: dict) -> dict:
         },
         "identity": {
             "aadhaar_number": aadhaar_number,
-            "enrolment_number": vid_number
+            "enrolment_number": vid_number,
+            "issue_date": issue_date,
+            "details_date": details_date
         },
         "address": {
             "full": full_address,           # plain text (comma separated, no HTML)

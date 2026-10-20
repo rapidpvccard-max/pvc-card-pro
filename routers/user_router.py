@@ -166,11 +166,30 @@ def get_full_user_history(current_user: models.User = Depends(auth.get_current_u
 def get_user_credits(current_user: models.User = Depends(auth.get_current_user), db: Session = Depends(database.get_db)):
     credits = db.query(models.UserCredits).filter(models.UserCredits.user_id == current_user.id).first()
     if not credits:
-        return {"wallet_balance": 0.0, "total_generated": 0, "cost_per_card": 0.95}
+        return {
+            "wallet_balance": 0.0,
+            "total_generated": 0,
+            "cost_per_card": 0.95,
+            "free_sample_available": True,
+            "sample_aadhaar": True,
+            "sample_aadhaar_color": True,
+            "sample_ayushman": True,
+            "sample_crop": True
+        }
+    sample_aadhaar = bool(getattr(credits, "sample_aadhaar", True))
+    sample_aadhaar_color = bool(getattr(credits, "sample_aadhaar_color", True))
+    sample_ayushman = bool(getattr(credits, "sample_ayushman", True))
+    sample_crop = bool(getattr(credits, "sample_crop", True))
+    has_any = sample_aadhaar or sample_aadhaar_color or sample_ayushman or sample_crop
     return {
         "wallet_balance": credits.wallet_balance, 
         "total_generated": credits.total_generated,
-        "cost_per_card": float(credits.cost_per_card or 0.95)
+        "cost_per_card": float(credits.cost_per_card or 0.95),
+        "free_sample_available": has_any,
+        "sample_aadhaar": sample_aadhaar,
+        "sample_aadhaar_color": sample_aadhaar_color,
+        "sample_ayushman": sample_ayushman,
+        "sample_crop": sample_crop
     }
 
 @router.post("/update-profile")

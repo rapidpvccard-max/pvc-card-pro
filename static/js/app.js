@@ -319,6 +319,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (fileInput) fileInput.accept = "application/pdf";
         }
+
+        if (typeof window.updateServiceDemoUI === 'function') {
+            window.updateServiceDemoUI(type === 'color' ? 'aadhaar_color' : type);
+        }
     };
 
     const docBtnAadhaar = document.getElementById('doc-btn-aadhaar');
@@ -723,6 +727,20 @@ document.addEventListener('DOMContentLoaded', () => {
             frontPreview.src = data.front_url + "?t=" + bustTime;
             backPreview.src = data.back_url + "?t=" + bustTime;
             
+            if (data.is_sample) {
+                const sampleNotice = document.getElementById('sample-card-notice');
+                if (sampleNotice) sampleNotice.style.display = 'block';
+                const sampleBanner = document.getElementById('free-sample-banner');
+                if (sampleBanner) sampleBanner.style.display = 'none';
+            } else {
+                const sampleNotice = document.getElementById('sample-card-notice');
+                if (sampleNotice) sampleNotice.style.display = 'none';
+            }
+
+            if (typeof window.refreshUserCredits === 'function') {
+                window.refreshUserCredits();
+            }
+
             if(processingSection) processingSection.style.display = 'none';
             resultSection.style.display = 'block';
             startExpiryCountdown(300); // 5 Minutes Zero-Retention Privacy Timer
@@ -1470,6 +1488,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (res.wallet_balance !== undefined) {
                     const balEls = document.querySelectorAll('.wallet-balance-amount, #user-wallet-display, #header-wallet-amount');
                     balEls.forEach(el => el.textContent = `₹${parseFloat(res.wallet_balance).toFixed(2)}`);
+                }
+
+                if (res.is_sample) {
+                    const sampleNotice = document.getElementById('sample-card-notice');
+                    if (sampleNotice) sampleNotice.style.display = 'block';
+                    const sampleBanner = document.getElementById('free-sample-banner');
+                    if (sampleBanner) sampleBanner.style.display = 'none';
+                } else {
+                    const sampleNotice = document.getElementById('sample-card-notice');
+                    if (sampleNotice) sampleNotice.style.display = 'none';
+                }
+
+                if (typeof window.refreshUserCredits === 'function') {
+                    window.refreshUserCredits();
                 }
 
                 if (processingSection) processingSection.style.display = 'none';

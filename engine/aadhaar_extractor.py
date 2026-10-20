@@ -85,6 +85,8 @@ class AadhaarData:
     local_address: str = ""
     local_script: str = ""
     local_confidence: int = 0        # 0-100, see extract_local_language_fields
+    issue_date: str = ""             # Date Aadhaar number was issued (e.g. 23/10/2012)
+    details_date: str = ""           # Details as on date (e.g. 18/07/2026)
     photo_bytes: Optional[bytes] = None      # JPEG2000 raw bytes
     photo_png_bytes: Optional[bytes] = None  # converted to PNG for easy use
     qr_base64: str = ""                      # Extracted original QR image as Base64 PNG
@@ -1146,9 +1148,32 @@ def extract_aadhaar_data(pdf_path: str, password: Optional[str] = None) -> Aadha
             pil_img.save(buf, format="PNG")
             result.photo_png_bytes = buf.getvalue()
             result.photo_bytes = None
-            trace.append(f"Using portrait photo from PDF (area={best_portrait_area}px²).")
         except Exception:
             pass
+
+    # Step 4: Extract issue date ("Aadhaar no. issued: DD/MM/YYYY") and details date ("Details as on: DD/MM/YYYY")
+    try:
+        m_issue = re.search(
+            r'(?:Aadhaar\s*no\.?\s*(?:\n|\r|\s)*issued|Issue\s*Date|Date\s*of\s*Issue)\s*[:\-]?\s*(\d{2}[\/\-]\d{2}[\/\-]\d{4})',
+            full_pdf_text,
+            re.IGNORECASE
+        ) or re.search(
+            r'Enroll?ment\s*(?:No\.?)?\s*[:\-]?\s*\d+\s*/\s*\d+\s*/\s*\d+\s+(\d{2}[\/\-]\d{2}[\/\-]\d{4})',
+            full_pdf_text,
+            re.IGNORECASE
+        )
+        if m_issue:
+            result.issue_date = m_issue.group(1).replace("-", "/").strip()
+
+        m_details = re.search(
+            r'(?:Details\s+as\s+on|Download\s+Date|Generation\s+Date|Generated\s+on)\s*[:\-]?\s*(\d{2}[\/\-]\d{2}[\/\-]\d{4})',
+            full_pdf_text,
+            re.IGNORECASE
+        )
+        if m_details:
+            result.details_date = m_details.group(1).replace("-", "/").strip()
+    except Exception as e:
+        trace.append(f"Issue/Details date scan notice: {e}")
 
     result.trace = trace
     return result

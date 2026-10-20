@@ -754,19 +754,149 @@
                 }
             }).catch(e => console.error(e));
 
-        fetch('/api/user/credits')
-            .then(res => res.json())
-            .then(data => {
-                const el = document.getElementById('header-wallet-balance');
-                if(el && data.wallet_balance !== undefined) {
-                    el.textContent = '₹' + parseFloat(data.wallet_balance).toFixed(2);
+        window.userCreditsData = null;
+
+        window.updateServiceDemoUI = function(category) {
+            if (!window.userCreditsData) return;
+            const data = window.userCreditsData;
+            const bal = parseFloat(data.wallet_balance || 0);
+            const rate = data.cost_per_card !== undefined ? parseFloat(data.cost_per_card).toFixed(2) : '0.95';
+            const reqRate = parseFloat(rate);
+
+            const names = {
+                'aadhaar': 'Aadhaar (Standard)',
+                'aadhaar_color': 'Aadhaar (Colourful)',
+                'ayushman': 'Ayushman PVC Card',
+                'crop': 'Auto Card Cropper'
+            };
+
+            const demoAvailable = {
+                'aadhaar': Boolean(data.sample_aadhaar),
+                'aadhaar_color': Boolean(data.sample_aadhaar_color),
+                'ayushman': Boolean(data.sample_ayushman),
+                'crop': Boolean(data.sample_crop)
+            };
+
+            // 1. Update 4 switcher tab badges on generator page
+            const updateTabBadge = (id, available, defaultHtml, defaultStyle) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (bal < reqRate && available) {
+                    el.innerHTML = '🎁 Free Demo';
+                    el.style.background = '#ecfdf5';
+                    el.style.color = '#059669';
+                    el.style.border = '1px solid #10b981';
+                    el.style.fontWeight = '800';
+                } else {
+                    el.innerHTML = defaultHtml;
+                    el.style.background = defaultStyle.bg;
+                    el.style.color = defaultStyle.color;
+                    el.style.border = defaultStyle.border || 'none';
+                    el.style.fontWeight = '700';
                 }
-                const rate = data.cost_per_card !== undefined ? parseFloat(data.cost_per_card).toFixed(2) : '0.95';
-                const rateBadge = document.getElementById('user-rate-badge');
-                if(rateBadge) rateBadge.textContent = '⚡ Rate: ₹' + rate + ' / Card';
-                const btnGenText = document.getElementById('btn-generate-text');
-                if(btnGenText) btnGenText.textContent = 'Generate PVC Card (-₹' + rate + ')';
-            }).catch(e => console.error(e));
+            };
+            updateTabBadge('badge-tab-aadhaar', demoAvailable['aadhaar'], '₹' + rate, {bg: 'rgba(241,245,249,0.9)', color: '#475569'});
+            updateTabBadge('badge-tab-aadhaar-color', demoAvailable['aadhaar_color'], 'New ✨', {bg: '#fef3c7', color: '#b45309'});
+            updateTabBadge('badge-tab-ayushman', demoAvailable['ayushman'], '₹' + rate, {bg: 'rgba(241,245,249,0.9)', color: '#475569'});
+            updateTabBadge('badge-tab-crop', demoAvailable['crop'], 'Hot 🔥', {bg: '#f5f3ff', color: '#7c3aed', border: '1px solid #ddd6fe'});
+
+            // 2. Update 4 service price badges on home dashboard
+            const updateHomeBadge = (id, available) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (bal < reqRate && available) {
+                    el.innerHTML = '🎁 1 Free Demo Available';
+                    el.style.background = '#ecfdf5';
+                    el.style.color = '#059669';
+                    el.style.border = '1.5px solid #10b981';
+                    el.style.fontWeight = '800';
+                } else {
+                    el.innerHTML = '₹' + rate + ' / card';
+                    el.style.background = '';
+                    el.style.color = '';
+                    el.style.border = '';
+                    el.style.fontWeight = '';
+                }
+            };
+            updateHomeBadge('badge-home-aadhaar', demoAvailable['aadhaar']);
+            updateHomeBadge('badge-home-aadhaar-color', demoAvailable['aadhaar_color']);
+            updateHomeBadge('badge-home-ayushman', demoAvailable['ayushman']);
+            updateHomeBadge('badge-home-crop', demoAvailable['crop']);
+
+            // 3. Determine active service category for generator workspace
+            let active = category;
+            if (!active) {
+                const docInput = document.getElementById('selected-document-type');
+                const styleInput = document.getElementById('selected-template-style');
+                if (docInput) {
+                    if (docInput.value === 'crop') active = 'crop';
+                    else if (docInput.value === 'ayushman') active = 'ayushman';
+                    else if (styleInput && styleInput.value === 'color') active = 'aadhaar_color';
+                    else active = 'aadhaar';
+                } else {
+                    active = 'aadhaar';
+                }
+            }
+
+            const isDemoForActive = demoAvailable[active];
+            const sampleBanner = document.getElementById('free-sample-banner');
+            const bannerTitle = document.getElementById('sample-banner-title');
+            const bannerDesc = document.getElementById('sample-banner-desc');
+            const bannerBadge = document.getElementById('sample-banner-badge');
+            const btnGenText = document.getElementById('btn-generate-text');
+            const btnSubmitCrop = document.getElementById('btn-submit-crop');
+            const rateBadge = document.getElementById('user-rate-badge');
+
+            const cardName = names[active] || 'PVC Card';
+
+            if (bal < reqRate && isDemoForActive) {
+                if (sampleBanner) sampleBanner.style.display = 'block';
+                if (bannerTitle) bannerTitle.innerHTML = `🎁 1 Free Demo Available for ${cardName}! <span style="background: #059669; color: #fff; font-size: 0.7rem; font-weight: 800; padding: 1px 7px; border-radius: 10px; text-transform: uppercase;">FREE TRIAL</span>`;
+                if (bannerDesc) bannerDesc.textContent = `Aap bina kisi recharge ke 1 Sample ${cardName} bana kar print quality test kar sakte hain (Watermark included).`;
+                if (bannerBadge) bannerBadge.textContent = '1 Free Demo';
+                
+                if (btnGenText) btnGenText.textContent = `✨ Generate Free ${cardName} Sample (Demo)`;
+                if (btnSubmitCrop) {
+                    const span = btnSubmitCrop.querySelector('span');
+                    if (span) span.textContent = `✨ Crop & Generate Free ${cardName} Sample (Demo)`;
+                }
+                if (rateBadge) {
+                    rateBadge.style.background = '#ecfdf5';
+                    rateBadge.style.color = '#047857';
+                    rateBadge.style.borderColor = '#a7f3d0';
+                    rateBadge.innerHTML = `🎁 1 Free ${cardName} Demo Available`;
+                }
+            } else {
+                if (sampleBanner) sampleBanner.style.display = 'none';
+                if (btnGenText) btnGenText.textContent = 'Generate PVC Card (-₹' + rate + ')';
+                if (btnSubmitCrop) {
+                    const span = btnSubmitCrop.querySelector('span');
+                    if (span) span.textContent = 'Crop & Generate Card (-₹' + rate + ')';
+                }
+                if (rateBadge) {
+                    rateBadge.style.background = '#ecfdf5';
+                    rateBadge.style.color = '#047857';
+                    rateBadge.style.borderColor = '#a7f3d0';
+                    rateBadge.innerHTML = '⚡ Rate: ₹' + rate + ' / Card';
+                }
+            }
+        };
+
+        window.refreshUserCredits = function() {
+            return fetch('/api/user/credits')
+                .then(res => res.json())
+                .then(data => {
+                    window.userCreditsData = data;
+                    const el = document.getElementById('header-wallet-balance');
+                    if(el && data.wallet_balance !== undefined) {
+                        el.textContent = '₹' + parseFloat(data.wallet_balance).toFixed(2);
+                    }
+                    window.updateServiceDemoUI();
+                    return data;
+                }).catch(e => console.error(e));
+        };
+
+        window.refreshUserCredits();
             
         function logout() {
             fetch('/auth/logout', { method: 'POST' }).then(() => window.location.href = '/login');

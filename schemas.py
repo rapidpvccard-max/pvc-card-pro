@@ -24,6 +24,11 @@ class UserResponse(BaseModel):
 class UserCreditsResponse(BaseModel):
     wallet_balance: float
     total_generated: int
+    free_sample_available: Optional[bool] = True
+    sample_aadhaar: Optional[bool] = True
+    sample_aadhaar_color: Optional[bool] = True
+    sample_ayushman: Optional[bool] = True
+    sample_crop: Optional[bool] = True
     
     class Config:
         from_attributes = True
@@ -33,6 +38,7 @@ class GenerationHistoryResponse(BaseModel):
     run_id: str
     document_type: str
     status: str
+    is_sample: Optional[bool] = False
     created_at: datetime
     
     class Config:
