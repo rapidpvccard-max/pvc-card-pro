@@ -355,26 +355,38 @@ def map_ayushman_data(engine_data: dict) -> dict:
             "state": get_str("state"),
             "state_local": get_str("state_local")
         },
+        "labels": {
+            "name": get_str("name_label") or "नाम / NAME",
+            "yob": get_str("yob_label") or "जन्म वर्ष / YOB :",
+            "gender": get_str("gender_label") or "लिंग / GENDER :",
+            "village_ward": get_str("village_ward_label") or "गाँव/वार्ड - Village/Ward :",
+            "subdivision_town": get_str("subdivision_town_label") or "उपखंड/कस्बा - Subdivision/Town :",
+            "district": get_str("district_label") or "ज़िला/District :",
+            "state": get_str("state_label") or "राज्य:"
+        },
         "contact": {
             "mobile": get_str("mobile")
         },
         "identity": {
             "pmjay_id": get_str("pmjay_id"),
+            "pmjay_label": get_str("pmjay_label") or "PM-JAY ID:",
             "abha_number": get_str("abha_number"),
-            "ration_other_id": get_str("ration_other_id")
+            "ration_other_id": get_str("ration_other_id"),
+            "ration_label": get_str("ration_label") or "Ration/Other ID:"
         },
         "scheme": {
-            "card_title_local": get_str("card_title_local") or "આયુષ્માન કાર્ડ",
-            "coverage_amount_local": get_str("coverage_amount_local") or "₹ ૫ લાખ સુધીની",
-            "treatment_text_local": get_str("treatment_text_local") or "મફત સારવાર",
-            "scheme_footer_local": get_str("scheme_footer_local") or "આયુષ્માન ભારત પ્રધાનમંત્રી જન આરોગ્ય યોજના",
-            "back_header_local": get_str("back_header_local") or "સ્વાસ્થ્યનું વરદાન, આયુષ્માન",
+            "card_title_local": get_str("card_title_local") or "आयुष्मान कार्ड",
+            "coverage_amount_local": get_str("coverage_amount_local") or "₹ ५ लाख तक",
+            "treatment_text_local": get_str("treatment_text_local") or "मुफ्त उपचार",
+            "scheme_footer_local": get_str("scheme_footer_local") or "आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना",
+            "scheme_footer_en": get_str("scheme_footer_en") or "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+            "back_header_local": get_str("back_header_local") or "स्वास्थ्य का वरदान, आयुष्मान",
             "point1_local": get_str("point1_local"),
             "point2_local": get_str("point2_local"),
             "point3_local": get_str("point3_local"),
-            "app_download_local": get_str("app_download_local") or "એપ ડાઉનલોડ કરો",
-            "contact_label_local": get_str("contact_label_local") or "સંપર્ક કરો",
-            "log_on_label_local": get_str("log_on_label_local") or "લોગ ઓન કરો"
+            "app_download_local": get_str("app_download_local") or "ऐप डाउनलोड करें",
+            "contact_label_local": get_str("contact_label_local") or "संपर्क करें",
+            "log_on_label_local": get_str("log_on_label_local") or "लॉग ऑन करें"
         },
         "photo": {
             "available": bool(engine_data.get("photo_png_base64")),

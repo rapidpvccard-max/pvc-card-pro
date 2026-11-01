@@ -268,6 +268,7 @@ def render_card(mapped_data: dict, engine_data: dict, output_dir: str, document_
         "address": mapped_data.get("address", {}),
         "contact": mapped_data.get("contact", {}),
         "scheme": mapped_data.get("scheme", {}),
+        "labels": mapped_data.get("labels", {}),
         "photo": mapped_data.get("photo", {}),
         "qr": mapped_data.get("qr", {}),
         "photo_base64": photo_base64,

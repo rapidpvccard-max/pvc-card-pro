@@ -18,7 +18,7 @@ import re
 import base64
 import logging
 from dataclasses import dataclass, asdict, field
-from typing import Optional, Any
+from typing import Optional, Any, Dict
 
 import fitz  # PyMuPDF
 from PIL import Image, ImageOps
@@ -39,32 +39,25 @@ logger.setLevel(logging.INFO)
 
 # State to Local Language and Scheme Titles Mapping for all Indian States
 STATE_LANGUAGE_MAP: Dict[str, Dict[str, str]] = {
-    "gujarat": {
-        "lang_code": "gu",
-        "lang_name": "Gujarati",
-        "state_local": "ગુજરાત",
-        "state_en": "GUJARAT",
-        "card_title_local": "આયુષ્માન કાર્ડ",
-        "coverage_amount_local": "૫ લાખ સુધીની",
-        "treatment_text_local": "મફત સારવાર",
-        "scheme_footer_local": "આયુષ્માન ભારત પ્રધાનમંત્રી જન આરોગ્ય યોજના",
-        "back_header_local": "સ્વાસ્થ્યનું વરદાન, આયુષ્માન",
-        "app_download_local": "એપ ડાઉનલોડ કરો",
-        "contact_label_local": "સંપર્ક કરો",
-        "log_on_label_local": "લોગ ઓન કરો",
-        "point1_local": "આ આયુષ્માન કાર્ડ, આપને અને આપના કુટુંબના દરેક સભ્યને આયુષ્માન ભારત PMJAY યોજના સાથે સંલગ્ન ગુજરાતની કોઈપણ હોસ્પિટલમાં, કુટુંબ દીઠ વાર્ષિક રૂપિયા ૫ લાખ સુધીનું આરોગ્ય કવચ મેળવવામાં મદદ કરશે.",
-        "point2_local": "આયુષ્માન ભારત PMJAY યોજના અંતર્ગત ભારતભરની AB PMJAY યોજના સાથે સંલગ્ન હોસ્પિટલોમાં આપે કોઈ પૈસા ચૂકવવા/જમા કરવાની જરૂર નથી.",
-        "point3_local": "યોજના સંબંધિત ફરિયાદની જાણ કરવા અથવા તમારી નજીકના AB PMJAY એમ્પેનલ્ડ હોસ્પિટલો વિશે વધુ જાણકારી મેળવવા, કૃપા કરીને અમારો સંપર્ક કરો. (ટોલ ફ્રી નં- ૧૮૦૦ ૨૩૩ ૧૦૨૨)"
-    },
     "maharashtra": {
         "lang_code": "mr",
         "lang_name": "Marathi",
         "state_local": "महाराष्ट्र",
         "state_en": "MAHARASHTRA",
+        "state_label": "राज्य :",
+        "name_label": "नाव/NAME",
+        "yob_label": "जन्म वर्ष/ YOB :",
+        "gender_label": "लिंग/ GENDER :",
+        "village_ward_label": "गाव/वार्ड-Village/Ward :",
+        "subdivision_town_label": "तालुका/शहर-Subdivision/Town :",
+        "district_label": "जिल्हा/District :",
         "card_title_local": "आयुष्मान कार्ड",
-        "coverage_amount_local": "५ लाख पर्यंत",
+        "coverage_amount_local": "₹ ५ लाखांपर्यंत",
         "treatment_text_local": "मोफत उपचार",
-        "scheme_footer_local": "आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना",
+        "scheme_footer_local": "आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना–महात्मा ज्योतिराव फुले जन आरोग्य योजना",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI - JAN AROGYA YOJANA-MAHATMA JYOTIRAO PHULE JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID - MJPJAY ID :",
+        "ration_label": "Ration Card No :",
         "back_header_local": "आरोग्याचे वरदान, आयुष्मान",
         "app_download_local": "ॲप डाउनलोड करा",
         "contact_label_local": "संपर्क करा",
@@ -73,15 +66,52 @@ STATE_LANGUAGE_MAP: Dict[str, Dict[str, str]] = {
         "point2_local": "आयुष्मान भारत PM-JAY योजनेअंतर्गत संलग्न रुग्णालयांमध्ये तुम्हाला कोणतेही पैसे देण्याची आवश्यकता नाही.",
         "point3_local": "तक्रार नोंदवण्यासाठी किंवा जवळच्या रुग्णालयांची माहिती मिळवण्यासाठी आमच्या टोल फ्री नंबर १४५५५ वर संपर्क साधा."
     },
+    "gujarat": {
+        "lang_code": "gu",
+        "lang_name": "Gujarati",
+        "state_local": "ગુજરાત",
+        "state_en": "GUJARAT",
+        "state_label": "રાજ્ય:",
+        "name_label": "નામ / NAME",
+        "yob_label": "જન્મ વર્ષ / YOB :",
+        "gender_label": "જાતિ / GENDER :",
+        "village_ward_label": "ગામ/વોર્ડ - Village/Ward :",
+        "subdivision_town_label": "તાલુકા/શહેર - Subdivision/Town :",
+        "district_label": "જિલ્લો/District :",
+        "card_title_local": "આયુષ્માન કાર્ડ",
+        "coverage_amount_local": "₹ ૫ લાખ સુધીની",
+        "treatment_text_local": "મફત સારવાર",
+        "scheme_footer_local": "આયુષ્માન ભારત પ્રધાનમંત્રી જન આરોગ્ય યોજના",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
+        "back_header_local": "સ્વાસ્થ્યનું વરદાન, આયુષ્માન",
+        "app_download_local": "એપ ડાઉનલોડ કરો",
+        "contact_label_local": "સંપર્ક કરો",
+        "log_on_label_local": "લોગ ઓન કરો",
+        "point1_local": "આ આયુષ્માન કાર્ડ, આપને અને આપના કુટુંબના દરેક સભ્યને આયુષ્માન ભારત PMJAY યોજના સાથે સંલગ્ન ગુજરાતની કોઈપણ હોસ્પિટલમાં, કુટુંબ દીઠ વાર્ષિક રૂપિયા ૫ લાખ સુધીનું આરોગ્ય કવચ મેળવવામાં મદદ કરશે.",
+        "point2_local": "આયુષ્માન ભારત PMJAY યોજના અંતર્ગત ભારતભરની AB PMJAY યોજના સાથે સંલગ્ન હોસ્પિટલોમાં આપે કોઈ પૈસા ચૂકવવા/જમા કરવાની જરૂર નથી.",
+        "point3_local": "યોજના સંબંધિત ફરિયાદની જાણ કરવા અથવા તમારી નજીકના AB PMJAY એમ્પેનલ્ડ હોસ્પિટલો વિશે વધુ જાણકારી મેળવવા, કૃપા કરીને અમારો સંપર્ક કરો. (ટોલ ફ્રી નં- ૧૮૦૦ ૨૩૩ ૧૦૨૨)"
+    },
     "default_hindi": {
         "lang_code": "hi",
         "lang_name": "Hindi",
         "state_local": "भारत",
         "state_en": "INDIA",
+        "state_label": "राज्य:",
+        "name_label": "नाम / NAME",
+        "yob_label": "जन्म वर्ष / YOB :",
+        "gender_label": "लिंग / GENDER :",
+        "village_ward_label": "गाँव/वार्ड - Village/Ward :",
+        "subdivision_town_label": "उपखंड/कस्बा - Subdivision/Town :",
+        "district_label": "ज़िला/District :",
         "card_title_local": "आयुष्मान कार्ड",
-        "coverage_amount_local": "५ लाख तक",
+        "coverage_amount_local": "₹ ५ लाख तक",
         "treatment_text_local": "मुफ्त उपचार",
         "scheme_footer_local": "आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
         "back_header_local": "स्वास्थ्य का वरदान, आयुष्मान",
         "app_download_local": "ऐप डाउनलोड करें",
         "contact_label_local": "संपर्क करें",
@@ -95,10 +125,20 @@ STATE_LANGUAGE_MAP: Dict[str, Dict[str, str]] = {
         "lang_name": "Hindi",
         "state_local": "उत्तर प्रदेश",
         "state_en": "UTTAR PRADESH",
+        "state_label": "राज्य:",
+        "name_label": "नाम / NAME",
+        "yob_label": "जन्म वर्ष / YOB :",
+        "gender_label": "लिंग / GENDER :",
+        "village_ward_label": "गाँव/वार्ड - Village/Ward :",
+        "subdivision_town_label": "उपखंड/कस्बा - Subdivision/Town :",
+        "district_label": "ज़िला/District :",
         "card_title_local": "आयुष्मान कार्ड",
-        "coverage_amount_local": "५ लाख तक",
+        "coverage_amount_local": "₹ ५ लाख तक",
         "treatment_text_local": "मुफ्त उपचार",
         "scheme_footer_local": "आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
         "back_header_local": "स्वास्थ्य का वरदान, आयुष्मान",
         "app_download_local": "ऐप डाउनलोड करें",
         "contact_label_local": "संपर्क करें",
@@ -112,10 +152,20 @@ STATE_LANGUAGE_MAP: Dict[str, Dict[str, str]] = {
         "lang_name": "Hindi",
         "state_local": "मध्य प्रदेश",
         "state_en": "MADHYA PRADESH",
+        "state_label": "राज्य:",
+        "name_label": "नाम / NAME",
+        "yob_label": "जन्म वर्ष / YOB :",
+        "gender_label": "लिंग / GENDER :",
+        "village_ward_label": "गाँव/वार्ड - Village/Ward :",
+        "subdivision_town_label": "उपखंड/कस्बा - Subdivision/Town :",
+        "district_label": "ज़िला/District :",
         "card_title_local": "आयुष्मान कार्ड",
-        "coverage_amount_local": "५ लाख तक",
+        "coverage_amount_local": "₹ ५ लाख तक",
         "treatment_text_local": "मुफ्त उपचार",
         "scheme_footer_local": "आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
         "back_header_local": "स्वास्थ्य का वरदान, आयुष्मान",
         "app_download_local": "ऐप डाउनलोड करें",
         "contact_label_local": "संपर्क करें",
@@ -129,10 +179,20 @@ STATE_LANGUAGE_MAP: Dict[str, Dict[str, str]] = {
         "lang_name": "Hindi",
         "state_local": "राजस्थान",
         "state_en": "RAJASTHAN",
+        "state_label": "राज्य:",
+        "name_label": "नाम / NAME",
+        "yob_label": "जन्म वर्ष / YOB :",
+        "gender_label": "लिंग / GENDER :",
+        "village_ward_label": "गाँव/वार्ड - Village/Ward :",
+        "subdivision_town_label": "उपखंड/कस्बा - Subdivision/Town :",
+        "district_label": "ज़िला/District :",
         "card_title_local": "आयुष्मान कार्ड",
-        "coverage_amount_local": "५ लाख तक",
+        "coverage_amount_local": "₹ ५ लाख तक",
         "treatment_text_local": "मुफ्त उपचार",
         "scheme_footer_local": "आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
         "back_header_local": "स्वास्थ्य का वरदान, आयुष्मान",
         "app_download_local": "ऐप डाउनलोड करें",
         "contact_label_local": "संपर्क करें",
@@ -146,10 +206,290 @@ STATE_LANGUAGE_MAP: Dict[str, Dict[str, str]] = {
         "lang_name": "Hindi",
         "state_local": "बिहार",
         "state_en": "BIHAR",
+        "state_label": "राज्य:",
+        "name_label": "नाम / NAME",
+        "yob_label": "जन्म वर्ष / YOB :",
+        "gender_label": "लिंग / GENDER :",
+        "village_ward_label": "गाँव/वार्ड - Village/Ward :",
+        "subdivision_town_label": "उपखंड/कस्बा - Subdivision/Town :",
+        "district_label": "ज़िला/District :",
         "card_title_local": "आयुष्मान कार्ड",
-        "coverage_amount_local": "५ लाख तक",
+        "coverage_amount_local": "₹ ५ लाख तक",
         "treatment_text_local": "मुफ्त उपचार",
         "scheme_footer_local": "आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
+        "back_header_local": "स्वास्थ्य का वरदान, आयुष्मान",
+        "app_download_local": "ऐप डाउनलोड करें",
+        "contact_label_local": "संपर्क करें",
+        "log_on_label_local": "लॉग ऑन करें",
+        "point1_local": "प्रति वर्ष ₹ 5 लाख तक का मुफ्त इलाज।",
+        "point2_local": "अस्पतालों में कोई पैसा नहीं देना होगा।",
+        "point3_local": "टोल फ्री नंबर 14555 पर संपर्क करें।"
+    },
+    "haryana": {
+        "lang_code": "hi",
+        "lang_name": "Hindi",
+        "state_local": "हरियाणा",
+        "state_en": "HARYANA",
+        "state_label": "राज्य:",
+        "name_label": "नाम / NAME",
+        "yob_label": "जन्म वर्ष / YOB :",
+        "gender_label": "लिंग / GENDER :",
+        "village_ward_label": "गाँव/वार्ड - Village/Ward :",
+        "subdivision_town_label": "उपखंड/कस्बा - Subdivision/Town :",
+        "district_label": "ज़िला/District :",
+        "card_title_local": "आयुष्मान कार्ड",
+        "coverage_amount_local": "₹ ५ लाख तक",
+        "treatment_text_local": "मुफ्त उपचार",
+        "scheme_footer_local": "आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
+        "back_header_local": "स्वास्थ्य का वरदान, आयुष्मान",
+        "app_download_local": "ऐप डाउनलोड करें",
+        "contact_label_local": "संपर्क करें",
+        "log_on_label_local": "लॉग ऑन करें",
+        "point1_local": "प्रति वर्ष ₹ 5 लाख तक का मुफ्त इलाज।",
+        "point2_local": "अस्पतालों में कोई पैसा नहीं देना होगा।",
+        "point3_local": "टोल फ्री नंबर 14555 पर संपर्क करें।"
+    },
+    "delhi": {
+        "lang_code": "hi",
+        "lang_name": "Hindi",
+        "state_local": "दिल्ली",
+        "state_en": "DELHI",
+        "state_label": "राज्य:",
+        "name_label": "नाम / NAME",
+        "yob_label": "जन्म वर्ष / YOB :",
+        "gender_label": "लिंग / GENDER :",
+        "village_ward_label": "गाँव/वार्ड - Village/Ward :",
+        "subdivision_town_label": "उपखंड/कस्बा - Subdivision/Town :",
+        "district_label": "ज़िला/District :",
+        "card_title_local": "आयुष्मान कार्ड",
+        "coverage_amount_local": "₹ ५ लाख तक",
+        "treatment_text_local": "मुफ्त उपचार",
+        "scheme_footer_local": "आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
+        "back_header_local": "स्वास्थ्य का वरदान, आयुष्मान",
+        "app_download_local": "ऐप डाउनलोड करें",
+        "contact_label_local": "संपर्क करें",
+        "log_on_label_local": "लॉग ऑन करें",
+        "point1_local": "प्रति वर्ष ₹ 5 लाख तक का मुफ्त इलाज।",
+        "point2_local": "अस्पतालों में कोई पैसा नहीं देना होगा।",
+        "point3_local": "टोल फ्री नंबर 14555 पर संपर्क करें।"
+    },
+    "jharkhand": {
+        "lang_code": "hi",
+        "lang_name": "Hindi",
+        "state_local": "झारखंड",
+        "state_en": "JHARKHAND",
+        "state_label": "राज्य:",
+        "name_label": "नाम / NAME",
+        "yob_label": "जन्म वर्ष / YOB :",
+        "gender_label": "लिंग / GENDER :",
+        "village_ward_label": "गाँव/वार्ड - Village/Ward :",
+        "subdivision_town_label": "उपखंड/कस्बा - Subdivision/Town :",
+        "district_label": "ज़िला/District :",
+        "card_title_local": "आयुष्मान कार्ड",
+        "coverage_amount_local": "₹ ५ लाख तक",
+        "treatment_text_local": "मुफ्त उपचार",
+        "scheme_footer_local": "आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
+        "back_header_local": "स्वास्थ्य का वरदान, आयुष्मान",
+        "app_download_local": "ऐप डाउनलोड करें",
+        "contact_label_local": "संपर्क करें",
+        "log_on_label_local": "लॉग ऑन करें",
+        "point1_local": "प्रति वर्ष ₹ 5 लाख तक का मुफ्त इलाज।",
+        "point2_local": "अस्पतालों में कोई पैसा नहीं देना होगा।",
+        "point3_local": "टोल फ्री नंबर 14555 पर संपर्क करें।"
+    },
+    "chhattisgarh": {
+        "lang_code": "hi",
+        "lang_name": "Hindi",
+        "state_local": "छत्तीसगढ़",
+        "state_en": "CHHATTISGARH",
+        "state_label": "राज्य:",
+        "name_label": "नाम / NAME",
+        "yob_label": "जन्म वर्ष / YOB :",
+        "gender_label": "लिंग / GENDER :",
+        "village_ward_label": "गाँव/वार्ड - Village/Ward :",
+        "subdivision_town_label": "उपखंड/कस्बा - Subdivision/Town :",
+        "district_label": "ज़िला/District :",
+        "card_title_local": "आयुष्मान कार्ड",
+        "coverage_amount_local": "₹ ५ लाख तक",
+        "treatment_text_local": "मुफ्त उपचार",
+        "scheme_footer_local": "आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
+        "back_header_local": "स्वास्थ्य का वरदान, आयुष्मान",
+        "app_download_local": "ऐप डाउनलोड करें",
+        "contact_label_local": "संपर्क करें",
+        "log_on_label_local": "लॉग ऑन करें",
+        "point1_local": "प्रति वर्ष ₹ 5 लाख तक का मुफ्त इलाज।",
+        "point2_local": "अस्पतालों में कोई पैसा नहीं देना होगा।",
+        "point3_local": "टोल फ्री नंबर 14555 पर संपर्क करें।"
+    },
+    "uttarakhand": {
+        "lang_code": "hi",
+        "lang_name": "Hindi",
+        "state_local": "उत्तराखंड",
+        "state_en": "UTTARAKHAND",
+        "state_label": "राज्य:",
+        "name_label": "नाम / NAME",
+        "yob_label": "जन्म वर्ष / YOB :",
+        "gender_label": "लिंग / GENDER :",
+        "village_ward_label": "गाँव/वार्ड - Village/Ward :",
+        "subdivision_town_label": "उपखंड/कस्बा - Subdivision/Town :",
+        "district_label": "ज़िला/District :",
+        "card_title_local": "आयुष्मान कार्ड",
+        "coverage_amount_local": "₹ ५ लाख तक",
+        "treatment_text_local": "मुफ्त उपचार",
+        "scheme_footer_local": "आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
+        "back_header_local": "स्वास्थ्य का वरदान, आयुष्मान",
+        "app_download_local": "ऐप डाउनलोड करें",
+        "contact_label_local": "संपर्क करें",
+        "log_on_label_local": "लॉग ऑन करें",
+        "point1_local": "प्रति वर्ष ₹ 5 लाख तक का मुफ्त इलाज।",
+        "point2_local": "अस्पतालों में कोई पैसा नहीं देना होगा।",
+        "point3_local": "टोल फ्री नंबर 14555 पर संपर्क करें।"
+    },
+    "himachal pradesh": {
+        "lang_code": "hi",
+        "lang_name": "Hindi",
+        "state_local": "हिमाचल प्रदेश",
+        "state_en": "HIMACHAL PRADESH",
+        "state_label": "राज्य:",
+        "name_label": "नाम / NAME",
+        "yob_label": "जन्म वर्ष / YOB :",
+        "gender_label": "लिंग / GENDER :",
+        "village_ward_label": "गाँव/वार्ड - Village/Ward :",
+        "subdivision_town_label": "उपखंड/कस्बा - Subdivision/Town :",
+        "district_label": "ज़िला/District :",
+        "card_title_local": "आयुष्मान कार्ड",
+        "coverage_amount_local": "₹ ५ लाख तक",
+        "treatment_text_local": "मुफ्त उपचार",
+        "scheme_footer_local": "आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
+        "back_header_local": "स्वास्थ्य का वरदान, आयुष्मान",
+        "app_download_local": "ऐप डाउनलोड करें",
+        "contact_label_local": "संपर्क करें",
+        "log_on_label_local": "लॉग ऑन करें",
+        "point1_local": "प्रति वर्ष ₹ 5 लाख तक का मुफ्त इलाज।",
+        "point2_local": "अस्पतालों में कोई पैसा नहीं देना होगा।",
+        "point3_local": "टोल फ्री नंबर 14555 पर संपर्क करें।"
+    },
+    "chandigarh": {
+        "lang_code": "hi",
+        "lang_name": "Hindi",
+        "state_local": "चंडीगढ़",
+        "state_en": "CHANDIGARH",
+        "state_label": "राज्य:",
+        "name_label": "नाम / NAME",
+        "yob_label": "जन्म वर्ष / YOB :",
+        "gender_label": "लिंग / GENDER :",
+        "village_ward_label": "गाँव/वार्ड - Village/Ward :",
+        "subdivision_town_label": "उपखंड/कस्बा - Subdivision/Town :",
+        "district_label": "ज़िला/District :",
+        "card_title_local": "आयुष्मान कार्ड",
+        "coverage_amount_local": "₹ ५ लाख तक",
+        "treatment_text_local": "मुफ्त उपचार",
+        "scheme_footer_local": "आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
+        "back_header_local": "स्वास्थ्य का वरदान, आयुष्मान",
+        "app_download_local": "ऐप डाउनलोड करें",
+        "contact_label_local": "संपर्क करें",
+        "log_on_label_local": "लॉग ऑन करें",
+        "point1_local": "प्रति वर्ष ₹ 5 लाख तक का मुफ्त इलाज।",
+        "point2_local": "अस्पतालों में कोई पैसा नहीं देना होगा।",
+        "point3_local": "टोल फ्री नंबर 14555 पर संपर्क करें।"
+    },
+    "jammu and kashmir": {
+        "lang_code": "hi",
+        "lang_name": "Hindi",
+        "state_local": "जम्मू और कश्मीर",
+        "state_en": "JAMMU AND KASHMIR",
+        "state_label": "राज्य:",
+        "name_label": "नाम / NAME",
+        "yob_label": "जन्म वर्ष / YOB :",
+        "gender_label": "लिंग / GENDER :",
+        "village_ward_label": "गाँव/वार्ड - Village/Ward :",
+        "subdivision_town_label": "उपखंड/कस्बा - Subdivision/Town :",
+        "district_label": "ज़िला/District :",
+        "card_title_local": "आयुष्मान कार्ड",
+        "coverage_amount_local": "₹ ५ लाख तक",
+        "treatment_text_local": "मुफ्त उपचार",
+        "scheme_footer_local": "आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
+        "back_header_local": "स्वास्थ्य का वरदान, आयुष्मान",
+        "app_download_local": "ऐप डाउनलोड करें",
+        "contact_label_local": "संपर्क करें",
+        "log_on_label_local": "लॉग ऑन करें",
+        "point1_local": "प्रति वर्ष ₹ 5 लाख तक का मुफ्त इलाज।",
+        "point2_local": "अस्पतालों में कोई पैसा नहीं देना होगा।",
+        "point3_local": "टोल फ्री नंबर 14555 पर संपर्क करें।"
+    },
+    "ladakh": {
+        "lang_code": "hi",
+        "lang_name": "Hindi",
+        "state_local": "लद्दाख",
+        "state_en": "LADAKH",
+        "state_label": "राज्य:",
+        "name_label": "नाम / NAME",
+        "yob_label": "जन्म वर्ष / YOB :",
+        "gender_label": "लिंग / GENDER :",
+        "village_ward_label": "गाँव/वार्ड - Village/Ward :",
+        "subdivision_town_label": "उपखंड/कस्बा - Subdivision/Town :",
+        "district_label": "ज़िला/District :",
+        "card_title_local": "आयुष्मान कार्ड",
+        "coverage_amount_local": "₹ ५ लाख तक",
+        "treatment_text_local": "मुफ्त उपचार",
+        "scheme_footer_local": "आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
+        "back_header_local": "स्वास्थ्य का वरदान, आयुष्मान",
+        "app_download_local": "ऐप डाउनलोड करें",
+        "contact_label_local": "संपर्क करें",
+        "log_on_label_local": "लॉग ऑन करें",
+        "point1_local": "प्रति वर्ष ₹ 5 लाख तक का मुफ्त इलाज।",
+        "point2_local": "अस्पतालों में कोई पैसा नहीं देना होगा।",
+        "point3_local": "टोल फ्री नंबर 14555 पर संपर्क करें।"
+    },
+    "goa": {
+        "lang_code": "hi",
+        "lang_name": "Hindi",
+        "state_local": "गोवा",
+        "state_en": "GOA",
+        "state_label": "राज्य:",
+        "name_label": "नाम / NAME",
+        "yob_label": "जन्म वर्ष / YOB :",
+        "gender_label": "लिंग / GENDER :",
+        "village_ward_label": "गाँव/वार्ड - Village/Ward :",
+        "subdivision_town_label": "उपखंड/कस्बा - Subdivision/Town :",
+        "district_label": "ज़िला/District :",
+        "card_title_local": "आयुष्मान कार्ड",
+        "coverage_amount_local": "₹ ५ लाख तक",
+        "treatment_text_local": "मुफ्त उपचार",
+        "scheme_footer_local": "आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
         "back_header_local": "स्वास्थ्य का वरदान, आयुष्मान",
         "app_download_local": "ऐप डाउनलोड करें",
         "contact_label_local": "संपर्क करें",
@@ -163,10 +503,20 @@ STATE_LANGUAGE_MAP: Dict[str, Dict[str, str]] = {
         "lang_name": "Telugu",
         "state_local": "తెలంగాణ",
         "state_en": "TELANGANA",
+        "state_label": "రాష్ట్రం:",
+        "name_label": "పేరు / NAME",
+        "yob_label": "పుట్టిన సంవత్సరం / YOB :",
+        "gender_label": "లింగం / GENDER :",
+        "village_ward_label": "గ్రామం/వార్డు - Village/Ward :",
+        "subdivision_town_label": "సబ్ డివిజన్/పట్టణం - Subdivision/Town :",
+        "district_label": "జిల్లా/District :",
         "card_title_local": "ఆయుష్మాన్ కార్డ్",
         "coverage_amount_local": "₹ 5 లక్షల వరకు",
         "treatment_text_local": "ఉచిత చికిత్స",
         "scheme_footer_local": "ఆయుష్మాన్ భారత్ ప్రధాన మంత్రి జన్ ఆరోగ్య యోజన",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
         "back_header_local": "ఆరోగ్య వరం, ఆయుష్మాన్",
         "app_download_local": "యాప్‌ని డౌన్‌లోడ్ చేయండి",
         "contact_label_local": "సంప్రదించండి",
@@ -180,10 +530,20 @@ STATE_LANGUAGE_MAP: Dict[str, Dict[str, str]] = {
         "lang_name": "Telugu",
         "state_local": "ఆంధ్రప్రదేశ్",
         "state_en": "ANDHRA PRADESH",
+        "state_label": "రాష్ట్రం:",
+        "name_label": "పేరు / NAME",
+        "yob_label": "పుట్టిన సంవత్సరం / YOB :",
+        "gender_label": "లింగం / GENDER :",
+        "village_ward_label": "గ్రామం/వార్డు - Village/Ward :",
+        "subdivision_town_label": "సబ్ డివిజన్/పట్టణం - Subdivision/Town :",
+        "district_label": "జిల్లా/District :",
         "card_title_local": "ఆయుష్మాన్ కార్డ్",
         "coverage_amount_local": "₹ 5 లక్షల వరకు",
         "treatment_text_local": "ఉచిత చికిత్స",
         "scheme_footer_local": "ఆయుష్మాన్ భారత్ ప్రధాన మంత్రి జన్ ఆరోగ్య యోజన",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
         "back_header_local": "ఆరోగ్య వరం, ఆయుష్మాన్",
         "app_download_local": "యాప్‌ని డౌన్‌లోడ్ చేయండి",
         "contact_label_local": "సంప్రదించండి",
@@ -197,10 +557,47 @@ STATE_LANGUAGE_MAP: Dict[str, Dict[str, str]] = {
         "lang_name": "Tamil",
         "state_local": "தமிழ்நாடு",
         "state_en": "TAMIL NADU",
+        "state_label": "மாநிலம்:",
+        "name_label": "பெயர் / NAME",
+        "yob_label": "பிறந்த ஆண்டு / YOB :",
+        "gender_label": "பாலினம் / GENDER :",
+        "village_ward_label": "கிராமம்/வார்டு - Village/Ward :",
+        "subdivision_town_label": "துணைப்பிரிவு/நகரம் - Subdivision/Town :",
+        "district_label": "மாவட்டம்/District :",
         "card_title_local": "ஆயுஷ்மான் அட்டை",
         "coverage_amount_local": "₹ 5 லட்சம் வரை",
         "treatment_text_local": "இலவச சிகிச்சை",
         "scheme_footer_local": "ஆயுஷ்மான் பாரத் பிரதமர் மக்கள் ஆரோக்கிய திட்டம்",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
+        "back_header_local": "சுகாதார வரம், ஆயுஷ்மான்",
+        "app_download_local": "செயலியைப் பதிவிறக்கவும்",
+        "contact_label_local": "தொடர்பு கொள்ளவும்",
+        "log_on_label_local": "உள்நுழைக",
+        "point1_local": "குடும்பத்திற்கு ஆண்டுக்கு ரூ. 5 லட்சம் வரை இலவச மருத்துவ சிகிச்சை.",
+        "point2_local": "மருத்துவமனைகளில் எந்தக் கட்டணமும் செலுத்த தேவையில்லை.",
+        "point3_local": "கட்டணமில்லா எண் 14555 ஐத் தொடர்பு கொள்ளவும்."
+    },
+    "puducherry": {
+        "lang_code": "ta",
+        "lang_name": "Tamil",
+        "state_local": "புதுச்சேரி",
+        "state_en": "PUDUCHERRY",
+        "state_label": "மாநிலம்:",
+        "name_label": "பெயர் / NAME",
+        "yob_label": "பிறந்த ஆண்டு / YOB :",
+        "gender_label": "பாலினம் / GENDER :",
+        "village_ward_label": "கிராமம்/வார்டு - Village/Ward :",
+        "subdivision_town_label": "துணைப்பிரிவு/நகரம் - Subdivision/Town :",
+        "district_label": "மாவட்டம்/District :",
+        "card_title_local": "ஆயுஷ்மான் அட்டை",
+        "coverage_amount_local": "₹ 5 லட்சம் வரை",
+        "treatment_text_local": "இலவச சிகிச்சை",
+        "scheme_footer_local": "ஆயுஷ்மான் பாரத் பிரதமர் மக்கள் ஆரோக்கிய திட்டம்",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
         "back_header_local": "சுகாதார வரம், ஆயுஷ்மான்",
         "app_download_local": "செயலியைப் பதிவிறக்கவும்",
         "contact_label_local": "தொடர்பு கொள்ளவும்",
@@ -214,10 +611,20 @@ STATE_LANGUAGE_MAP: Dict[str, Dict[str, str]] = {
         "lang_name": "Kannada",
         "state_local": "ಕರ್ನಾಟಕ",
         "state_en": "KARNATAKA",
+        "state_label": "ರಾಜ್ಯ:",
+        "name_label": "ಹೆಸರು / NAME",
+        "yob_label": "ಹುಟ್ಟಿದ ವರ್ಷ / YOB :",
+        "gender_label": "ಲಿಂಗ / GENDER :",
+        "village_ward_label": "ಗ್ರಾಮ/ವಾರ್ಡ್ - Village/Ward :",
+        "subdivision_town_label": "ಉಪವಿಭಾಗ/ಪಟ್ಟಣ - Subdivision/Town :",
+        "district_label": "ಜಿಲ್ಲೆ/District :",
         "card_title_local": "ಆಯುಷ್ಮಾನ್ ಕಾರ್ಡ್",
         "coverage_amount_local": "₹ 5 ಲಕ್ಷದವರೆಗೆ",
         "treatment_text_local": "ಉಚಿತ ಚಿಕಿತ್ಸೆ",
         "scheme_footer_local": "ಆಯುಷ್ಮಾನ್ ಭಾರತ ಪ್ರಧಾನ ಮಂತ್ರಿ ಜನ ಆರೋಗ್ಯ ಯೋಜನೆ",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
         "back_header_local": "ಆರೋಗ್ಯದ ವರ, ಆಯುಷ್ಮಾನ್",
         "app_download_local": "ಆ್ಯಪ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ",
         "contact_label_local": "ಸಂಪರ್ಕಿಸಿ",
@@ -231,10 +638,47 @@ STATE_LANGUAGE_MAP: Dict[str, Dict[str, str]] = {
         "lang_name": "Bengali",
         "state_local": "পশ্চিমবঙ্গ",
         "state_en": "WEST BENGAL",
+        "state_label": "রাজ্য:",
+        "name_label": "নাম / NAME",
+        "yob_label": "জন্মের বছর / YOB :",
+        "gender_label": "লিঙ্গ / GENDER :",
+        "village_ward_label": "গ্রাম/ওয়ার্ড - Village/Ward :",
+        "subdivision_town_label": "মহকুমা/শহর - Subdivision/Town :",
+        "district_label": "জেলা/District :",
         "card_title_local": "আয়ুষ্মান কার্ড",
         "coverage_amount_local": "₹ ৫ লাখ পর্যন্ত",
         "treatment_text_local": "বিনামূল্যে চিকিৎসা",
         "scheme_footer_local": "আয়ুষ্মান ভারত প্রধানমন্ত্রী জন আরোগ্য যোজনা",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
+        "back_header_local": "স্বাস্থ্যের বরদান, আয়ুষ্মান",
+        "app_download_local": "অ্যাপ ডাউনলোড করুন",
+        "contact_label_local": "যোগাযোগ করুন",
+        "log_on_label_local": "লগ ইন করুন",
+        "point1_local": "পরিবার প্রতি বছরে ₹ ৫ লাখ পর্যন্ত বিনামূল্যে চিকিৎসা।",
+        "point2_local": "হাসপাতালে কোনো টাকা জমা দিতে হবে না।",
+        "point3_local": "টোল ফ্রি নম্বর 14555।"
+    },
+    "tripura": {
+        "lang_code": "bn",
+        "lang_name": "Bengali",
+        "state_local": "ত্রিপুরা",
+        "state_en": "TRIPURA",
+        "state_label": "রাজ্য:",
+        "name_label": "নাম / NAME",
+        "yob_label": "জন্মের বছর / YOB :",
+        "gender_label": "লিঙ্গ / GENDER :",
+        "village_ward_label": "গ্রাম/ওয়ার্ড - Village/Ward :",
+        "subdivision_town_label": "মহকুমা/শহর - Subdivision/Town :",
+        "district_label": "জেলা/District :",
+        "card_title_local": "আয়ুষ্মান কার্ড",
+        "coverage_amount_local": "₹ ৫ লাখ পর্যন্ত",
+        "treatment_text_local": "বিনামূল্যে চিকিৎসা",
+        "scheme_footer_local": "আয়ুষ্মান ভারত প্রধানমন্ত্রী জন আরোগ্য যোজনা",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
         "back_header_local": "স্বাস্থ্যের বরদান, আয়ুষ্মান",
         "app_download_local": "অ্যাপ ডাউনলোড করুন",
         "contact_label_local": "যোগাযোগ করুন",
@@ -248,10 +692,20 @@ STATE_LANGUAGE_MAP: Dict[str, Dict[str, str]] = {
         "lang_name": "Odia",
         "state_local": "ଓଡ଼ିଶା",
         "state_en": "ODISHA",
+        "state_label": "ରାଜ୍ୟ:",
+        "name_label": "ନାମ / NAME",
+        "yob_label": "ଜନ୍ମ ବର୍ଷ / YOB :",
+        "gender_label": "ଲିଙ୍ଗ / GENDER :",
+        "village_ward_label": "ଗ୍ରାମ/ୱାର୍ଡ - Village/Ward :",
+        "subdivision_town_label": "ଉପ-ବିଭାଗ/ସହର - Subdivision/Town :",
+        "district_label": "ଜିଲ୍ଲା/District :",
         "card_title_local": "ଆୟୁଷ୍ମାନ କାର୍ଡ",
         "coverage_amount_local": "₹ ୫ ଲକ୍ଷ ପର୍ଯ୍ୟନ୍ତ",
         "treatment_text_local": "ମାଗଣା ଚିକିତ୍ସା",
         "scheme_footer_local": "ଆୟୁଷ୍ମାନ ଭାରତ ପ୍ରଧାନମନ୍ତ୍ରୀ ଜନ ଆରୋଗ୍ୟ ଯୋଜନା",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
         "back_header_local": "ସ୍ୱାସ୍ଥ୍ୟର ବରଦାନ, ଆୟୁଷ୍ମାନ",
         "app_download_local": "ଆପ୍ ଡାଉନଲୋଡ୍ କରନ୍ତୁ",
         "contact_label_local": "ଯୋଗାଯୋଗ କରନ୍ତୁ",
@@ -265,10 +719,20 @@ STATE_LANGUAGE_MAP: Dict[str, Dict[str, str]] = {
         "lang_name": "Punjabi",
         "state_local": "ਪੰਜਾਬ",
         "state_en": "PUNJAB",
+        "state_label": "ਰਾਜ:",
+        "name_label": "ਨਾਮ / NAME",
+        "yob_label": "ਜਨਮ ਸਾਲ / YOB :",
+        "gender_label": "ਲਿੰਗ / GENDER :",
+        "village_ward_label": "ਪਿੰਡ/ਵਾਰਡ - Village/Ward :",
+        "subdivision_town_label": "ਸਬ-ਡਵੀਜ਼ਨ/ਕਸਬਾ - Subdivision/Town :",
+        "district_label": "ਜ਼ਿਲ੍ਹਾ/District :",
         "card_title_local": "ਆਯੁਸ਼ਮਾਨ ਕਾਰਡ",
         "coverage_amount_local": "₹ 5 ਲੱਖ ਤੱਕ",
         "treatment_text_local": "ਮੁਫ਼ਤ ਇਲਾਜ",
         "scheme_footer_local": "ਆਯੁਸ਼ਮਾਨ ਭਾਰਤ ਪ੍ਰਧਾਨ ਮੰਤਰੀ ਜਨ ਅਰੋਗਿਆ ਯੋਜਨਾ",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
         "back_header_local": "ਸਿਹਤ ਦਾ ਵਰਦਾਨ, ਆਯੁਸ਼ਮਾਨ",
         "app_download_local": "ਐਪ ਡਾਊਨਲੋਡ ਕਰੋ",
         "contact_label_local": "ਸੰਪਰਕ ਕਰੋ",
@@ -276,6 +740,60 @@ STATE_LANGUAGE_MAP: Dict[str, Dict[str, str]] = {
         "point1_local": "ਪ੍ਰਤੀ ਪਰਿਵਾਰ ਸਾਲਾਨਾ ₹ 5 ਲੱਖ ਤੱਕ ਮੁਫਤ ਇਲਾਜ।",
         "point2_local": "ਹਸਪਤਾਲ ਵਿੱਚ ਕੋਈ ਪੈਸਾ ਨਹੀਂ ਦੇਣਾ ਪਵੇਗਾ।",
         "point3_local": "ਟੋਲ ਫ੍ਰੀ ਨੰਬਰ 14555।"
+    },
+    "kerala": {
+        "lang_code": "ml",
+        "lang_name": "Malayalam",
+        "state_local": "കേരളം",
+        "state_en": "KERALA",
+        "state_label": "സംസ്ഥാനം:",
+        "name_label": "പേര് / NAME",
+        "yob_label": "ജനന വർഷം / YOB :",
+        "gender_label": "ലിംഗഭേദം / GENDER :",
+        "village_ward_label": "ഗ്രാമം/വാർഡ് - Village/Ward :",
+        "subdivision_town_label": "സബ് ഡിവിഷൻ/പട്ടണം - Subdivision/Town :",
+        "district_label": "ജില്ല/District :",
+        "card_title_local": "ആയുഷ്മാൻ കാർഡ്",
+        "coverage_amount_local": "₹ 5 ലക്ഷം വരെ",
+        "treatment_text_local": "സൗജന്യ ചികിത്സ",
+        "scheme_footer_local": "ആയുഷ്മാൻ ഭാരത് പ്രധാനമന്ത്രി ജൻ ആരോഗ്യ യോജന",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
+        "back_header_local": "ആരോഗ്യ വരം, ആയുഷ്മാൻ",
+        "app_download_local": "ആപ്പ് ഡൗൺലോഡ് ചെയ്യുക",
+        "contact_label_local": "ബന്ധപ്പെടുക",
+        "log_on_label_local": "ലോഗിൻ ചെയ്യുക",
+        "point1_local": "ഒരു കുടുംബത്തിന് പ്രതിവർഷം ₹ 5 ലക്ഷം വരെ സൗജന്യ ചികിത്സ.",
+        "point2_local": "ആശുപത്രികളിൽ പണം നൽകേണ്ടതില്ല.",
+        "point3_local": "ടോൾ ഫ്രീ നമ്പർ 14555."
+    },
+    "assam": {
+        "lang_code": "as",
+        "lang_name": "Assamese",
+        "state_local": "অসম",
+        "state_en": "ASSAM",
+        "state_label": "ৰাজ্য:",
+        "name_label": "নাম / NAME",
+        "yob_label": "জন্মৰ বছৰ / YOB :",
+        "gender_label": "লিংগ / GENDER :",
+        "village_ward_label": "গাঁও/ৱাৰ্ড - Village/Ward :",
+        "subdivision_town_label": "মহকুমা/চহৰ - Subdivision/Town :",
+        "district_label": "জিলা/District :",
+        "card_title_local": "আয়ুষ্মান কাৰ্ড",
+        "coverage_amount_local": "₹ ৫ লাখ পৰ্যন্ত",
+        "treatment_text_local": "বিনামূলীয়া চিকিৎসা",
+        "scheme_footer_local": "আয়ুষ্মান ভাৰত প্ৰধানমন্ত্ৰী জন আৰোগ্য যোজনা",
+        "scheme_footer_en": "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+        "pmjay_label": "PM-JAY ID:",
+        "ration_label": "Ration/Other ID:",
+        "back_header_local": "স্বাস্থ্যৰ বৰদান, আয়ুষ্মান",
+        "app_download_local": "এপ ডাউনল'ড কৰক",
+        "contact_label_local": "যোগাযোগ কৰক",
+        "log_on_label_local": "লগ ইন কৰক",
+        "point1_local": "প্ৰতি পৰিয়াল বাৰ্ষিক ₹ ৫ লাখলৈকে বিনামূলীয়া চিকিৎসা।",
+        "point2_local": "চিকিৎসালয়ত কোনো ধন জমা দিব নালাগে।",
+        "point3_local": "টোল ফ্ৰী নম্বৰ 14555।"
     }
 }
 
@@ -292,25 +810,37 @@ class AyushmanData:
     village_ward: str = ""
     subdivision_town: str = ""
     district: str = ""
-    state: str = "Gujarat"
-    state_local: str = "ગુજરાત"
+    state: str = ""
+    state_local: str = ""
     abha_number: str = ""
     ration_other_id: str = ""
     
     # State & Local Language Titles
-    language_code: str = "gu"
-    language_name: str = "Gujarati"
-    card_title_local: str = "આયુષ્માન કાર્ડ"
-    coverage_amount_local: str = "૫ લાખ સુધીની"
-    treatment_text_local: str = "મફત સારવાર"
-    scheme_footer_local: str = "આયુષ્માન ભારત પ્રધાનમંત્રી જન આરોગ્ય યોજના"
-    back_header_local: str = "સ્વાસ્થ્યનું વરદાન, આયુષ્માન"
+    language_code: str = "hi"
+    language_name: str = "Hindi"
+    card_title_local: str = "आयुष्मान कार्ड"
+    coverage_amount_local: str = "₹ ५ लाख तक"
+    treatment_text_local: str = "मुफ्त उपचार"
+    scheme_footer_local: str = "आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना"
+    scheme_footer_en: str = "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA"
+    back_header_local: str = "स्वास्थ्य का वरदान, आयुष्मान"
     point1_local: str = ""
     point2_local: str = ""
     point3_local: str = ""
-    app_download_local: str = "એપ ડાઉનલોડ કરો"
-    contact_label_local: str = "સંપર્ક કરો"
-    log_on_label_local: str = "લોગ ઓન કરો"
+    app_download_local: str = "ऐप डाउनलोड करें"
+    contact_label_local: str = "संपर्क करें"
+    log_on_label_local: str = "लॉग ऑन करें"
+
+    # Local Demographic Field Labels
+    name_label: str = "नाम / NAME"
+    yob_label: str = "जन्म वर्ष / YOB :"
+    gender_label: str = "लिंग / GENDER :"
+    village_ward_label: str = "गाँव/वार्ड - Village/Ward :"
+    subdivision_town_label: str = "उपखंड/कस्बा - Subdivision/Town :"
+    district_label: str = "ज़िला/District :"
+    state_label: str = "राज्य:"
+    pmjay_label: str = "PM-JAY ID:"
+    ration_label: str = "Ration/Other ID:"
 
     # Images
     photo_png_base64: Optional[str] = None
@@ -484,10 +1014,14 @@ def parse_pmjay_qr_text(qr_raw_text: str) -> Dict[str, str]:
         elif re.match(r'^[6-9]\d{9}$', l):
             res['mobile'] = l
         elif re.match(r'^\d{4,28}$', l) and not re.match(r'^(19\d\d|20\d\d)$', l) and not re.match(r'^[6-9]\d{9}$', l):
-            res['ration_other_id'] = l
+            existing = res.get('ration_other_id', '')
+            if len(l) >= 10:
+                res['ration_other_id'] = l
+            elif not existing:
+                res['ration_other_id'] = l
 
     # 3. Positional State / Name / District resolution
-    known_states = ['GUJARAT', 'MAHARASHTRA', 'UTTAR PRADESH', 'MADHYA PRADESH', 'BIHAR', 'RAJASTHAN', 'DELHI', 'TELANGANA', 'ANDHRA PRADESH', 'TAMIL NADU', 'KARNATAKA', 'WEST BENGAL', 'ODISHA', 'PUNJAB']
+    known_states = ['GUJARAT', 'MAHARASHTRA', 'UTTAR PRADESH', 'MADHYA PRADESH', 'BIHAR', 'RAJASTHAN', 'DELHI', 'HARYANA', 'JHARKHAND', 'CHHATTISGARH', 'UTTARAKHAND', 'HIMACHAL PRADESH', 'TELANGANA', 'ANDHRA PRADESH', 'TAMIL NADU', 'KARNATAKA', 'WEST BENGAL', 'ODISHA', 'PUNJAB', 'KERALA', 'ASSAM', 'GOA', 'TRIPURA', 'JAMMU AND KASHMIR', 'LADAKH', 'CHANDIGARH', 'PUDUCHERRY']
     for idx, l in enumerate(lines):
         l_u = l.upper()
         if l_u in known_states:
@@ -618,7 +1152,7 @@ def extract_ayushman_data(pdf_path: str, password: Optional[str] = None) -> Ayus
 
         if not data.name:
             for idx, line in enumerate(lines):
-                if re.match(r'^(?:NAME|Name|નામ|नाम)\s*[:/]?$', line, re.IGNORECASE) and idx + 1 < len(lines):
+                if re.match(r'^(?:NAME|Name|नाव|નામ|नाम|নাম|పేరు|பெயர்|ਨਾਮ|ಹೆಸರು|പേര്)\s*[:/]?$', line, re.IGNORECASE) and idx + 1 < len(lines):
                     next_line = lines[idx + 1]
                     if re.match(r'^[A-Za-z\s\.\']{3,50}$', next_line) and not any(kw in next_line.upper() for kw in ["YOB", "GENDER", "MOBILE", "DISTRICT", "STATE", "SURAT", "RAJKOT", "AHMEDABAD", "VADODARA"]):
                         data.name = next_line.strip().title()
@@ -675,7 +1209,7 @@ def extract_ayushman_data(pdf_path: str, password: Optional[str] = None) -> Ayus
                     data.mobile = cand_mob
 
         if not data.village_ward:
-            m_vw = re.search(r'(?:Village/Ward|Village|Ward|ગામ/વોર્ડ|ગામ|વોર્ડ)\s*[:\-]?\s*([^:\n\r]+?)(?=\r?\n|$|Subdivision|Town|District)', page1_text, re.IGNORECASE)
+            m_vw = re.search(r'(?:Village/Ward|Village|Ward|गाव/वार्ड|गाँव/वार्ड|ગામ/વોર્ડ|गाव|गाँव|ગામ|വാർഡ്|গ্রাম|గ్రామం|கிராமம்)\s*[:\-]?\s*([^:\n\r]+?)(?=\r?\n|$|Subdivision|Town|District)', page1_text, re.IGNORECASE)
             if m_vw:
                 cand_vw = m_vw.group(1).split('\n')[0].strip()
                 if is_valid_ayushman_value(cand_vw):
@@ -683,7 +1217,7 @@ def extract_ayushman_data(pdf_path: str, password: Optional[str] = None) -> Ayus
                         data.village_ward = cand_vw
 
         if not data.subdivision_town:
-            m_st = re.search(r'(?:Subdivision/Town|Subdivision|Town|તાલુકો/શહેર|તાલુકો|શહેર|તાલુકા/શહેર)\s*[:\-]?\s*([^:\n\r]+?)(?=\r?\n|$|District|જિલ્લો|જિલ્લા)', page1_text, re.IGNORECASE)
+            m_st = re.search(r'(?:Subdivision/Town|Subdivision|Town|तालुका/शहर|उपखंड/कस्बा|तहसील/शहर|तालुका|તાલુકો/શહેર|તાલુકા/શહેર|মহকুমা|సబ్ డివిజన్)\s*[:\-]?\s*([^:\n\r]+?)(?=\r?\n|$|District|જિલ્લો|જિલ્લા)', page1_text, re.IGNORECASE)
             if m_st:
                 cand_st = m_st.group(1).split('\n')[0].strip()
                 if is_valid_ayushman_value(cand_st):
@@ -691,14 +1225,14 @@ def extract_ayushman_data(pdf_path: str, password: Optional[str] = None) -> Ayus
                         data.subdivision_town = cand_st
 
         if not data.district:
-            m_dist = re.search(r'(?:District|જિલ્લો|जिला|જિલ્લા)\s*[:/]?\s*([A-Za-z\s]+?)(?=\r?\n|$|State|રાજ્ય|Mobile|PM-JAY)', page1_text, re.IGNORECASE)
+            m_dist = re.search(r'(?:District|जिल्हा|ज़िला|जिला|જિલ્લો|જિલ્લા|জেলা|జిల్లా|மாவட்டம்|ਜ਼ਿਲ੍ਹਾ|ಜಿಲ್ಲೆ|ജില്ല)\s*[:/]?\s*([A-Za-z\s]+?)(?=\r?\n|$|State|રાજ્ય|Mobile|PM-JAY)', page1_text, re.IGNORECASE)
             if m_dist:
                 cand_dist = m_dist.group(1).split('\n')[0].strip().title()
                 if is_valid_ayushman_value(cand_dist):
                     data.district = cand_dist
 
         if not data.state:
-            m_state = re.search(r'(?:State|રાજ્ય|राज्य)\s*[:/]?\s*([A-Za-z\s]+?)(?=\r?\n|$|Mobile|PM-JAY|ABHA)', page1_text, re.IGNORECASE)
+            m_state = re.search(r'(?:State|राज्य|રાજ્ય|రాష్ట్రం|மாநிலம்|রাজ্য|ਰਾਜ|ರಾಜ್ಯ|സംസ്ഥാനം)\s*[:/]?\s*([A-Za-z\s]+?)(?=\r?\n|$|Mobile|PM-JAY|ABHA)', page1_text, re.IGNORECASE)
             if m_state:
                 cand_state = m_state.group(1).split('\n')[0].strip().title()
                 if is_valid_ayushman_value(cand_state):
@@ -759,13 +1293,16 @@ def extract_ayushman_data(pdf_path: str, password: Optional[str] = None) -> Ayus
             elif re.search(r'[\u0A00-\u0A7F]', full_text):
                 detected_lang = STATE_LANGUAGE_MAP["punjab"]
                 data.state = "Punjab"
+            elif re.search(r'[\u0D00-\u0D7F]', full_text):
+                detected_lang = STATE_LANGUAGE_MAP["kerala"]
+                data.state = "Kerala"
             elif re.search(r'[\u0900-\u097F]', full_text):
-                if "महाराष्ट्र" in full_text or "मुंबई" in full_text:
+                if any(kw in full_text for kw in ["महाराष्ट्र", "मुंबई", "धुळे", "पुणे", "नासिक", "MJPJAY", "ज्योतिराव", "गाव", "जिल्हा", "तालुका", "नाव"]):
                     detected_lang = STATE_LANGUAGE_MAP["maharashtra"]
                     data.state = "Maharashtra"
                 else:
                     detected_lang = STATE_LANGUAGE_MAP["default_hindi"]
-                    data.state = "Madhya Pradesh"
+                    data.state = "Uttar Pradesh"
 
         # Heuristic fallback
         if not detected_lang:
@@ -774,9 +1311,9 @@ def extract_ayushman_data(pdf_path: str, password: Optional[str] = None) -> Ayus
                 data.state = "Gujarat"
 
         if not detected_lang:
-            detected_lang = STATE_LANGUAGE_MAP["gujarat"]
+            detected_lang = STATE_LANGUAGE_MAP["default_hindi"]
             if not data.state:
-                data.state = "Gujarat"
+                data.state = "India"
 
         # Apply mapped values
         data.language_code = detected_lang["lang_code"]
@@ -786,6 +1323,7 @@ def extract_ayushman_data(pdf_path: str, password: Optional[str] = None) -> Ayus
         data.coverage_amount_local = detected_lang["coverage_amount_local"]
         data.treatment_text_local = detected_lang["treatment_text_local"]
         data.scheme_footer_local = detected_lang["scheme_footer_local"]
+        data.scheme_footer_en = detected_lang.get("scheme_footer_en", "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA")
         data.back_header_local = detected_lang["back_header_local"]
         data.app_download_local = detected_lang["app_download_local"]
         data.contact_label_local = detected_lang["contact_label_local"]
@@ -793,6 +1331,17 @@ def extract_ayushman_data(pdf_path: str, password: Optional[str] = None) -> Ayus
         data.point1_local = detected_lang.get("point1_local", "")
         data.point2_local = detected_lang.get("point2_local", "")
         data.point3_local = detected_lang.get("point3_local", "")
+
+        # Local Demographic Field Labels
+        data.name_label = detected_lang.get("name_label", "नाम / NAME")
+        data.yob_label = detected_lang.get("yob_label", "जन्म वर्ष / YOB :")
+        data.gender_label = detected_lang.get("gender_label", "लिंग / GENDER :")
+        data.village_ward_label = detected_lang.get("village_ward_label", "गाँव/वार्ड - Village/Ward :")
+        data.subdivision_town_label = detected_lang.get("subdivision_town_label", "उपखंड/कस्बा - Subdivision/Town :")
+        data.district_label = detected_lang.get("district_label", "ज़िला/District :")
+        data.state_label = detected_lang.get("state_label", "राज्य:")
+        data.pmjay_label = detected_lang.get("pmjay_label", "PM-JAY ID:")
+        data.ration_label = detected_lang.get("ration_label", "Ration/Other ID:")
 
         # Fallback QR code generation if needed
         if not data.qr_base64:

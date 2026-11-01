@@ -13,7 +13,7 @@
             margin: 0;
             padding: 0;
             background: #ffffff;
-            font-family: 'Roboto', 'Nirmala UI', 'Noto Sans Gujarati', 'Noto Sans Devanagari', 'Noto Sans Telugu', 'Noto Sans Tamil', 'Noto Sans Kannada', 'Noto Sans Bengali', sans-serif;
+            font-family: 'Roboto', 'Nirmala UI', 'Noto Sans Devanagari', 'Noto Sans Gujarati', 'Noto Sans Telugu', 'Noto Sans Tamil', 'Noto Sans Kannada', 'Noto Sans Bengali', 'Noto Sans Malayalam', 'Noto Sans Gurmukhi', 'Noto Sans Oriya', sans-serif;
             overflow: hidden;
             -webkit-font-smoothing: antialiased;
         }
@@ -234,7 +234,7 @@
 
     <!-- TOP HEADING -->
     <div class="back-heading">
-        <div class="heading-orange">{{ scheme.back_header_local or 'સ્વાસ્થ્યનું વરદાન, આયુષ્માન' }}</div>
+        <div class="heading-orange">{{ scheme.back_header_local or ('आरोग्याचे वरदान, आयुष्मान' if person.state == 'Maharashtra' else 'स्वास्थ्य का वरदान, आयुष्मान') }}</div>
     </div>
 
     <!-- NUMBERED INSTRUCTIONS (Evenly spread & enlarged) -->
@@ -244,7 +244,7 @@
         <div class="instr-item">
             <div class="item-num">1.</div>
             <div class="item-text">
-                <div class="text-local">{{ scheme.point1_local or 'આ આયુષ્માન કાર્ડ, આપને અને આપના કુટુંબના દરેક સભ્યને આયુષ્માન ભારત PMJAY યોજના સાથે સંલગ્ન ગુજરાતની કોઈપણ હોસ્પિટલમાં, કુટુંબ દીઠ વાર્ષિક રૂપિયા ૫ લાખ સુધીનું આરોગ્ય કવચ મેળવવામાં મદદ કરશે.' }}</div>
+                <div class="text-local">{{ scheme.point1_local or ('हे आयुष्मान कार्ड तुम्हाला आणि तुमच्या कुटुंबातील प्रत्येक सदस्याला देशभरातील कोणत्याही संलग्न रुग्णालयात प्रति कुटुंब वार्षिक ५ लाख रुपयांपर्यंतचे मोफत आरोग्य कवच मिळवून देईल.' if person.state == 'Maharashtra' else 'यह आयुष्मान कार्ड आपको और आपके परिवार के प्रत्येक सदस्य को प्रति वर्ष ₹ 5 लाख तक के मुफ्त इलाज की सुविधा प्रदान करेगा।') }}</div>
                 <div class="text-en">This Ayushman card will help you in availing benefits of free hospitalization cover of Rs. 5 Lakhs per annum to you and your family collectively at any empanelled hospital across India under Ayushman Bharat PM-JAY.</div>
             </div>
         </div>
@@ -253,7 +253,7 @@
         <div class="instr-item">
             <div class="item-num">2.</div>
             <div class="item-text">
-                <div class="text-local">{{ scheme.point2_local or 'આયુષ્માન ભારત PMJAY યોજના અંતર્ગત ભારતભરની AB PMJAY યોજના સાથે સંલગ્ન હોસ્પિટલોમાં આપે કોઈ પૈસા ચૂકવવા/જમા કરવાની જરૂર નથી.' }}</div>
+                <div class="text-local">{{ scheme.point2_local or ('आयुष्मान भारत PM-JAY योजनेअंतर्गत संलग्न रुग्णालयांमध्ये तुम्हाला कोणतेही पैसे देण्याची आवश्यकता नाही.' if person.state == 'Maharashtra' else 'आयुष्मान भारत PM-JAY के तहत संबद्ध अस्पतालों में आपको कोई भी शुल्क या राशि जमा करने की आवश्यकता नहीं है।') }}</div>
                 <div class="text-en">You are not required to pay/deposit any money at the AB PM-JAY empanelled hospital across India under Ayushman Bharat PM-JAY.</div>
             </div>
         </div>
@@ -262,7 +262,7 @@
         <div class="instr-item">
             <div class="item-num">3.</div>
             <div class="item-text">
-                <div class="text-local">{{ scheme.point3_local or 'યોજના સંબંધિત ફરિયાદની જાણ કરવા અથવા તમારી નજીકના AB PMJAY એમ્પેનલ્ડ હોસ્પિટલો વિશે વધુ જાણકારી મેળવવા, કૃપા કરીને અમારો સંપર્ક કરો. (ટોલ ફ્રી નં- ૧૮૦૦ ૨૩૩ ૧૦૨૨)' }}</div>
+                <div class="text-local">{{ scheme.point3_local or ('तक्रार नोंदवण्यासाठी किंवा जवळच्या रुग्णालयांची माहिती मिळवण्यासाठी आमच्या टोल फ्री नंबर १४५५५ वर संपर्क साधा.' if person.state == 'Maharashtra' else 'किसी भी सहायता या शिकायत के लिए हमारे टोल फ्री नंबर 14555 पर संपर्क करें।') }}</div>
                 <div class="text-en">For any help, to report a grievance or to know more about AB PM-JAY empanelled hospitals near you, please reach out to us. (Toll Free No- 1800 233 1022)</div>
             </div>
         </div>
@@ -279,7 +279,7 @@
         <div class="app-section">
             <div class="app-download-label">
                 Please download the App /<br>
-                {{ scheme.app_download_local or 'એપ ડાઉનલોડ કરો' }}
+                {{ scheme.app_download_local or ('ॲप डाउनलोड करा' if person.state == 'Maharashtra' else 'ऐप डाउनलोड करें') }}
             </div>
             <div class="gplay-btn">
                 <!-- Google Play icon (multicolor triangle) -->
@@ -318,10 +318,10 @@
         <!-- Right: Contact / helpline -->
         <div class="contact-section">
             <div class="contact-line">
-                {{ scheme.contact_label_local or 'સંપર્ક કરો' }} / Please contact <strong>14555</strong>
+                {{ scheme.contact_label_local or ('संपर्क करा' if person.state == 'Maharashtra' else 'संपर्क करें') }} / Please contact <strong>14555</strong>
             </div>
             <div class="contact-line">
-                or log on to / {{ scheme.log_on_label_local or 'લોગ ઓન કરો' }}
+                or log on to / {{ scheme.log_on_label_local or ('लॉग ऑन करा' if person.state == 'Maharashtra' else 'लॉग ऑन करें') }}
             </div>
             <div class="contact-line">
                 <strong>https://pmjay.gov.in</strong>
