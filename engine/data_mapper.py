@@ -98,14 +98,20 @@ def map_aadhaar_data(engine_data: dict) -> dict:
     local_name = get_str("local_full_name")
     local_address = get_str("local_address")
     local_script = get_str("local_script")
+    local_confidence = int(engine_data.get("local_confidence") or 0)
     
     # Strip duplicate leading address prefix (e.g., 'સરનામું :', 'पता :')
     if local_address:
-        local_address = re.sub(r'^(સરનામું|पता|पत्ता|ঠিকানা|முகவரி|చిరునామా|విళాస|ವಿಳಾಸ|മേൽവിലാസം|ਪਤਾ|ଠିକଣା|ঠিকনা|پتہ|Address)\s*[:\-]?\s*', '', local_address, flags=re.IGNORECASE).strip()
+        local_address = re.sub(r'^(સરનામું|पता|पत्ता|ঠিকানা|முகவரி|చిరునామా|విళాస|ವಿಳಾಸ|8Cಸ|മേൽವിലാസം|വിലാസം|ਪਤਾ|ଠಿಕଣା|ঠিকনা|پتہ|Address)\s*[:\-]?\s*', '', local_address, flags=re.IGNORECASE).strip()
 
     # If local_name is identical to full_name (e.g. English name on both lines), clear local_name
     if local_name.lower().strip() == full_name.lower().strip():
         local_name = ""
+
+    # Suppress corrupted local names (PUA boxes, unmapped artifacts)
+    if local_name:
+        if re.search(r'[\uE000-\uF8FF\uFFF0-\uFFFF]', local_name) or local_confidence < 30:
+            local_name = ""
     
     # Map script code to canonical language name
     SCRIPT_MAP = {
@@ -212,7 +218,7 @@ def map_aadhaar_data(engine_data: dict) -> dict:
             # We read the address DIRECTLY from the PDF text — preserving original order exactly.
             # Pattern: "Address:" or "Address :" followed by multi-line address text until Aadhaar number
             addr_match = re.search(
-                r'(?:Address|पत्ता|पता|સરનામું|ठिकाणा)\s*[:\-]?\s*\n?([\s\S]+?)(?=\n\s*\d{4}\s\d{4}\s\d{4}|\n\s*VID\s*:|\n\s*1947\b|$)',
+                r'(?:Address|पत्ता|पता|સરનામું|ठिकाणा|ವಿಳಾಸ|8Cಸ|చిరునాಮಾ|విళాసం|முகவரி|മേൽವിലാസം|വിലാസം|ঠিকানা|ঠিকনা|ଠಿಕଣା|ਪਤਾ|پتہ)\s*[:\-]?\s*\n?([\s\S]+?)(?=\n\s*\d{4}\s\d{4}\s\d{4}|\n\s*VID\s*:|\n\s*1947\b|$)',
                 pdf_text, re.IGNORECASE
             )
             if addr_match:

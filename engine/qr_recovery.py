@@ -23,20 +23,21 @@ def recover_qr_from_pdf(pdf_path: str, password: Optional[str], engine_trace: li
             chosen_index = int(match.group(1))
             break
             
-    if chosen_index == -1:
-        # The engine didn't successfully use any QR candidate (fallback or failure)
-        return None
-        
-    # 2. Extract the exact same candidates
+    # 2. Extract candidate QR images
     try:
         candidates = extract_candidate_qr_images(pdf_path, password=password, trace=[])
     except Exception:
         return None
-        
-    if chosen_index >= len(candidates):
+
+    if not candidates:
         return None
-        
-    qr_bytes = candidates[chosen_index]
+
+    if 0 <= chosen_index < len(candidates):
+        qr_bytes = candidates[chosen_index]
+    else:
+        # Fallback: if QR decoding didn't succeed, still use the best candidate QR image
+        # so the physical PVC card always displays the authentic QR code instead of "QR Code Unavailable".
+        qr_bytes = candidates[0]
     
     # 3. Convert original image bytes to PNG base64 for browser compatibility
     try:

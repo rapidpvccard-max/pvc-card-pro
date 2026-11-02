@@ -217,6 +217,34 @@ def _cleanup_worker():
 atexit.register(_cleanup_worker)
 
 
+_font_cache: dict = {}
+
+def _get_fonts_b64() -> tuple[str, str]:
+    """Load and cache Nirmala UI Regular and Bold base64 strings."""
+    if "reg" in _font_cache and "bold" in _font_cache:
+        return _font_cache["reg"], _font_cache["bold"]
+    reg_b64 = ""
+    bold_b64 = ""
+    fonts_dir = os.path.join(os.path.dirname(__file__), "..", "static", "fonts")
+    reg_path = os.path.join(fonts_dir, "Nirmala.ttf")
+    bold_path = os.path.join(fonts_dir, "NirmalaB.ttf")
+    if os.path.exists(reg_path):
+        try:
+            with open(reg_path, "rb") as f:
+                reg_b64 = base64.b64encode(f.read()).decode("ascii")
+        except Exception:
+            pass
+    if os.path.exists(bold_path):
+        try:
+            with open(bold_path, "rb") as f:
+                bold_b64 = base64.b64encode(f.read()).decode("ascii")
+        except Exception:
+            pass
+    _font_cache["reg"] = reg_b64
+    _font_cache["bold"] = bold_b64
+    return reg_b64, bold_b64
+
+
 # ---------------------------------------------------------------------------
 # Public Entrypoint
 # ---------------------------------------------------------------------------
@@ -259,9 +287,12 @@ def render_card(mapped_data: dict, engine_data: dict, output_dir: str, document_
     template_front_base64 = _get_template_b64(images_dir, doc_type, "front", style)
     template_back_base64 = _get_template_b64(images_dir, doc_type, "back", style)
 
+    font_reg_b64, font_bold_b64 = _get_fonts_b64()
     context = {
         "document_type": doc_type,
         "template_style": style,
+        "font_reg_b64": font_reg_b64,
+        "font_bold_b64": font_bold_b64,
         "language": mapped_data.get("language", {}),
         "person": mapped_data.get("person", {}),
         "identity": mapped_data.get("identity", {}),

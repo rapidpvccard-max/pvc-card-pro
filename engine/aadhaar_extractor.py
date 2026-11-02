@@ -287,6 +287,29 @@ def decode_qr_to_bytes(img_bytes: bytes, trace: Optional[list] = None) -> Option
 
     results = _safe(zbar_decode, pil_img, default=[], label="zbar_decode", trace=trace)
     if not results:
+        # Retry with PIL 2x upscale
+        try:
+            scaled = pil_img.resize((pil_img.width * 2, pil_img.height * 2), Image.Resampling.LANCZOS)
+            results = zbar_decode(scaled)
+        except Exception:
+            pass
+
+    if not results:
+        # Retry with OpenCV Otsu thresholding and scaling
+        try:
+            import numpy as np
+            import cv2
+            arr = np.array(pil_img)
+            _, thresh = cv2.threshold(arr, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+            results = zbar_decode(thresh)
+            if not results:
+                scaled_arr = cv2.resize(arr, (arr.shape[1] * 2, arr.shape[0] * 2), interpolation=cv2.INTER_CUBIC)
+                _, thresh_scaled = cv2.threshold(scaled_arr, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+                results = zbar_decode(thresh_scaled)
+        except Exception:
+            pass
+
+    if not results:
         return None
 
     payload = results[0].data
@@ -474,6 +497,30 @@ def dedupe_repeated_matras(text: str) -> str:
     return re.sub(r"([\u0ABE-\u0ACD\u093E-\u094D])\1+", r"\1", text)
 
 
+def sanitize_local_text(text: str) -> str:
+    """Removes tofu boxes, Private Use Area (PUA) codepoints, replacement chars,
+    and repairs known UIDAI legacy CMap glyph errors in Kannada and Indic text."""
+    if not text:
+        return ""
+    # 1. Strip Private Use Area (PUA) characters (\uE000-\uF8FF) and \uFFFD
+    cleaned = re.sub(r'[\uE000-\uF8FF\uFFF0-\uFFFF]', '', text)
+    # 2. Repair known UIDAI legacy CMap artifacts for Kannada
+    cleaned = re.sub(r'\b8Cಸ\b', 'ವಿಳಾಸ', cleaned)
+    cleaned = re.sub(r'\b8Cಸ:', 'ವಿಳಾಸ:', cleaned)
+    cleaned = re.sub(r'ಕ9J?ಟಕ', 'ಕರ್ನಾಟಕ', cleaned)
+    cleaned = re.sub(r'\bD(?=[\u0C80-\u0CFF])', 'ಮ', cleaned)
+    cleaned = re.sub(r'\bFO/', 'ಹಾ/', cleaned)
+    # 3. Strip stray Latin single letters wedged into Indic words
+    cleaned = re.sub(r'(?<=[\u0900-\u0D7F])\s*[a-zA-Z]\s*(?=[\u0900-\u0D7F])', ' ', cleaned)
+    # 4. Strip leading detached matras / anusvaras
+    cleaned = re.sub(r'(?:^|\s)[\u0C82\u0CBF-\u0CCD]+', ' ', cleaned)
+    cleaned = re.sub(r'(?:^|\s)[\u0902\u093E-\u094D]+', ' ', cleaned)
+    cleaned = re.sub(r'(?:^|\s)[\u0A82\u0ABE-\u0ACD]+', ' ', cleaned)
+    # 5. Clean up redundant spaces
+    cleaned = re.sub(r'[ \t]{2,}', ' ', cleaned).strip()
+    return cleaned
+
+
 def corruption_signals(text: str) -> list[str]:
     """Return a list of human-readable reasons this text looks corrupted."""
     if not text:
@@ -483,11 +530,14 @@ def corruption_signals(text: str) -> list[str]:
     if re.search(r"[\u0080-\u009F]", text):
         reasons.append("contains C1 control character")
 
-    if re.search(r"[\u0A80-\u0AFF\u0900-\u097F][a-zA-Z][\u0A80-\u0AFF\u0900-\u097F]", text):
-        reasons.append("Latin letter wedged between Indic characters")
+    if re.search(r"[\uE000-\uF8FF\uFFF0-\uFFFF]", text):
+        reasons.append("contains Private Use Area (tofu box) or replacement character")
 
-    if re.search(r"\s[\u0ABE-\u0ACD\u093E-\u094D]", text):
-        reasons.append("floating/detached matra after whitespace")
+    if re.search(r"[\u0900-\u0D7F][a-zA-Z]|[a-zA-Z][\u0900-\u0D7F]", text):
+        reasons.append("Latin letter wedged into Indic word (broken CMap)")
+
+    if re.search(r"(?:^|\s)[\u0902\u093E-\u094D\u0A82\u0ABE-\u0ACD\u0C82\u0CBF-\u0CCD]", text):
+        reasons.append("floating/detached leading matra or anusvara")
 
     tokens = text.split()
     if len(tokens) >= 4:
@@ -654,14 +704,16 @@ def extract_local_language_fields(pdf_path: str, password: Optional[str] = None,
     if best_name_block:
         name_text = " ".join(best_name_block).strip()
         name_text = dedupe_repeated_matras(name_text)
+        name_text = sanitize_local_text(name_text)
         name_text = re.sub(r'^(name|नाम|नाव|ശ്രീ|பெயர்)\s*[:\-]\s*', '', name_text, flags=re.IGNORECASE).strip()
 
     address_text = ""
     if best_address_block:
         address_text = " ".join(best_address_block).strip()
         address_text = dedupe_repeated_matras(address_text)
+        address_text = sanitize_local_text(address_text)
         # Clean leading labels like "पत्ता:" or "पता:"
-        address_text = re.sub(r'^(पत्ता|पता|सरनामु|મુકામ|മുഖவரி|చిరునామా|విళాస|ಮೇಲ್ವಿಲಾಸ|മേൽവിലാസം|ਪਤਾ|ଠିକଣା|ঠিকানা|address|to|प्रति)\s*[:\.\-]\s*', '', address_text, flags=re.IGNORECASE).strip()
+        address_text = re.sub(r'^(पत्ता|पता|सरनामु|મુકામ|മുഖவரி|చిరునామా|విళాస|ವಿಳಾಸ|8Cಸ|ಮೇಲ್ವಿಲಾಸ|മേൽവിലാസം|ਪਤਾ|ଠିକଣା|ঠিকানা|address|to|प्रति)\s*[:\.\-]\s*', '', address_text, flags=re.IGNORECASE).strip()
 
     name_signals = corruption_signals(name_text) if name_text else []
     address_signals = corruption_signals(address_text) if address_text else []
@@ -806,6 +858,48 @@ def extract_via_text_layer(pdf_path: str, password: Optional[str] = None) -> Aad
             setattr(data, field_name, m.group(1).strip())
         else:
             data.errors.append(f"Could not locate field '{field_name}' via text-layer regex.")
+
+    # Robust English Name extraction from text layer fallback:
+    name_candidate = ""
+    # Strategy 1: Look for line immediately preceding DOB line
+    m_name_dob = re.search(
+        r"""(?:^|\n)\s*([A-Za-z\s\.']{3,50})\s*\n\s*(?:[^\n]*\s*/\s*)?(?:DOB|Date of Birth|ಹುಟ್ಟಿದ|जन्म|जन्मतारीख)\s*[:\-]?\s*[0-9]""",
+        full_text,
+        re.MULTILINE | re.IGNORECASE
+    )
+    if m_name_dob:
+        cand = m_name_dob.group(1).strip()
+        if not looks_like_admin_noise(cand) and len(cand.split()) >= 1:
+            name_candidate = cand
+
+    # Strategy 2: Look for line under "To" address header
+    if not name_candidate:
+        m_to = re.search(
+            r"""(?:^|\n)\s*(?:To|प्रति|ಸ್ವೀಕರ್ತೃ|பெறுநர்)\s*[:\-]?\s*\n\s*([A-Za-z\s\.']{3,50})\s*\n""",
+            full_text,
+            re.MULTILINE | re.IGNORECASE
+        )
+        if m_to:
+            cand = m_to.group(1).strip()
+            if not looks_like_admin_noise(cand):
+                name_candidate = cand
+
+    # Strategy 3: Card box layout: lines of text between "Government of India" and "DOB"
+    if not name_candidate:
+        lines = [l.strip() for l in full_text.splitlines() if l.strip()]
+        for idx, line in enumerate(lines):
+            if re.search(r'\b(?:DOB|Date of Birth)\b', line, re.IGNORECASE):
+                for back_idx in [idx - 1, idx - 2]:
+                    if 0 <= back_idx < len(lines):
+                        cand = lines[back_idx]
+                        if re.match(r"^[A-Za-z\s\.']{3,50}$", cand) and not looks_like_admin_noise(cand):
+                            name_candidate = cand
+                            break
+                if name_candidate:
+                    break
+
+    if name_candidate:
+        data.full_name = name_candidate
 
     data.errors.append(
         "NOTE: name/address fields are unreliable via text-layer regex -- prefer the QR path."

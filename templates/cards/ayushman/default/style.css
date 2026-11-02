@@ -1,3 +1,20 @@
+{% if font_reg_b64 %}
+@font-face {
+    font-family: 'Nirmala UI';
+    src: url('data:font/truetype;charset=utf-8;base64,{{ font_reg_b64 }}') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+{% endif %}
+{% if font_bold_b64 %}
+@font-face {
+    font-family: 'Nirmala UI';
+    src: url('data:font/truetype;charset=utf-8;base64,{{ font_bold_b64 }}') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+{% endif %}
+
 /* Local System Fonts used directly */
 
 :root {

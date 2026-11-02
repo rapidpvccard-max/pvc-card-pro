@@ -18,6 +18,7 @@ if [ -d "static/fonts" ]; then
     sudo mkdir -p /usr/local/share/fonts/nirmala
     sudo cp static/fonts/*.ttf /usr/local/share/fonts/nirmala/ 2>/dev/null || true
     sudo chmod 644 /usr/local/share/fonts/nirmala/*.ttf 2>/dev/null || true
+    sudo apt-get install -y -qq fonts-indic fonts-noto-extra 2>/dev/null || true
     sudo fc-cache -f 2>/dev/null || true
 fi
 
