@@ -212,9 +212,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnAadhaarColor = document.getElementById('doc-btn-aadhaar-color');
         const btnAyushman = document.getElementById('doc-btn-ayushman');
         const uploadText = document.getElementById('upload-zone-text');
+        const uploadSubText = document.getElementById('upload-zone-sub');
         const heroTitle = document.getElementById('hero-title');
         const heroDesc = document.getElementById('hero-desc');
         const pwDesc = document.getElementById('password-desc');
+        const fileInput = document.getElementById('pdf-file');
         
         window.clearPasswordError();
         window.clearCropperDisallowedError();
@@ -252,16 +254,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (inputStyle) inputStyle.value = 'default';
             if (btnPassport) btnPassport.classList.add('active');
             if (uploadText) uploadText.textContent = 'Upload Photo or Selfie (JPG, PNG, PDF)';
-            if (uploadLimit) uploadLimit.textContent = 'Portrait Photo ya Selfie upload karein (Auto Face Detect, BG Removal & 4x6 Print Sheet)';
+            if (uploadSubText) uploadSubText.innerHTML = 'Drag & drop your photo/selfie here or <span style="color: #db2777; font-weight: 700;">Browse Images</span>';
+            if (uploadLimit) uploadLimit.textContent = 'JPG, PNG, WEBP, Selfie ya Portrait Photo (Max: 15MB)';
             if (heroTitle) heroTitle.textContent = 'AI Passport Photo Studio 📸';
             if (heroDesc) heroDesc.textContent = '1-Click AI Face Detection, Background Color Replacement & 300 DPI Print Sheet Generator.';
-            if (fileInput) fileInput.accept = "image/jpeg,image/png,image/webp,image/jpg,application/pdf";
+            if (fileInput) {
+                fileInput.accept = "image/jpeg,image/png,image/webp,image/jpg,image/*,application/pdf";
+            }
             if (btnGenText) btnGenText.textContent = 'Generate Passport Photos (-₹0.95)';
         } else if (type === 'crop') {
             if (inputDoc) inputDoc.value = 'crop';
             if (inputStyle) inputStyle.value = 'default';
             if (btnCrop) btnCrop.classList.add('active');
             if (uploadText) uploadText.textContent = 'Upload Voter, PAN, e-Shram, DL, Kisan, Ration Card';
+            if (uploadSubText) uploadSubText.innerHTML = 'Drag & drop your card file here or <span style="color: #7c3aed; font-weight: 700;">Browse Files</span>';
             if (uploadLimit) uploadLimit.textContent = 'Voter, PAN, e-Shram, DL, Kisan, Ration (Note: Aadhaar & Ayushman card yahan allow nahi hai)';
             if (heroTitle) heroTitle.textContent = 'Auto Card Cropper (CR80 Edge-to-Edge)';
             if (heroDesc) heroDesc.textContent = 'Upload official Voter ID, e-Shram, PAN, DL, Kisan, or Ration card. Auto-crops to exact CR80 size with 100% precision.';
@@ -277,13 +283,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 passwordHintPill.style.background = '#f5f3ff';
                 passwordHintPill.style.borderColor = '#ddd6fe';
             }
-            if (fileInput) fileInput.accept = "application/pdf,image/png,image/jpeg,image/jpg";
+            if (fileInput) fileInput.accept = "application/pdf,image/png,image/jpeg,image/jpg,image/*";
             if (btnGenText) btnGenText.textContent = 'Auto Crop & Generate Card (-₹0.95)';
         } else if (type === 'ayushman') {
             if (inputDoc) inputDoc.value = 'ayushman';
             if (inputStyle) inputStyle.value = 'default';
             if (btnAyushman) btnAyushman.classList.add('active');
             if (uploadText) uploadText.textContent = 'Upload Ayushman PDF';
+            if (uploadSubText) uploadSubText.innerHTML = 'Drag & drop your PDF file here or <span style="color: #2563eb; font-weight: 700;">Browse Files</span>';
             if (uploadLimit) uploadLimit.textContent = 'Supports Ayushman PMJAY Cards (Max: 10MB)';
             if (heroTitle) heroTitle.textContent = 'Create Professional Ayushman PVC Cards';
             if (heroDesc) heroDesc.textContent = 'Upload your Ayushman / PM-JAY PDF and PVC Card Pro will extract the required details and generate print-ready files.';
@@ -306,6 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (inputStyle) inputStyle.value = 'color';
             if (btnAadhaarColor) btnAadhaarColor.classList.add('active');
             if (uploadText) uploadText.textContent = 'Upload Aadhaar PDF (Colourful HD Card)';
+            if (uploadSubText) uploadSubText.innerHTML = 'Drag & drop your PDF file here or <span style="color: #2563eb; font-weight: 700;">Browse Files</span>';
             if (uploadLimit) uploadLimit.textContent = 'Sirf official UIDAI website se downloaded password-protected e-Aadhaar PDF (Max: 10MB)';
             if (heroTitle) heroTitle.textContent = 'Create Vibrant Colourful Aadhaar Cards';
             if (heroDesc) heroDesc.textContent = 'Upload your Aadhaar PDF and PVC Card Pro will generate a stunning multicolor HD background layout ready for duplex print.';
@@ -328,6 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (inputStyle) inputStyle.value = 'default';
             if (btnAadhaar) btnAadhaar.classList.add('active');
             if (uploadText) uploadText.textContent = 'Upload Aadhaar PDF (Standard White)';
+            if (uploadSubText) uploadSubText.innerHTML = 'Drag & drop your PDF file here or <span style="color: #2563eb; font-weight: 700;">Browse Files</span>';
             if (uploadLimit) uploadLimit.textContent = 'Sirf official UIDAI website se downloaded password-protected e-Aadhaar PDF (Max: 10MB)';
             if (heroTitle) heroTitle.textContent = 'Create Professional PVC Cards in Seconds';
             if (heroDesc) heroDesc.textContent = 'Upload your Aadhaar PDF and PVC Card Pro will securely extract the required details, prepare the card design and generate print-ready files.';
@@ -551,6 +560,35 @@ document.addEventListener('DOMContentLoaded', () => {
             const file = fileInput.files[0];
             const currentDocType = (document.getElementById('selected-document-type')?.value || 'aadhaar').toLowerCase();
             
+            if (currentDocType === 'passport') {
+                const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+                const isImg = file.type.startsWith('image/') || /\.(png|jpe?g|webp|bmp)$/i.test(file.name);
+                if (!isPdf && !isImg) {
+                    window.showToast('Please select a photo image (JPG, PNG, WEBP) or PDF.', 'error');
+                    fileInput.value = '';
+                    fileDropArea.classList.remove('has-file');
+                    fileInfo.style.display = 'none';
+                    uploadBtn.disabled = true;
+                    return;
+                }
+                const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                if (file.size > 15 * 1024 * 1024) {
+                    window.showToast('Photo size is larger than the 15 MB limit.', 'error');
+                    fileInput.value = '';
+                    fileDropArea.classList.remove('has-file');
+                    fileInfo.style.display = 'none';
+                    uploadBtn.disabled = true;
+                    return;
+                }
+                filenameDisplay.textContent = file.name;
+                filesizeDisplay.textContent = `${fileSizeMB} MB • Photo Ready 📸`;
+                fileDropArea.classList.add('has-file');
+                Array.from(fileDropArea.children).forEach(c => { if(c.tagName !== 'INPUT') c.style.display = 'none'; });
+                fileInfo.style.display = 'flex';
+                uploadBtn.disabled = false;
+                return;
+            }
+
             if (currentDocType === 'crop') {
                 const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
                 const isImg = file.type.startsWith('image/') || /\.(png|jpe?g|webp)$/i.test(file.name);

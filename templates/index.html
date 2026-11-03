@@ -930,9 +930,9 @@
                         <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     </div>
                     <div class="dropzone-title" id="upload-zone-text">Upload Aadhaar PDF</div>
-                    <div class="dropzone-subtitle">Drag & drop your PDF file here or <span style="color: #2563eb; font-weight: 700;">Browse Files</span></div>
+                    <div class="dropzone-subtitle" id="upload-zone-sub">Drag & drop your file here or <span style="color: #2563eb; font-weight: 700;">Browse Files</span></div>
                     <div class="dropzone-limit" id="upload-zone-limit">Sirf official UIDAI website se downloaded password-protected e-Aadhaar PDF (Max: 10MB)</div>
-                    <input type="file" id="pdf-file" class="form-input" name="file" accept="application/pdf" required style="display:none;">
+                    <input type="file" id="pdf-file" class="form-input" name="file" accept="image/jpeg,image/png,image/webp,image/jpg,application/pdf" required style="display:none;">
                 </label>
 
                 <!-- File Selected Info Banner -->
@@ -1507,5 +1507,5 @@
         input.type = input.type === 'password' ? 'text' : 'password';
     }
 </script>
-<script src="/static/js/app.js?v=27"></script>
+<script src="/static/js/app.js?v=28"></script>
 {% endblock %}
