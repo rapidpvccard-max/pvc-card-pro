@@ -225,16 +225,39 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnAyushman) btnAyushman.classList.remove('active');
         const btnCrop = document.getElementById('doc-btn-crop');
         if (btnCrop) btnCrop.classList.remove('active');
+        const btnPassport = document.getElementById('doc-btn-passport');
+        if (btnPassport) btnPassport.classList.remove('active');
 
         const instantCropContainer = document.getElementById('instant-autocrop-container');
         if (instantCropContainer) {
             instantCropContainer.style.display = (type === 'crop') ? 'block' : 'none';
         }
 
+        const passportStudioContainer = document.getElementById('passport-studio-container');
+        if (passportStudioContainer) {
+            passportStudioContainer.style.display = (type === 'passport') ? 'block' : 'none';
+        }
+
+        const pwContainer = document.getElementById('password-group-container');
+        if (pwContainer) {
+            pwContainer.style.display = (type === 'passport') ? 'none' : 'block';
+        }
+
         const uploadLimit = document.getElementById('upload-zone-limit');
         const pwLabel = document.getElementById('password-field-label');
+        const btnGenText = document.getElementById('btn-generate-text');
 
-        if (type === 'crop') {
+        if (type === 'passport') {
+            if (inputDoc) inputDoc.value = 'passport';
+            if (inputStyle) inputStyle.value = 'default';
+            if (btnPassport) btnPassport.classList.add('active');
+            if (uploadText) uploadText.textContent = 'Upload Photo or Selfie (JPG, PNG, PDF)';
+            if (uploadLimit) uploadLimit.textContent = 'Portrait Photo ya Selfie upload karein (Auto Face Detect, BG Removal & 4x6 Print Sheet)';
+            if (heroTitle) heroTitle.textContent = 'AI Passport Photo Studio 📸';
+            if (heroDesc) heroDesc.textContent = '1-Click AI Face Detection, Background Color Replacement & 300 DPI Print Sheet Generator.';
+            if (fileInput) fileInput.accept = "image/jpeg,image/png,image/webp,image/jpg,application/pdf";
+            if (btnGenText) btnGenText.textContent = 'Generate Passport Photos (-₹0.95)';
+        } else if (type === 'crop') {
             if (inputDoc) inputDoc.value = 'crop';
             if (inputStyle) inputStyle.value = 'default';
             if (btnCrop) btnCrop.classList.add('active');
@@ -255,6 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 passwordHintPill.style.borderColor = '#ddd6fe';
             }
             if (fileInput) fileInput.accept = "application/pdf,image/png,image/jpeg,image/jpg";
+            if (btnGenText) btnGenText.textContent = 'Auto Crop & Generate Card (-₹0.95)';
         } else if (type === 'ayushman') {
             if (inputDoc) inputDoc.value = 'ayushman';
             if (inputStyle) inputStyle.value = 'default';
@@ -276,6 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 passwordHintPill.style.borderColor = '#a7f3d0';
             }
             if (fileInput) fileInput.accept = "application/pdf";
+            if (btnGenText) btnGenText.textContent = 'Generate Ayushman PVC Card (-₹0.95)';
         } else if (type === 'aadhaar_color' || type === 'color') {
             if (inputDoc) inputDoc.value = 'aadhaar';
             if (inputStyle) inputStyle.value = 'color';
@@ -297,6 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 passwordHintPill.style.borderColor = '#fde68a';
             }
             if (fileInput) fileInput.accept = "application/pdf";
+            if (btnGenText) btnGenText.textContent = 'Generate Colourful PVC Card (-₹0.95)';
         } else {
             if (inputDoc) inputDoc.value = 'aadhaar';
             if (inputStyle) inputStyle.value = 'default';
@@ -318,6 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 passwordHintPill.style.borderColor = '#bfdbfe';
             }
             if (fileInput) fileInput.accept = "application/pdf";
+            if (btnGenText) btnGenText.textContent = 'Generate Standard PVC Card (-₹0.95)';
         }
 
         if (typeof window.updateServiceDemoUI === 'function') {
@@ -351,6 +378,64 @@ document.addEventListener('DOMContentLoaded', () => {
         docBtnCrop.addEventListener('click', (e) => {
             e.preventDefault();
             window.setDocumentType('crop');
+        });
+    }
+    const docBtnPassport = document.getElementById('doc-btn-passport');
+    if (docBtnPassport) {
+        docBtnPassport.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.setDocumentType('passport');
+        });
+    }
+
+    // Passport Studio Options: Background Swatches Selection
+    document.querySelectorAll('.passport-color-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+            document.querySelectorAll('.passport-color-option').forEach(o => {
+                o.classList.remove('active');
+                o.style.borderColor = '#e2e8f0';
+                o.style.background = '#f8fafc';
+            });
+            opt.classList.add('active');
+            opt.style.borderColor = '#3b82f6';
+            opt.style.background = '#eff6ff';
+            const rad = opt.querySelector('input[type="radio"]');
+            if (rad) rad.checked = true;
+        });
+    });
+
+    // Passport Studio Options: Layout Selection
+    document.querySelectorAll('.passport-layout-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+            document.querySelectorAll('.passport-layout-option').forEach(o => {
+                o.classList.remove('active');
+                o.style.borderColor = '#e2e8f0';
+                o.style.background = '#f8fafc';
+            });
+            opt.classList.add('active');
+            opt.style.borderColor = '#2563eb';
+            opt.style.background = '#eff6ff';
+            const rad = opt.querySelector('input[type="radio"]');
+            if (rad) rad.checked = true;
+        });
+    });
+
+    // Passport Studio Options: Name & Date of Photo (DOP) Strip Toggle
+    const chkPassportNameDop = document.getElementById('chk-passport-name-dop');
+    const passportFields = document.getElementById('passport-name-dop-fields');
+    if (chkPassportNameDop && passportFields) {
+        chkPassportNameDop.addEventListener('change', () => {
+            passportFields.style.display = chkPassportNameDop.checked ? 'grid' : 'none';
+            if (chkPassportNameDop.checked) {
+                const dopInput = document.getElementById('passport-photo-date');
+                if (dopInput && !dopInput.value) {
+                    const today = new Date();
+                    const dd = String(today.getDate()).padStart(2, '0');
+                    const mm = String(today.getMonth() + 1).padStart(2, '0');
+                    const yyyy = today.getFullYear();
+                    dopInput.value = `${dd}/${mm}/${yyyy}`;
+                }
+            }
         });
     }
 
@@ -589,15 +674,137 @@ document.addEventListener('DOMContentLoaded', () => {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
+    async function handlePassportPhotoSubmit() {
+        if (!fileInput || fileInput.files.length === 0) {
+            window.showToast('Please select a photo or selfie image.', 'warning');
+            return;
+        }
+
+        const selectedColor = document.querySelector('input[name="passport_bg_color"]:checked')?.value || 'light_blue';
+        const selectedLayout = document.querySelector('input[name="passport_layout"]:checked')?.value || '4x6_8';
+        const useNameDop = document.getElementById('chk-passport-name-dop')?.checked || false;
+        const candName = useNameDop ? (document.getElementById('passport-candidate-name')?.value || '').trim() : '';
+        const photoDate = useNameDop ? (document.getElementById('passport-photo-date')?.value || '').trim() : '';
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        formData.append('bg_color', selectedColor);
+        formData.append('layout_type', selectedLayout);
+        formData.append('candidate_name', candName);
+        formData.append('date_of_photo', photoDate);
+
+        // Enter Processing UI
+        uploadSection.style.display = 'none';
+        if (processingSection) processingSection.style.display = 'block';
+        document.getElementById('workflow-indicator').style.display = 'flex';
+        resetProgress();
+        setStepState(0, 'completed');
+        setStepState(1, 'active');
+
+        try {
+            const response = await fetch('/api/passport-photo/generate', {
+                method: 'POST',
+                body: formData
+            });
+
+            setStepState(1, 'completed');
+            setStepState(2, 'completed');
+            setStepState(3, 'completed');
+            setStepState(4, 'active');
+
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+            if (response.status === 402) {
+                let errJson = null;
+                try { errJson = await response.json(); } catch(e){}
+                throw new Error(errJson?.error || "Insufficient wallet balance to generate Passport Photos. Please recharge your wallet.");
+            }
+
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || "Failed to process passport photo.");
+            }
+
+            setStepState(4, 'completed');
+
+            // Show results
+            if (processingSection) processingSection.style.display = 'none';
+            resultSection.style.display = 'block';
+
+            // Hide standard card dual-grid and master A4 box, show passport results
+            const dualGrid = document.querySelector('.dual-preview-grid');
+            const masterA4 = document.querySelector('.master-a4-box');
+            const passportResContent = document.getElementById('passport-result-content');
+
+            if (dualGrid) dualGrid.style.display = 'none';
+            if (masterA4) masterA4.style.display = 'none';
+            if (passportResContent) passportResContent.style.display = 'block';
+
+            const singleImg = document.getElementById('passport-single-preview');
+            const sheetImg = document.getElementById('passport-sheet-preview');
+            if (singleImg) singleImg.src = data.single_url;
+            if (sheetImg) sheetImg.src = data.sheet_url;
+
+            const btnSingle = document.getElementById('btn-dl-passport-single');
+            const btnOnline = document.getElementById('btn-dl-passport-online');
+            const btnSheet = document.getElementById('btn-dl-passport-sheet');
+            const btnPdf = document.getElementById('btn-dl-passport-pdf');
+
+            if (btnSingle) btnSingle.href = data.single_url;
+            if (btnOnline) btnOnline.href = data.online_url;
+            if (btnSheet) btnSheet.href = data.sheet_url;
+            if (btnPdf) btnPdf.href = data.pdf_url;
+
+            const countBadge = document.getElementById('passport-photo-count-badge');
+            if (countBadge) {
+                countBadge.textContent = `${data.photo_count} Photos • 300 DPI`;
+            }
+
+            const sheetTitle = document.getElementById('passport-sheet-title');
+            if (sheetTitle) {
+                sheetTitle.textContent = data.layout_type.startsWith('a4') ? 'PRINT SHEET (A4 PAPER)' : 'PRINT SHEET (4×6 GLOSSY)';
+            }
+
+            const sampleNotice = document.getElementById('sample-card-notice');
+            if (sampleNotice) {
+                sampleNotice.style.display = data.is_sample ? 'block' : 'none';
+            }
+
+            if (data.wallet_balance !== undefined && typeof window.refreshUserCredits === 'function') {
+                window.refreshUserCredits();
+            }
+
+            if (typeof startExpiryTimer === 'function') {
+                startExpiryTimer(300, data.run_id);
+            }
+
+            window.showToast('AI Passport Photos generated successfully!', 'success');
+
+        } catch (err) {
+            console.error("Passport generation error:", err);
+            if (processingSection) processingSection.style.display = 'none';
+            uploadSection.style.display = 'block';
+            window.showToast(err.message || 'Error creating passport photos', 'error');
+        }
+    }
+
     uploadForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         if (fileInput.files.length === 0) {
-            window.showToast('Please select a PDF file.', 'warning');
+            window.showToast('Please select a file to upload.', 'warning');
             return;
         }
 
         const docType = (document.getElementById('selected-document-type')?.value || 'aadhaar').toLowerCase();
+
+        // AI Passport Photo Studio Pipeline
+        if (docType === 'passport') {
+            await handlePassportPhotoSubmit();
+            return;
+        }
 
         // Auto Card Cropper: Route directly to launchCropPreview with current file & password
         if (docType === 'crop') {
@@ -1026,6 +1233,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         window.clearPasswordError();
         updateFileInfo();
+        
+        // Reset previews
+        const dualGrid = document.querySelector('.dual-preview-grid');
+        const masterA4 = document.querySelector('.master-a4-box');
+        const passportResContent = document.getElementById('passport-result-content');
+        if (passportResContent) passportResContent.style.display = 'none';
+        if (dualGrid) dualGrid.style.display = 'grid';
+        if (masterA4) masterA4.style.display = 'block';
+
         resultSection.style.display = 'none';
         if (processingSection) processingSection.style.display = 'none';
         if (cropEditorSection) cropEditorSection.style.display = 'none';

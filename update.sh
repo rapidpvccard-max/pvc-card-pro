@@ -13,6 +13,9 @@ git pull origin main
 echo "📦 Verifying Python dependencies..."
 ./venv/bin/pip install -r requirements.txt --quiet
 
+echo "📦 Warming up AI passport models..."
+./venv/bin/python3 -c "from rembg import new_session; new_session('silueta'); print('AI Models Ready!')" 2>/dev/null || true
+
 echo "📦 Verifying fonts..."
 if [ -d "static/fonts" ]; then
     sudo mkdir -p /usr/local/share/fonts/nirmala

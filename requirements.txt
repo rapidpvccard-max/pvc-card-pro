@@ -19,3 +19,5 @@ numpy
 opencv-python-headless
 requests
 qrcode
+rembg
+onnxruntime

@@ -8,6 +8,7 @@ import time
 import base64
 import io
 import json
+from typing import Optional, List, Dict, Any
 
 load_dotenv()
 from fastapi import FastAPI, Request, UploadFile, File, Form, Depends
@@ -79,6 +80,7 @@ try:
     from engine.qr_recovery import recover_qr_from_pdf
     from engine.a4_print import create_a4_print_pdf
     from engine.watermark import apply_card_watermark
+    from engine.passport_photo import process_passport_studio
     from engine.card_cropper import (
         PRESETS,
         generate_page_preview,
@@ -106,6 +108,8 @@ except (ImportError, FileNotFoundError) as e:
         return None
     def create_a4_print_pdf(front_path, back_path, output_path):
         pass
+    def process_passport_studio(*args, **kwargs):
+        raise RuntimeError(f"Passport studio import failed: {err_msg}")
 
 # Ensure directories exist
 for directory in ['uploads', 'output']:
@@ -119,7 +123,8 @@ def is_service_sample_available(user_credits, category: str) -> bool:
         "aadhaar": "sample_aadhaar",
         "aadhaar_color": "sample_aadhaar_color",
         "ayushman": "sample_ayushman",
-        "crop": "sample_crop"
+        "crop": "sample_crop",
+        "passport": "sample_passport"
     }
     col_name = col_map.get(category)
     if col_name and hasattr(user_credits, col_name):
@@ -134,16 +139,17 @@ def consume_service_sample(user_credits, category: str):
         "aadhaar": "sample_aadhaar",
         "aadhaar_color": "sample_aadhaar_color",
         "ayushman": "sample_ayushman",
-        "crop": "sample_crop"
+        "crop": "sample_crop",
+        "passport": "sample_passport"
     }
     col_name = col_map.get(category)
     if col_name and hasattr(user_credits, col_name):
         setattr(user_credits, col_name, False)
     
-    # Check if any demo remains across all 4 services
+    # Check if any demo remains across all services
     has_remaining = any(
         bool(getattr(user_credits, c, False))
-        for c in ["sample_aadhaar", "sample_aadhaar_color", "sample_ayushman", "sample_crop"]
+        for c in ["sample_aadhaar", "sample_aadhaar_color", "sample_ayushman", "sample_crop", "sample_passport"]
         if hasattr(user_credits, c)
     )
     user_credits.free_sample_available = has_remaining
@@ -505,7 +511,8 @@ async def generate_pipeline(
                 "aadhaar": "Standard Aadhaar",
                 "aadhaar_color": "Colourful Aadhaar",
                 "ayushman": "Ayushman PVC Card",
-                "crop": "Auto Card Cropper"
+                "crop": "Auto Card Cropper",
+                "passport": "AI Passport Photo Studio"
             }
             c_name = cat_display_names.get(service_category, "this card")
             return JSONResponse(
@@ -1201,3 +1208,210 @@ async def purge_run(
             print(f"[Zero-Retention] Instant user/timer purge triggered for run: {run_id}")
         return {"success": True, "purged": True}
     return JSONResponse(status_code=404, content={"success": False, "error": "Run not found"})
+
+
+# -------------------------------------------------------------
+# AI PASSPORT PHOTO STUDIO ENDPOINTS
+# -------------------------------------------------------------
+
+@app.post("/api/passport-photo/generate")
+async def generate_passport_photo(
+    file: UploadFile = File(...),
+    bg_color: str = Form("light_blue"),
+    custom_hex: Optional[str] = Form(None),
+    layout_type: str = Form("4x6_8"),
+    candidate_name: str = Form(""),
+    date_of_photo: str = Form(""),
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    service_category = "passport"
+    user_rate = float(getattr(current_user.credits, 'cost_per_card', 0.95) or 0.95) if current_user.credits else 0.95
+    wallet_balance = float(getattr(current_user.credits, 'wallet_balance', 0.0) or 0.0) if current_user.credits else 0.0
+    sample_available = is_service_sample_available(current_user.credits, service_category)
+
+    is_sample_generation = False
+    if wallet_balance < user_rate:
+        if sample_available:
+            is_sample_generation = True
+        else:
+            return JSONResponse(
+                status_code=402,
+                content={"success": False, "error": f"Insufficient wallet balance to generate AI Passport Photos. Required: ₹{user_rate:.2f} (Demo already used)."}
+            )
+
+    content_type = (file.content_type or "").lower()
+    allowed_types = ["image/jpeg", "image/png", "image/webp", "image/jpg", "application/pdf"]
+    filename_lower = (file.filename or "").lower()
+    has_valid_ext = any(filename_lower.endswith(ext) for ext in [".jpg", ".jpeg", ".png", ".webp", ".pdf"])
+    
+    if content_type not in allowed_types and not has_valid_ext:
+        return JSONResponse(status_code=400, content={"success": False, "error": "Only JPG, PNG, WEBP, or PDF files are supported for Passport Photo Studio."})
+
+    content = await file.read(MAX_FILE_SIZE + 1)
+    if len(content) > MAX_FILE_SIZE:
+        return JSONResponse(status_code=413, content={"success": False, "error": "File size exceeds the 10 MB limit."})
+
+    run_id = str(uuid.uuid4())
+    ext = os.path.splitext(file.filename)[1].lower() if file.filename else ".jpg"
+    if not ext: ext = ".jpg"
+    temp_filepath = os.path.join(UPLOAD_DIR, f"passport_{run_id}{ext}")
+
+    doc_label = f"passport ({layout_type})"
+    if is_sample_generation:
+        doc_label += " [SAMPLE DEMO]"
+
+    history = models.GenerationHistory(
+        id=run_id,
+        user_id=current_user.id,
+        run_id=run_id,
+        document_type=doc_label,
+        is_sample=is_sample_generation,
+        status="processing"
+    )
+    db.add(history)
+    db.commit()
+
+    try:
+        with open(temp_filepath, "wb") as f:
+            f.write(content)
+    except Exception as e:
+        history.status = "failed"
+        db.commit()
+        return JSONResponse(status_code=500, content={"success": False, "error": "Could not save uploaded image."})
+
+    output_dir = os.path.join("static", "renders", run_id)
+    os.makedirs(output_dir, exist_ok=True)
+
+    try:
+        studio_res = await run_in_threadpool(
+            process_passport_studio,
+            input_file_path=temp_filepath,
+            output_dir=output_dir,
+            bg_color_name=bg_color,
+            custom_hex=custom_hex,
+            layout_type=layout_type,
+            candidate_name=candidate_name.strip() if candidate_name else "",
+            date_of_photo=date_of_photo.strip() if date_of_photo else ""
+        )
+
+        try:
+            os.remove(temp_filepath)
+        except Exception:
+            pass
+
+        if is_sample_generation:
+            try:
+                apply_card_watermark(studio_res["single_photo_path"])
+                apply_card_watermark(studio_res["print_sheet_path"])
+            except Exception:
+                pass
+            consume_service_sample(current_user.credits, service_category)
+            current_user.credits.total_generated += 1
+            history.status = "success"
+            history.is_sample = True
+            history.completed_at = datetime.datetime.utcnow()
+            history.output_file = studio_res.get("single_photo_path")
+
+            tx = models.CreditTransaction(
+                user_id=current_user.id,
+                amount=0.0,
+                transaction_type="free_sample",
+                reference_id=run_id,
+                balance_after=current_user.credits.wallet_balance
+            )
+            db.add(tx)
+            db.commit()
+        else:
+            current_user.credits.wallet_balance -= user_rate
+            current_user.credits.total_generated += 1
+            history.status = "success"
+            history.completed_at = datetime.datetime.utcnow()
+            history.output_file = studio_res.get("single_photo_path")
+
+            tx = models.CreditTransaction(
+                user_id=current_user.id,
+                amount=-user_rate,
+                transaction_type="generation_usage",
+                reference_id=run_id,
+                balance_after=current_user.credits.wallet_balance
+            )
+            db.add(tx)
+            db.commit()
+
+        return {
+            "success": True,
+            "run_id": run_id,
+            "single_url": f"/download-passport/{run_id}/single",
+            "online_url": f"/download-passport/{run_id}/online",
+            "sheet_url": f"/download-passport/{run_id}/sheet",
+            "pdf_url": f"/download-passport/{run_id}/pdf",
+            "photo_count": studio_res.get("photo_count", 8),
+            "layout_type": layout_type,
+            "is_sample": is_sample_generation,
+            "wallet_balance": current_user.credits.wallet_balance if current_user.credits else 0.0
+        }
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        history.status = "failed"
+        history.completed_at = datetime.datetime.utcnow()
+        db.commit()
+        try:
+            os.remove(temp_filepath)
+        except Exception:
+            pass
+        return JSONResponse(status_code=500, content={"success": False, "error": f"Passport studio processing failed: {str(e)}"})
+
+
+@app.get("/download-passport/{run_id}/{file_type}")
+async def download_passport_file(
+    run_id: str,
+    file_type: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    if file_type not in ["single", "online", "sheet", "pdf"]:
+        return JSONResponse(status_code=400, content={"success": False, "error": "Invalid passport file type requested."})
+
+    history = db.query(models.GenerationHistory).filter(
+        models.GenerationHistory.run_id == run_id,
+        models.GenerationHistory.user_id == current_user.id
+    ).first()
+
+    if not history:
+        return JSONResponse(status_code=403, content={"success": False, "error": "Access denied or run_id not found."})
+
+    run_dir = os.path.join("static", "renders", run_id)
+    file_map = {
+        "single": ("passport_single.png", f"Passport_Photo_{run_id[:8]}.png", "image/png"),
+        "online": ("passport_single_online.jpg", f"Passport_Online_50KB_{run_id[:8]}.jpg", "image/jpeg"),
+        "sheet": ("passport_sheet.png", f"Passport_Sheet_{run_id[:8]}.png", "image/png"),
+        "pdf": ("passport_print.pdf", f"Passport_Print_300DPI_{run_id[:8]}.pdf", "application/pdf")
+    }
+
+    target_filename, download_name, media_type = file_map[file_type]
+    file_path = os.path.join(run_dir, target_filename)
+
+    is_expired = False
+    if history.created_at:
+        elapsed = (datetime.datetime.utcnow() - history.created_at).total_seconds()
+        if elapsed > 300:
+            is_expired = True
+    elif os.path.exists(file_path) and (time.time() - os.path.getmtime(file_path) > 300):
+        is_expired = True
+
+    if is_expired or not os.path.exists(file_path):
+        if os.path.exists(run_dir):
+            shutil.rmtree(run_dir, ignore_errors=True)
+        return JSONResponse(
+            status_code=410,
+            content={"success": False, "error": "File session expired. For zero-retention privacy, temporary files are permanently purged after 5 minutes."}
+        )
+
+    return FileResponse(
+        path=file_path,
+        filename=download_name,
+        media_type=media_type
+    )

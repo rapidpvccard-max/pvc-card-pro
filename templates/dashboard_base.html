@@ -767,17 +767,19 @@
                 'aadhaar': 'Aadhaar (Standard)',
                 'aadhaar_color': 'Aadhaar (Colourful)',
                 'ayushman': 'Ayushman PVC Card',
-                'crop': 'Auto Card Cropper'
+                'crop': 'Auto Card Cropper',
+                'passport': 'AI Passport Photo Studio'
             };
 
             const demoAvailable = {
                 'aadhaar': Boolean(data.sample_aadhaar),
                 'aadhaar_color': Boolean(data.sample_aadhaar_color),
                 'ayushman': Boolean(data.sample_ayushman),
-                'crop': Boolean(data.sample_crop)
+                'crop': Boolean(data.sample_crop),
+                'passport': Boolean(data.sample_passport !== undefined ? data.sample_passport : data.free_sample_available)
             };
 
-            // 1. Update 4 switcher tab badges on generator page
+            // 1. Update switcher tab badges on generator page
             const updateTabBadge = (id, available, defaultHtml, defaultStyle) => {
                 const el = document.getElementById(id);
                 if (!el) return;
@@ -799,6 +801,7 @@
             updateTabBadge('badge-tab-aadhaar-color', demoAvailable['aadhaar_color'], 'New ✨', {bg: '#fef3c7', color: '#b45309'});
             updateTabBadge('badge-tab-ayushman', demoAvailable['ayushman'], '₹' + rate, {bg: 'rgba(241,245,249,0.9)', color: '#475569'});
             updateTabBadge('badge-tab-crop', demoAvailable['crop'], 'Hot 🔥', {bg: '#f5f3ff', color: '#7c3aed', border: '1px solid #ddd6fe'});
+            updateTabBadge('badge-tab-passport', demoAvailable['passport'], 'New ✨', {bg: '#fdf2f8', color: '#db2777', border: '1px solid #fbcfe8'});
 
             // 2. Update 4 service price badges on home dashboard
             const updateHomeBadge = (id, available) => {
@@ -822,6 +825,7 @@
             updateHomeBadge('badge-home-aadhaar-color', demoAvailable['aadhaar_color']);
             updateHomeBadge('badge-home-ayushman', demoAvailable['ayushman']);
             updateHomeBadge('badge-home-crop', demoAvailable['crop']);
+            updateHomeBadge('badge-home-passport', demoAvailable['passport']);
 
             // 3. Determine active service category for generator workspace
             let active = category;

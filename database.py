@@ -81,6 +81,7 @@ def ensure_database_schema(engine):
                 ('sample_aadhaar_color', 'BOOLEAN DEFAULT TRUE'),
                 ('sample_ayushman', 'BOOLEAN DEFAULT TRUE'),
                 ('sample_crop', 'BOOLEAN DEFAULT TRUE'),
+                ('sample_passport', 'BOOLEAN DEFAULT TRUE'),
                 ('updated_at', 'TIMESTAMP'),
             ],
             'generation_history': [
