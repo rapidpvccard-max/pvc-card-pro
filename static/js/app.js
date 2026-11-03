@@ -249,6 +249,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const pwLabel = document.getElementById('password-field-label');
         const btnGenText = document.getElementById('btn-generate-text');
 
+        // Dynamic Left Stepper, Guidelines & Top Rate Badge
+        const s1Title = document.getElementById('wf-step-1-title');
+        const s1Sub = document.getElementById('wf-step-1-sub');
+        const s2Title = document.getElementById('wf-step-2-title');
+        const s2Sub = document.getElementById('wf-step-2-sub');
+        const s3Title = document.getElementById('wf-step-3-title');
+        const s3Sub = document.getElementById('wf-step-3-sub');
+        const s4Title = document.getElementById('wf-step-4-title');
+        const s4Sub = document.getElementById('wf-step-4-sub');
+        const s5Title = document.getElementById('wf-step-5-title');
+        const s5Sub = document.getElementById('wf-step-5-sub');
+        const guideTitle = document.getElementById('wf-guidelines-title');
+        const guideDesc = document.getElementById('wf-guidelines-desc');
+        const rateBadge = document.getElementById('user-rate-badge');
+        const resTitle = document.getElementById('result-title');
+        const resSubtitle = document.getElementById('result-subtitle');
+
         if (type === 'passport') {
             if (inputDoc) inputDoc.value = 'passport';
             if (inputStyle) inputStyle.value = 'default';
@@ -262,6 +279,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 fileInput.accept = "image/jpeg,image/png,image/webp,image/jpg,image/*,application/pdf";
             }
             if (btnGenText) btnGenText.textContent = 'Generate Passport Photos (-₹0.95)';
+
+            // Update Left Stepper for Passport Mode
+            if (s1Title) s1Title.textContent = 'Upload Portrait';
+            if (s1Sub) s1Sub.textContent = 'Photo, selfie or scan';
+            if (s2Title) s2Title.textContent = 'AI BG Removal';
+            if (s2Sub) s2Sub.textContent = 'Clean studio background';
+            if (s3Title) s3Title.textContent = '35×45mm Framing';
+            if (s3Sub) s3Sub.textContent = 'Biometric aspect ratio';
+            if (s4Title) s4Title.textContent = 'Sheet Layout';
+            if (s4Sub) s4Sub.textContent = '4×6 or A4 multi-photo grid';
+            if (s5Title) s5Title.textContent = 'Studio Print Ready';
+            if (s5Sub) s5Sub.textContent = '300 DPI PDF & <50KB JPG';
+            if (guideTitle) guideTitle.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> Passport Print Tips`;
+            if (guideDesc) guideDesc.innerHTML = 'Print on 4×6 or A4 glossy photo paper at <strong>100% Scale (Actual Size)</strong>. Thin cutting lines provided for easy trimming.';
+            if (rateBadge) rateBadge.textContent = '⚡ Rate: ₹0.95 / Print Sheet';
+            if (resTitle) resTitle.textContent = '🎉 AI Studio Passport Photos Ready!';
+            if (resSubtitle) resSubtitle.textContent = 'Studio-quality 300 DPI photo sheet and online exam copy generated successfully.';
         } else if (type === 'crop') {
             if (inputDoc) inputDoc.value = 'crop';
             if (inputStyle) inputStyle.value = 'default';
@@ -285,6 +319,23 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (fileInput) fileInput.accept = "application/pdf,image/png,image/jpeg,image/jpg,image/*";
             if (btnGenText) btnGenText.textContent = 'Auto Crop & Generate Card (-₹0.95)';
+
+            // Update Left Stepper for Cropper Mode
+            if (s1Title) s1Title.textContent = 'Upload Card File';
+            if (s1Sub) s1Sub.textContent = 'PDF or scanned image';
+            if (s2Title) s2Title.textContent = 'Auto Cropper';
+            if (s2Sub) s2Sub.textContent = 'Edge & corner detection';
+            if (s3Title) s3Title.textContent = 'CR80 Standard';
+            if (s3Sub) s3Sub.textContent = '85.6 × 54.0 mm layout';
+            if (s4Title) s4Title.textContent = 'A4 Duplex Sheet';
+            if (s4Sub) s4Sub.textContent = 'Mirror duplex alignment';
+            if (s5Title) s5Title.textContent = 'Print Ready';
+            if (s5Sub) s5Sub.textContent = 'Download 300 DPI PDF';
+            if (guideTitle) guideTitle.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> Cropper Print Tips`;
+            if (guideDesc) guideDesc.innerHTML = 'Print on 4x6 / A4 glossy photo paper at <strong>100% Scale</strong> (Actual Size) with mirror duplex option.';
+            if (rateBadge) rateBadge.textContent = '⚡ Rate: ₹0.95 / Card';
+            if (resTitle) resTitle.textContent = 'PVC Card Ready to Print!';
+            if (resSubtitle) resSubtitle.textContent = 'High-fidelity 300 DPI layout generated successfully with zero formatting errors.';
         } else if (type === 'ayushman') {
             if (inputDoc) inputDoc.value = 'ayushman';
             if (inputStyle) inputStyle.value = 'default';
@@ -308,6 +359,23 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (fileInput) fileInput.accept = "application/pdf";
             if (btnGenText) btnGenText.textContent = 'Generate Ayushman PVC Card (-₹0.95)';
+
+            // Restore PVC Stepper
+            if (s1Title) s1Title.textContent = 'Upload PDF';
+            if (s1Sub) s1Sub.textContent = 'Source document';
+            if (s2Title) s2Title.textContent = 'AI Extraction';
+            if (s2Sub) s2Sub.textContent = 'Text & photo details';
+            if (s3Title) s3Title.textContent = 'PVC Layout';
+            if (s3Sub) s3Sub.textContent = 'CR80 dual spec';
+            if (s4Title) s4Title.textContent = 'A4 Duplex';
+            if (s4Sub) s4Sub.textContent = 'Mirror alignment';
+            if (s5Title) s5Title.textContent = 'Print Ready';
+            if (s5Sub) s5Sub.textContent = 'Download PDF';
+            if (guideTitle) guideTitle.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> Print Guidelines`;
+            if (guideDesc) guideDesc.innerHTML = 'Print on 4x6 / A4 glossy photo paper at <strong>100% Scale</strong> (Actual Size) with mirror duplex option.';
+            if (rateBadge) rateBadge.textContent = '⚡ Rate: ₹0.95 / Card';
+            if (resTitle) resTitle.textContent = 'PVC Card Ready to Print!';
+            if (resSubtitle) resSubtitle.textContent = 'High-fidelity 300 DPI layout generated successfully with zero formatting errors.';
         } else if (type === 'aadhaar_color' || type === 'color') {
             if (inputDoc) inputDoc.value = 'aadhaar';
             if (inputStyle) inputStyle.value = 'color';
@@ -331,6 +399,23 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (fileInput) fileInput.accept = "application/pdf";
             if (btnGenText) btnGenText.textContent = 'Generate Colourful PVC Card (-₹0.95)';
+
+            // Restore PVC Stepper
+            if (s1Title) s1Title.textContent = 'Upload PDF';
+            if (s1Sub) s1Sub.textContent = 'Source document';
+            if (s2Title) s2Title.textContent = 'AI Extraction';
+            if (s2Sub) s2Sub.textContent = 'Text & photo details';
+            if (s3Title) s3Title.textContent = 'PVC Layout';
+            if (s3Sub) s3Sub.textContent = 'CR80 dual spec';
+            if (s4Title) s4Title.textContent = 'A4 Duplex';
+            if (s4Sub) s4Sub.textContent = 'Mirror alignment';
+            if (s5Title) s5Title.textContent = 'Print Ready';
+            if (s5Sub) s5Sub.textContent = 'Download PDF';
+            if (guideTitle) guideTitle.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> Print Guidelines`;
+            if (guideDesc) guideDesc.innerHTML = 'Print on 4x6 / A4 glossy photo paper at <strong>100% Scale</strong> (Actual Size) with mirror duplex option.';
+            if (rateBadge) rateBadge.textContent = '⚡ Rate: ₹0.95 / Card';
+            if (resTitle) resTitle.textContent = 'PVC Card Ready to Print!';
+            if (resSubtitle) resSubtitle.textContent = 'High-fidelity 300 DPI layout generated successfully with zero formatting errors.';
         } else {
             if (inputDoc) inputDoc.value = 'aadhaar';
             if (inputStyle) inputStyle.value = 'default';
@@ -354,6 +439,23 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (fileInput) fileInput.accept = "application/pdf";
             if (btnGenText) btnGenText.textContent = 'Generate Standard PVC Card (-₹0.95)';
+
+            // Restore PVC Stepper
+            if (s1Title) s1Title.textContent = 'Upload PDF';
+            if (s1Sub) s1Sub.textContent = 'Source document';
+            if (s2Title) s2Title.textContent = 'AI Extraction';
+            if (s2Sub) s2Sub.textContent = 'Text & photo details';
+            if (s3Title) s3Title.textContent = 'PVC Layout';
+            if (s3Sub) s3Sub.textContent = 'CR80 dual spec';
+            if (s4Title) s4Title.textContent = 'A4 Duplex';
+            if (s4Sub) s4Sub.textContent = 'Mirror alignment';
+            if (s5Title) s5Title.textContent = 'Print Ready';
+            if (s5Sub) s5Sub.textContent = 'Download PDF';
+            if (guideTitle) guideTitle.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> Print Guidelines`;
+            if (guideDesc) guideDesc.innerHTML = 'Print on 4x6 / A4 glossy photo paper at <strong>100% Scale</strong> (Actual Size) with mirror duplex option.';
+            if (rateBadge) rateBadge.textContent = '⚡ Rate: ₹0.95 / Card';
+            if (resTitle) resTitle.textContent = 'PVC Card Ready to Print!';
+            if (resSubtitle) resSubtitle.textContent = 'High-fidelity 300 DPI layout generated successfully with zero formatting errors.';
         }
 
         if (typeof window.updateServiceDemoUI === 'function') {
@@ -771,6 +873,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (processingSection) processingSection.style.display = 'none';
             resultSection.style.display = 'block';
 
+            // Update result headline for passport studio
+            const resTitle = document.getElementById('result-title');
+            const resSubtitle = document.getElementById('result-subtitle');
+            if (resTitle) resTitle.textContent = '🎉 AI Studio Passport Photos Ready!';
+            if (resSubtitle) resSubtitle.textContent = 'Studio-quality 300 DPI photo sheet and online exam copy generated successfully.';
+
             // Hide standard card dual-grid and master A4 box, show passport results
             const dualGrid = document.querySelector('.dual-preview-grid');
             const masterA4 = document.querySelector('.master-a4-box');
@@ -988,6 +1096,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if(processingSection) processingSection.style.display = 'none';
             resultSection.style.display = 'block';
+
+            // Ensure PVC card result headline
+            const resTitle = document.getElementById('result-title');
+            const resSubtitle = document.getElementById('result-subtitle');
+            if (resTitle) resTitle.textContent = 'PVC Card Ready to Print!';
+            if (resSubtitle) resSubtitle.textContent = 'High-fidelity 300 DPI layout generated successfully with zero formatting errors.';
+
             startExpiryCountdown(300); // 5 Minutes Zero-Retention Privacy Timer
             
         } catch (error) {
@@ -1269,6 +1384,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 backPreview.parentElement.parentElement.style.display = 'block';
             }
         }
+        
+        // Reset passport previews
+        const singleImg = document.getElementById('passport-single-preview');
+        const sheetImg = document.getElementById('passport-sheet-preview');
+        if (singleImg) singleImg.src = '';
+        if (sheetImg) sheetImg.src = '';
+
         window.clearPasswordError();
         updateFileInfo();
         
@@ -1284,7 +1406,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (processingSection) processingSection.style.display = 'none';
         if (cropEditorSection) cropEditorSection.style.display = 'none';
         uploadSection.style.display = 'block';
+
+        // Reset workflow progress
+        resetProgress();
     });
+
+    const btnPassportStartOver = document.getElementById('btn-passport-start-over');
+    if (btnPassportStartOver) {
+        btnPassportStartOver.addEventListener('click', () => {
+            btnStartOver.click();
+            const mainCard = document.getElementById('main-card');
+            if (mainCard) mainCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    }
 
     // =========================================================
     // SMART CROPPER INTERACTIVE CONTROLLER
@@ -1760,6 +1894,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (processingSection) processingSection.style.display = 'none';
                 if (resultSection) resultSection.style.display = 'block';
+
+                const resTitle = document.getElementById('result-title');
+                const resSubtitle = document.getElementById('result-subtitle');
+                if (resTitle) resTitle.textContent = 'PVC Card Ready to Print!';
+                if (resSubtitle) resSubtitle.textContent = 'High-fidelity 300 DPI layout generated successfully with zero formatting errors.';
 
                 startExpiryCountdown(300);
                 window.showToast('✅ PVC Card cropped & generated successfully!', 'success');

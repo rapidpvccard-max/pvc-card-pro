@@ -833,7 +833,8 @@
                 const docInput = document.getElementById('selected-document-type');
                 const styleInput = document.getElementById('selected-template-style');
                 if (docInput) {
-                    if (docInput.value === 'crop') active = 'crop';
+                    if (docInput.value === 'passport') active = 'passport';
+                    else if (docInput.value === 'crop') active = 'crop';
                     else if (docInput.value === 'ayushman') active = 'ayushman';
                     else if (styleInput && styleInput.value === 'color') active = 'aadhaar_color';
                     else active = 'aadhaar';
@@ -872,7 +873,13 @@
                 }
             } else {
                 if (sampleBanner) sampleBanner.style.display = 'none';
-                if (btnGenText) btnGenText.textContent = 'Generate PVC Card (-₹' + rate + ')';
+                if (btnGenText) {
+                    if (active === 'passport') {
+                        btnGenText.textContent = 'Generate Passport Photos (-₹' + rate + ')';
+                    } else {
+                        btnGenText.textContent = 'Generate PVC Card (-₹' + rate + ')';
+                    }
+                }
                 if (btnSubmitCrop) {
                     const span = btnSubmitCrop.querySelector('span');
                     if (span) span.textContent = 'Crop & Generate Card (-₹' + rate + ')';
@@ -881,7 +888,11 @@
                     rateBadge.style.background = '#ecfdf5';
                     rateBadge.style.color = '#047857';
                     rateBadge.style.borderColor = '#a7f3d0';
-                    rateBadge.innerHTML = '⚡ Rate: ₹' + rate + ' / Card';
+                    if (active === 'passport') {
+                        rateBadge.innerHTML = '⚡ Rate: ₹' + rate + ' / Print Sheet';
+                    } else {
+                        rateBadge.innerHTML = '⚡ Rate: ₹' + rate + ' / Card';
+                    }
                 }
             }
         };
