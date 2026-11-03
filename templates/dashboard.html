@@ -299,19 +299,19 @@
         color: #64748b;
     }
 
-    /* Service Cards (Aadhaar, Ayushman, Colourful Aadhaar, Cropper) - 4 in 1 Line */
+    /* Service Cards (Aadhaar, Ayushman, Colourful Aadhaar, Cropper, Passport) - 5 in 1 Line */
     .services-showcase-grid {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 18px;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 14px;
         margin-bottom: 36px;
     }
 
     .service-showcase-card {
         background: #ffffff;
         border: 1px solid #e2e8f0;
-        border-radius: 20px;
-        padding: 24px 18px;
+        border-radius: 18px;
+        padding: 20px 14px;
         position: relative;
         cursor: pointer;
         display: flex;
@@ -344,6 +344,11 @@
     .service-showcase-card.card-crop:hover {
         border-color: #7c3aed;
         box-shadow: 0 16px 30px -5px rgba(124, 58, 237, 0.2);
+    }
+
+    .service-showcase-card.card-passport:hover {
+        border-color: #db2777;
+        box-shadow: 0 16px 30px -5px rgba(219, 39, 119, 0.2);
     }
 
     .service-card-top {
@@ -391,6 +396,12 @@
         border: 1px solid #fde68a;
     }
 
+    .service-badge-pill.pink-badge {
+        background: #fdf2f8;
+        color: #db2777;
+        border: 1px solid #fbcfe8;
+    }
+
     .service-price-pill.blue {
         background: #eff6ff;
         color: #1d4ed8;
@@ -409,10 +420,16 @@
         border: 1px solid #fde68a;
     }
 
+    .service-price-pill.pink {
+        background: #fdf2f8;
+        color: #9d174d;
+        border: 1px solid #fbcfe8;
+    }
+
     .service-icon-box {
-        width: 48px;
-        height: 48px;
-        border-radius: 14px;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -420,8 +437,8 @@
     }
 
     .service-icon-box svg {
-        width: 24px;
-        height: 24px;
+        width: 22px;
+        height: 22px;
     }
 
     .service-icon-box.blue {
@@ -446,6 +463,12 @@
         background: linear-gradient(135deg, #8b5cf6, #7c3aed);
         color: #ffffff;
         box-shadow: 0 8px 16px -2px rgba(124, 58, 237, 0.35);
+    }
+
+    .service-icon-box.pink {
+        background: linear-gradient(135deg, #f43f5e, #db2777);
+        color: #ffffff;
+        box-shadow: 0 8px 16px -2px rgba(219, 39, 119, 0.35);
     }
 
     .service-title-box {
@@ -525,6 +548,7 @@
     .service-launch-link.amber { color: #d97706; }
     .service-launch-link.green { color: #059669; }
     .service-launch-link.purple { color: #7c3aed; }
+    .service-launch-link.pink { color: #db2777; }
 
     /* Recent Generations Section */
     .recent-activity-card {
@@ -623,13 +647,20 @@
     }
 
     /* Responsive Mobile CSS */
-    @media (max-width: 1024px) {
+    @media (max-width: 1400px) {
+        .services-showcase-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+    }
+
+    @media (max-width: 900px) {
         .metrics-stats-grid {
             grid-template-columns: repeat(2, 1fr);
         }
         .services-showcase-grid {
             grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
+            gap: 14px;
         }
     }
 
@@ -666,15 +697,19 @@
         .stat-label {
             font-size: 0.72rem;
         }
+    }
+
+    @media (max-width: 600px) {
         .services-showcase-grid {
             grid-template-columns: 1fr;
-            gap: 16px;
+            gap: 12px;
             margin-bottom: 24px;
         }
         .service-showcase-card {
             padding: 20px 16px;
             border-radius: 18px;
         }
+    }
         .service-card-top {
             margin-bottom: 14px;
         }
@@ -1013,42 +1048,42 @@
     </div>
 
     <!-- 5. AI Passport Photo Studio -->
-    <div class="service-box" onclick="window.location.href='/generator?type=passport'" style="border-top: 4px solid #db2777;">
+    <div class="service-showcase-card card-passport" onclick="window.location.href='/generator?type=passport'">
         <div>
             <div class="service-card-top">
-                <div class="service-icon-box" style="background: #fdf2f8; color: #db2777;">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                <div class="service-icon-box pink">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                 </div>
                 <div class="service-badges-wrap">
-                    <span class="service-badge-pill" style="background: #fdf2f8; color: #db2777; border: 1px solid #fbcfe8;">New 📸</span>
-                    <span class="service-price-pill" id="badge-home-passport" style="background: #fdf2f8; color: #9d174d; border: 1px solid #fbcfe8;">₹0.95 / print</span>
+                    <span class="service-badge-pill pink-badge">New 📸</span>
+                    <span class="service-price-pill pink" id="badge-home-passport">₹0.95 / print</span>
                 </div>
             </div>
 
             <div class="service-title-box">
-                <h3 class="service-name">AI Passport Photo Studio</h3>
-                <p class="service-subtitle">4x6 Glossy Sheets (8/6/12 photos), A4 Sheets & Online 50KB</p>
+                <h3 class="service-name">AI Passport Studio</h3>
+                <p class="service-subtitle">4×6 Glossy & A4 Sheets + Online 50KB</p>
             </div>
             
             <div class="service-features-list">
                 <div class="service-feature-item">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span>Smart AI Face Detection & Indian 35×45mm Framing</span>
+                    <span>1-Click AI Face Framing (Indian 35×45mm Spec)</span>
                 </div>
                 <div class="service-feature-item">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span>1-Click Studio Background (White, Light Blue, Navy)</span>
+                    <span>Studio Background (Light Blue, White, Navy)</span>
                 </div>
                 <div class="service-feature-item">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span>SSC / Police Exam Name & DOP Strip + 50KB Online Copy</span>
+                    <span>SSC / Police Exam Strip + 300 DPI Print PDF</span>
                 </div>
             </div>
         </div>
         
         <div class="service-card-footer">
             <span style="font-size: 0.82rem; color: #64748b; font-weight: 600;">Studio Photo Suite</span>
-            <span class="service-launch-link" style="color: #db2777;">
+            <span class="service-launch-link pink">
                 Create Passport Photos &rarr;
             </span>
         </div>
