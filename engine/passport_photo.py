@@ -358,12 +358,15 @@ def generate_print_sheet(
         sheet_w, sheet_h = SHEET_4X6_W, SHEET_4X6_H
         cols, rows = 1, 1
     elif layout_type.startswith("4x6"):
-        sheet_w, sheet_h = SHEET_4X6_W, SHEET_4X6_H
         if layout_type == "4x6_6":
+            sheet_w, sheet_h = SHEET_4X6_W, SHEET_4X6_H
             cols, rows = 3, 2
         elif layout_type == "4x6_12":
-            cols, rows = 4, 3
+            # 12 Photos: 3 cols x 4 rows on 4x6 Portrait (1200 x 1800) - cyber cafe standard 3x4 grid
+            sheet_w, sheet_h = SHEET_4X6_H, SHEET_4X6_W  # 1200 x 1800
+            cols, rows = 3, 4
         else:
+            sheet_w, sheet_h = SHEET_4X6_W, SHEET_4X6_H
             cols, rows = 4, 2  # standard 8 photos
 
     elif layout_type.startswith("a4"):
@@ -379,7 +382,11 @@ def generate_print_sheet(
 
     # Scale photo if needed for 12 or 36 layouts
     if layout_type == "4x6_12":
-        cur_w, cur_h = int(PHOTO_WIDTH * 0.82), int(PHOTO_HEIGHT * 0.82)
+        # 3 cols x 4 rows on 1200 x 1800 canvas:
+        # 4 rows * 416px + 3 * 20px gaps = 1724px height (< 1800px, 38px top/bottom margins)
+        # 3 cols * 323px + 2 * 24px gaps = 1017px width (< 1200px, 91px left/right margins)
+        cur_h = 416
+        cur_w = int(PHOTO_WIDTH * (cur_h / PHOTO_HEIGHT))
         unit_photo = photo_bordered.resize((cur_w, cur_h), Image.Resampling.LANCZOS)
     elif layout_type == "a4_36":
         cur_w, cur_h = int(PHOTO_WIDTH * 0.90), int(PHOTO_HEIGHT * 0.90)
@@ -396,13 +403,13 @@ def generate_print_sheet(
     total_content_h = rows * cur_h
 
     gap_x = 24 if cols > 1 else 0
-    gap_y = 24 if rows > 1 else 0
+    gap_y = 20 if layout_type == "4x6_12" else (24 if rows > 1 else 0)
 
     total_w_with_gaps = total_content_w + (cols - 1) * gap_x
     total_h_with_gaps = total_content_h + (rows - 1) * gap_y
 
-    start_x = max(20, (sheet_w - total_w_with_gaps) // 2)
-    start_y = max(20, (sheet_h - total_h_with_gaps) // 2)
+    start_x = max(10, (sheet_w - total_w_with_gaps) // 2)
+    start_y = max(10, (sheet_h - total_h_with_gaps) // 2)
 
     for r in range(rows):
         for c in range(cols):
