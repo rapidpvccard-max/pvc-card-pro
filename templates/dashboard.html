@@ -305,18 +305,21 @@
         grid-template-columns: repeat(5, minmax(0, 1fr));
         gap: 14px;
         margin-bottom: 36px;
+        align-items: stretch;
     }
 
     .service-showcase-card {
         background: #ffffff;
         border: 1px solid #e2e8f0;
         border-radius: 18px;
-        padding: 20px 14px;
+        padding: 18px 14px;
         position: relative;
         cursor: pointer;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        height: 100%;
+        min-height: 400px;
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
     }
@@ -353,41 +356,46 @@
 
     .service-card-top {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: space-between;
-        margin-bottom: 16px;
-        gap: 8px;
+        height: 42px;
+        margin-bottom: 14px;
+        gap: 6px;
     }
 
     .service-badges-wrap {
         display: flex;
         align-items: center;
-        gap: 6px;
-        flex-wrap: wrap;
+        gap: 4px;
+        flex-wrap: nowrap;
         justify-content: flex-end;
     }
 
     .service-price-pill {
         display: inline-flex;
         align-items: center;
-        padding: 4px 10px;
+        padding: 3px 8px;
         border-radius: 20px;
-        font-size: 0.78rem;
+        font-size: 0.74rem;
         font-weight: 800;
         font-family: 'Plus Jakarta Sans', sans-serif;
         letter-spacing: 0.2px;
         white-space: nowrap;
+        max-width: 130px;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .service-badge-pill {
         display: inline-flex;
         align-items: center;
-        padding: 4px 8px;
+        padding: 3px 6px;
         border-radius: 20px;
-        font-size: 0.74rem;
+        font-size: 0.70rem;
         font-weight: 800;
         font-family: 'Plus Jakarta Sans', sans-serif;
         white-space: nowrap;
+        flex-shrink: 0;
     }
 
     .service-badge-pill.amber-badge {
@@ -427,8 +435,8 @@
     }
 
     .service-icon-box {
-        width: 44px;
-        height: 44px;
+        width: 38px;
+        height: 38px;
         border-radius: 12px;
         display: flex;
         align-items: center;
@@ -437,73 +445,85 @@
     }
 
     .service-icon-box svg {
-        width: 22px;
-        height: 22px;
+        width: 20px;
+        height: 20px;
     }
 
     .service-icon-box.blue {
         background: linear-gradient(135deg, #2563eb, #1d4ed8);
         color: #ffffff;
-        box-shadow: 0 8px 16px -2px rgba(37, 99, 235, 0.35);
+        box-shadow: 0 6px 14px -2px rgba(37, 99, 235, 0.35);
     }
 
     .service-icon-box.green {
         background: linear-gradient(135deg, #10b981, #059669);
         color: #ffffff;
-        box-shadow: 0 8px 16px -2px rgba(16, 185, 129, 0.35);
+        box-shadow: 0 6px 14px -2px rgba(16, 185, 129, 0.35);
     }
 
     .service-icon-box.amber {
         background: linear-gradient(135deg, #f59e0b, #d97706);
         color: #ffffff;
-        box-shadow: 0 8px 16px -2px rgba(245, 158, 11, 0.35);
+        box-shadow: 0 6px 14px -2px rgba(245, 158, 11, 0.35);
     }
 
     .service-icon-box.purple {
         background: linear-gradient(135deg, #8b5cf6, #7c3aed);
         color: #ffffff;
-        box-shadow: 0 8px 16px -2px rgba(124, 58, 237, 0.35);
+        box-shadow: 0 6px 14px -2px rgba(124, 58, 237, 0.35);
     }
 
     .service-icon-box.pink {
         background: linear-gradient(135deg, #f43f5e, #db2777);
         color: #ffffff;
-        box-shadow: 0 8px 16px -2px rgba(219, 39, 119, 0.35);
+        box-shadow: 0 6px 14px -2px rgba(219, 39, 119, 0.35);
     }
 
     .service-title-box {
-        margin-bottom: 14px;
+        height: 60px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        margin-bottom: 12px;
     }
 
     .service-name {
-        font-size: 1.15rem;
+        font-size: 1.05rem;
         font-weight: 800;
         color: #0f172a;
         font-family: 'Plus Jakarta Sans', sans-serif;
-        margin-bottom: 4px;
+        margin-bottom: 3px;
         line-height: 1.25;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .service-subtitle {
-        font-size: 0.8rem;
+        font-size: 0.76rem;
         color: #64748b;
         font-weight: 500;
         line-height: 1.35;
-        min-height: 34px;
+        height: 32px;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
     }
 
     .service-features-list {
         display: flex;
         flex-direction: column;
         gap: 8px;
-        margin-bottom: 20px;
+        min-height: 125px;
+        margin-bottom: 16px;
     }
 
     .service-feature-item {
         display: flex;
         align-items: flex-start;
-        gap: 8px;
-        font-size: 0.78rem;
+        gap: 7px;
+        font-size: 0.76rem;
         line-height: 1.35;
         color: #334155;
     }
@@ -516,33 +536,40 @@
     }
 
     .service-card-footer {
+        margin-top: auto;
         display: flex;
         flex-direction: column;
         align-items: flex-start;
-        gap: 6px;
-        padding-top: 14px;
+        gap: 4px;
+        padding-top: 12px;
         border-top: 1px solid #f1f5f9;
+        height: 48px;
+        justify-content: flex-end;
     }
 
     .service-card-footer > span:first-child {
-        font-size: 0.74rem !important;
+        font-size: 0.72rem !important;
         color: #94a3b8 !important;
         font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
     }
 
     .service-launch-link {
         font-weight: 700;
-        font-size: 0.88rem;
+        font-size: 0.84rem;
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 5px;
+        white-space: nowrap;
         transition: gap 0.2s ease;
     }
 
     .service-showcase-card:hover .service-launch-link {
-        gap: 10px;
+        gap: 9px;
     }
-
 
     .service-launch-link.blue { color: #2563eb; }
     .service-launch-link.amber { color: #d97706; }
@@ -886,7 +913,7 @@
         <div>
             <div class="service-card-top">
                 <div class="service-icon-box blue">
-                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 </div>
                 <div class="service-badges-wrap">
                     <span class="service-price-pill blue" id="badge-home-aadhaar">₹0.95 / card</span>
@@ -900,24 +927,24 @@
             
             <div class="service-features-list">
                 <div class="service-feature-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span>1-Click Text, Photo & High-Precision QR Extraction</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>1-Click Text, Photo & High-Precision QR</span>
                 </div>
                 <div class="service-feature-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span>Automatic Indic Language & Font Repair (Hindi, Gujarati, Telugu, etc.)</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Automatic Indic Language & Font Repair</span>
                 </div>
                 <div class="service-feature-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span>Standard CR80 Geometry + Mirror Duplex A4 Sheet Print</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Standard CR80 + Mirror Duplex A4 Print</span>
                 </div>
             </div>
         </div>
         
         <div class="service-card-footer">
-            <span style="font-size: 0.82rem; color: #64748b; font-weight: 600;">Government Standard Format</span>
+            <span>UIDAI Standard Format</span>
             <span class="service-launch-link blue">
-                Generate Aadhaar Card &rarr;
+                Generate Aadhaar &rarr;
             </span>
         </div>
     </div>
@@ -927,7 +954,7 @@
         <div>
             <div class="service-card-top">
                 <div class="service-icon-box green">
-                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
                 </div>
                 <div class="service-badges-wrap">
                     <span class="service-price-pill green" id="badge-home-ayushman">₹0.95 / card</span>
@@ -941,24 +968,24 @@
             
             <div class="service-features-list">
                 <div class="service-feature-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span>Golden Card PMJAY Official Color & Typography Spec</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Golden Card PMJAY Official Spec Template</span>
                 </div>
                 <div class="service-feature-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                     <span>High-Resolution QR Code Recovery Engine</span>
                 </div>
                 <div class="service-feature-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span>Crisp 300 DPI Photo Rendering & A4 Print Export</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Crisp 300 DPI Rendering & A4 Print Export</span>
                 </div>
             </div>
         </div>
         
         <div class="service-card-footer">
-            <span style="font-size: 0.82rem; color: #64748b; font-weight: 600;">PMJAY Golden Card Spec</span>
+            <span>PMJAY Golden Card Spec</span>
             <span class="service-launch-link green">
-                Generate Ayushman Card &rarr;
+                Generate Ayushman &rarr;
             </span>
         </div>
     </div>
@@ -968,7 +995,7 @@
         <div>
             <div class="service-card-top">
                 <div class="service-icon-box amber">
-                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
                 </div>
                 <div class="service-badges-wrap">
                     <span class="service-badge-pill amber-badge">New ✨</span>
@@ -978,29 +1005,29 @@
 
             <div class="service-title-box">
                 <h3 class="service-name">Aadhaar (Colourful)</h3>
-                <p class="service-subtitle">HD Vibrant Gradient Background Layout</p>
+                <p class="service-subtitle">HD Vibrant Multicolor Gradient Background</p>
             </div>
             
             <div class="service-features-list">
                 <div class="service-feature-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                     <span>Vibrant Multicolor Official Gradient Template</span>
                 </div>
                 <div class="service-feature-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span>100% Matching Font Sizes, Photo & Security Guilloche</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>100% Matching Fonts & Security Guilloche</span>
                 </div>
                 <div class="service-feature-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                     <span>CR80 Duplex Spec + Mirror A4 Print Export</span>
                 </div>
             </div>
         </div>
         
         <div class="service-card-footer">
-            <span style="font-size: 0.82rem; color: #64748b; font-weight: 600;">HD Gradient Edition</span>
+            <span>HD Gradient Edition</span>
             <span class="service-launch-link amber">
-                Generate Colourful Card &rarr;
+                Generate Colourful &rarr;
             </span>
         </div>
     </div>
@@ -1010,39 +1037,39 @@
         <div>
             <div class="service-card-top">
                 <div class="service-icon-box purple">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
                 </div>
                 <div class="service-badges-wrap">
-                    <span class="service-badge-pill" style="background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe;">Hot ✂️</span>
+                    <span class="service-badge-pill" style="background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe;">Hot 🌶️</span>
                     <span class="service-price-pill" id="badge-home-crop" style="background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe;">₹0.95 / card</span>
                 </div>
             </div>
 
             <div class="service-title-box">
                 <h3 class="service-name">Auto Card Cropper</h3>
-                <p class="service-subtitle">Voter ID, Kisan Card, Ration Card, e-Shram, PAN, DL & Any Card</p>
+                <p class="service-subtitle">Voter, e-Shram, PAN, DL, Kisan & Ration</p>
             </div>
             
             <div class="service-features-list">
                 <div class="service-feature-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                     <span>Instant Auto-Detection & 1-Click Smart Presets</span>
                 </div>
                 <div class="service-feature-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span>CR80 Edge-to-Edge Cut (No Extra White Margins)</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>CR80 Edge-to-Edge Cut (Zero Margins)</span>
                 </div>
                 <div class="service-feature-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span>Interactive Crop Adjuster + 1-Page A4 Duplex Print</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Interactive Crop Adjuster + A4 Duplex Print</span>
                 </div>
             </div>
         </div>
         
         <div class="service-card-footer">
-            <span style="font-size: 0.82rem; color: #64748b; font-weight: 600;">Universal Card Cutter</span>
+            <span>Universal Card Cutter</span>
             <span class="service-launch-link purple">
-                Crop & Generate Card &rarr;
+                Crop & Generate &rarr;
             </span>
         </div>
     </div>
@@ -1052,7 +1079,7 @@
         <div>
             <div class="service-card-top">
                 <div class="service-icon-box pink">
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                 </div>
                 <div class="service-badges-wrap">
                     <span class="service-badge-pill pink-badge">New 📸</span>
@@ -1062,27 +1089,27 @@
 
             <div class="service-title-box">
                 <h3 class="service-name">AI Passport Studio</h3>
-                <p class="service-subtitle">4×6 Glossy & A4 Sheets + Online 50KB</p>
+                <p class="service-subtitle">4×6 Glossy & A4 Sheets + Online 50KB Copy</p>
             </div>
             
             <div class="service-features-list">
                 <div class="service-feature-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span>1-Click AI Face Framing (Indian 35×45mm Spec)</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>1-Click AI Face Framing (35×45mm Spec)</span>
                 </div>
                 <div class="service-feature-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                     <span>Studio Background (Light Blue, White, Navy)</span>
                 </div>
                 <div class="service-feature-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                     <span>SSC / Police Exam Strip + 300 DPI Print PDF</span>
                 </div>
             </div>
         </div>
         
         <div class="service-card-footer">
-            <span style="font-size: 0.82rem; color: #64748b; font-weight: 600;">Studio Photo Suite</span>
+            <span>Studio Photo Suite</span>
             <span class="service-launch-link pink">
                 Create Passport Photos &rarr;
             </span>

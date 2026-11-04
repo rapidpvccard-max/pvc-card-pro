@@ -803,15 +803,15 @@
             updateTabBadge('badge-tab-crop', demoAvailable['crop'], 'Hot 🔥', {bg: '#f5f3ff', color: '#7c3aed', border: '1px solid #ddd6fe'});
             updateTabBadge('badge-tab-passport', demoAvailable['passport'], 'New ✨', {bg: '#fdf2f8', color: '#db2777', border: '1px solid #fbcfe8'});
 
-            // 2. Update 4 service price badges on home dashboard
+            // 2. Update service price badges on home dashboard
             const updateHomeBadge = (id, available) => {
                 const el = document.getElementById(id);
                 if (!el) return;
                 if (bal < reqRate && available) {
-                    el.innerHTML = '🎁 1 Free Demo Available';
+                    el.innerHTML = '🎁 Free Demo';
                     el.style.background = '#ecfdf5';
                     el.style.color = '#059669';
-                    el.style.border = '1.5px solid #10b981';
+                    el.style.border = '1px solid #10b981';
                     el.style.fontWeight = '800';
                 } else {
                     el.innerHTML = '₹' + rate + ' / card';
