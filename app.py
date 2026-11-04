@@ -186,6 +186,8 @@ async def login_page(request: Request):
     return templates.TemplateResponse(request=request, name="login.html")
 
 @app.get("/admin", response_class=HTMLResponse)
+@app.get("/ADMIN", response_class=HTMLResponse)
+@app.get("/Admin", response_class=HTMLResponse)
 async def admin_page(request: Request, db: Session = Depends(database.get_db)):
     token = request.cookies.get("access_token")
     if not token:
@@ -196,7 +198,12 @@ async def admin_page(request: Request, db: Session = Depends(database.get_db)):
         user_id = payload.get("sub")
         if not user_id:
             return RedirectResponse(url="/login?error=Please+login+as+Admin")
-        user = db.query(models.User).filter(models.User.id == int(user_id)).first()
+        
+        if str(user_id).isdigit():
+            user = db.query(models.User).filter(models.User.id == int(user_id)).first()
+        else:
+            user = db.query(models.User).filter(models.User.email == str(user_id)).first()
+            
         if not user:
             return RedirectResponse(url="/login?error=Session+expired.+Please+login+again.")
         if auth.is_admin_email(user.email) and not user.is_admin:
@@ -204,7 +211,8 @@ async def admin_page(request: Request, db: Session = Depends(database.get_db)):
             db.commit()
         if not user.is_admin:
             return RedirectResponse(url="/login?error=Access+denied.+Administrator+privileges+required.")
-    except Exception:
+    except Exception as e:
+        print(f"[Admin Auth Check Error] {e}")
         return RedirectResponse(url="/login?error=Session+expired.+Please+login+again.")
     return templates.TemplateResponse(request=request, name="admin_dashboard.html")
 
