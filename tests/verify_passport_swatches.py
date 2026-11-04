@@ -12,7 +12,7 @@ def test_passport_swatches():
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        # Test standard 1366x768 screen
+        # Test standard 1366x850 screen
         context = browser.new_context(viewport={"width": 1366, "height": 850})
         context.add_cookies([{
             "name": "access_token",
@@ -36,45 +36,47 @@ def test_passport_swatches():
         wrapper.scroll_into_view_if_needed()
         page.wait_for_timeout(500)
 
-        # Check all swatches
-        swatches = page.locator(".passport-swatch-item").all()
-        print(f"Found {len(swatches)} swatches in the bar.")
-        assert len(swatches) >= 10, f"Expected at least 10 swatches, found {len(swatches)}"
+        # Check all swatch cards
+        swatches = page.locator(".passport-swatch-card").all()
+        print(f"Found {len(swatches)} swatch cards in the bar.")
+        assert len(swatches) == 11, f"Expected 11 swatches, found {len(swatches)}"
 
-        # Verify all swatches have the same Y-coordinate (meaning they are in ONE SINGLE LINE!)
+        # Verify all swatches have identical Y-coordinate (ONE SINGLE HORIZONTAL LINE)
         y_coords = []
         for i, sw in enumerate(swatches):
             box = sw.bounding_box()
             y_coords.append(round(box["y"]))
             color_name = sw.get_attribute("data-name")
-            print(f"Swatch {i+1}: '{color_name}' at x={box['x']:.1f}, y={box['y']:.1f}")
+            print(f"Swatch {i+1}: '{color_name}' at x={box['x']:.1f}, y={box['y']:.1f}, w={box['width']:.1f}, h={box['height']:.1f}")
 
         print(f"All Swatch Y coordinates: {y_coords}")
         assert len(set(y_coords)) == 1, f"Swatches are not in 1 line! Y coords: {y_coords}"
-        print("SUCCESS: All swatches are in ONE SINGLE LINE!")
+        print("SUCCESS: All 11 swatches are perfectly aligned in ONE SINGLE LINE!")
 
-        # Test clicking White swatch
-        white_swatch = page.locator(".passport-swatch-item[data-color='white']")
+        # Test clicking Pure White swatch
+        white_swatch = page.locator(".passport-swatch-card[data-color='white']")
         white_swatch.click()
         page.wait_for_timeout(300)
-        badge = page.locator("#selected-passport-color-badge")
-        print("After clicking White, badge text:", badge.inner_text())
-        assert "White" in badge.inner_text()
+        badge_text = page.locator("#active-color-text").inner_text()
+        print("After clicking White, badge text:", badge_text)
+        assert "Pure White" in badge_text
 
         # Test clicking Sky Blue swatch
-        sky_swatch = page.locator(".passport-swatch-item[data-color='sky_blue']")
+        sky_swatch = page.locator(".passport-swatch-card[data-color='sky_blue']")
         sky_swatch.click()
         page.wait_for_timeout(300)
-        print("After clicking Sky Blue, badge text:", badge.inner_text())
-        assert "Sky Blue" in badge.inner_text()
+        badge_text = page.locator("#active-color-text").inner_text()
+        print("After clicking Sky Blue, badge text:", badge_text)
+        assert "Sky Blue" in badge_text
 
         # Click back to Light Blue
-        page.locator(".passport-swatch-item[data-color='light_blue']").click()
+        page.locator(".passport-swatch-card[data-color='light_blue']").click()
         page.wait_for_timeout(300)
 
-        # Take screenshot of the settings container
-        container.screenshot(path="C:/Users/NANO/.gemini/antigravity/brain/7ea1a93d-7ea4-442d-a150-3f2da8dbe098/passport_settings_single_line.png")
-        print("Screenshot saved to passport_settings_single_line.png.")
+        # Take high-resolution screenshot of the swatches wrapper and whole container
+        wrapper.screenshot(path="C:/Users/NANO/.gemini/antigravity/brain/7ea1a93d-7ea4-442d-a150-3f2da8dbe098/passport_swatches_modern_tiles.png")
+        container.screenshot(path="C:/Users/NANO/.gemini/antigravity/brain/7ea1a93d-7ea4-442d-a150-3f2da8dbe098/passport_settings_modern_studio.png")
+        print("Screenshots saved successfully!")
 
         browser.close()
 

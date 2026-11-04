@@ -506,18 +506,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Passport Studio Options: Background Swatches Selection (Single-Line Swatches Bar)
-    const swatchItems = document.querySelectorAll('.passport-swatch-item, .passport-color-option');
-    const colorBadge = document.getElementById('selected-passport-color-badge');
+    // Passport Studio Options: Background Swatches Selection (Modern Studio Tile Bar)
+    const swatchCards = document.querySelectorAll('.passport-swatch-card, .passport-color-option');
+    const activeColorDot = document.getElementById('active-color-dot');
+    const activeColorText = document.getElementById('active-color-text');
     const customPicker = document.getElementById('passport-custom-picker');
     const customRadio = document.getElementById('passport-custom-radio');
-    const customDisc = document.getElementById('custom-swatch-display');
-    const customCheck = document.getElementById('custom-check-icon');
+    const customDisplay = document.getElementById('custom-swatch-display');
+    const customBadge = document.getElementById('custom-check-badge');
 
-    swatchItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            const colorCode = item.getAttribute('data-color');
-            const colorName = item.getAttribute('data-name');
+    swatchCards.forEach(card => {
+        card.addEventListener('click', (e) => {
+            const colorCode = card.getAttribute('data-color');
+            const colorName = card.getAttribute('data-name');
+            const colorHex = card.getAttribute('data-hex');
 
             if (colorCode === 'custom') {
                 if (customPicker) {
@@ -526,14 +528,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            swatchItems.forEach(s => s.classList.remove('active'));
-            item.classList.add('active');
+            swatchCards.forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
 
-            const rad = item.querySelector('input[type="radio"]');
+            const rad = card.querySelector('input[type="radio"]');
             if (rad) rad.checked = true;
 
-            if (colorBadge && colorName) {
-                colorBadge.textContent = colorName;
+            if (activeColorDot && colorHex) {
+                activeColorDot.style.background = colorHex;
+            }
+            if (activeColorText && colorName) {
+                activeColorText.textContent = colorName;
             }
         });
     });
@@ -541,15 +546,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (customPicker) {
         customPicker.addEventListener('input', (e) => {
             const hex = e.target.value;
-            const customItem = document.querySelector('.swatch-custom-item');
-            if (customItem && customRadio && customDisc) {
-                swatchItems.forEach(s => s.classList.remove('active'));
-                customItem.classList.add('active');
+            const customCard = document.querySelector('.swatch-custom-item');
+            if (customCard && customRadio && customDisplay) {
+                swatchCards.forEach(c => c.classList.remove('active'));
+                customCard.classList.add('active');
                 customRadio.value = hex;
                 customRadio.checked = true;
-                customDisc.style.background = hex;
-                if (customCheck) customCheck.style.display = 'block';
-                if (colorBadge) colorBadge.textContent = `Custom Color (${hex.toUpperCase()})`;
+                customDisplay.style.background = hex;
+                if (customBadge) customBadge.style.display = 'flex';
+                if (activeColorDot) activeColorDot.style.background = hex;
+                if (activeColorText) activeColorText.textContent = `Custom (${hex.toUpperCase()})`;
             }
         });
     }
