@@ -797,6 +797,167 @@ STATE_LANGUAGE_MAP: Dict[str, Dict[str, str]] = {
     }
 }
 
+# Comprehensive District / City to State Mapping for All Indian States
+DISTRICT_STATE_MAP: Dict[str, str] = {
+    # Gujarat (All 33 districts + major cities/talukas)
+    "surat": "gujarat", "ahmedabad": "gujarat", "vadodara": "gujarat", "baroda": "gujarat",
+    "rajkot": "gujarat", "bhavnagar": "gujarat", "jamnagar": "gujarat", "junagadh": "gujarat",
+    "gandhinagar": "gujarat", "anand": "gujarat", "navsari": "gujarat", "morbi": "gujarat",
+    "bharuch": "gujarat", "porbandar": "gujarat", "surendranagar": "gujarat", "mehsana": "gujarat",
+    "kutch": "gujarat", "kachchh": "gujarat", "bhuj": "gujarat", "gandhidham": "gujarat",
+    "valsad": "gujarat", "vapi": "gujarat", "amreli": "gujarat", "banaskantha": "gujarat",
+    "palanpur": "gujarat", "patan": "gujarat", "panchmahal": "gujarat", "godhra": "gujarat",
+    "dahod": "gujarat", "sabarkantha": "gujarat", "himatnagar": "gujarat", "himmatnagar": "gujarat",
+    "aravalli": "gujarat", "modasa": "gujarat", "botad": "gujarat", "chhotaudepur": "gujarat",
+    "chhota udepur": "gujarat", "chhota udaipur": "gujarat", "devbhumi dwarka": "gujarat",
+    "devbhoomi dwarka": "gujarat", "dwarka": "gujarat", "khambhalia": "gujarat",
+    "gir somnath": "gujarat", "veraval": "gujarat", "kheda": "gujarat", "nadiad": "gujarat",
+    "mahisagar": "gujarat", "lunawada": "gujarat", "narmada": "gujarat", "rajpipla": "gujarat",
+    "tapi": "gujarat", "vyara": "gujarat", "dang": "gujarat", "ahwa": "gujarat",
+    "ankleshwar": "gujarat", "bardoli": "gujarat", "deesa": "gujarat", "kalol": "gujarat",
+    "gondal": "gujarat", "jetpur": "gujarat", "palitana": "gujarat", "khambhat": "gujarat",
+    "dhoraji": "gujarat", "keshod": "gujarat", "wadhwan": "gujarat", "savarkundla": "gujarat",
+    "mandvi": "gujarat", "halol": "gujarat", "bilimora": "gujarat", "unjha": "gujarat",
+    "kadi": "gujarat", "visnagar": "gujarat", "siddhpur": "gujarat", "idar": "gujarat",
+    "dhrangadhra": "gujarat",
+
+    # Maharashtra (All 36 districts + major cities)
+    "mumbai": "maharashtra", "pune": "maharashtra", "nagpur": "maharashtra", "thane": "maharashtra",
+    "nashik": "maharashtra", "nasik": "maharashtra", "aurangabad": "maharashtra",
+    "chhatrapati sambhajinagar": "maharashtra", "solapur": "maharashtra", "amravati": "maharashtra",
+    "kolhapur": "maharashtra", "dhule": "maharashtra", "jalgaon": "maharashtra", "nanded": "maharashtra",
+    "sangli": "maharashtra", "satara": "maharashtra", "ahmednagar": "maharashtra",
+    "ahilyanagar": "maharashtra", "akola": "maharashtra", "latur": "maharashtra",
+    "chandrapur": "maharashtra", "parbhani": "maharashtra", "jalna": "maharashtra",
+    "raigad": "maharashtra", "ratnagiri": "maharashtra", "sindhudurg": "maharashtra",
+    "beed": "maharashtra", "osmanabad": "maharashtra", "dharashiv": "maharashtra",
+    "wardha": "maharashtra", "bhandara": "maharashtra", "gondia": "maharashtra",
+    "gadchiroli": "maharashtra", "yavatmal": "maharashtra", "washim": "maharashtra",
+    "hingoli": "maharashtra", "palghar": "maharashtra", "nandurbar": "maharashtra",
+    "kalyan": "maharashtra", "dombivli": "maharashtra", "navi mumbai": "maharashtra",
+    "panvel": "maharashtra", "mira-bhayandar": "maharashtra", "bhiwandi": "maharashtra",
+    "ulhasnagar": "maharashtra", "malegaon": "maharashtra", "vasai": "maharashtra",
+    "virar": "maharashtra", "ichalkaranji": "maharashtra", "bhusawal": "maharashtra",
+    "baramati": "maharashtra", "shirdi": "maharashtra",
+
+    # Karnataka
+    "bengaluru": "karnataka", "bangalore": "karnataka", "mysuru": "karnataka", "mysore": "karnataka",
+    "hubballi": "karnataka", "hubli": "karnataka", "dharwad": "karnataka", "mangaluru": "karnataka",
+    "mangalore": "karnataka", "belagavi": "karnataka", "belgaum": "karnataka",
+    "kalaburagi": "karnataka", "gulbarga": "karnataka", "davanagere": "karnataka",
+    "ballari": "karnataka", "bellary": "karnataka", "vijayapura": "karnataka", "bijapur": "karnataka",
+    "shivamogga": "karnataka", "shimoga": "karnataka", "tumakuru": "karnataka", "tumkur": "karnataka",
+    "raichur": "karnataka", "bidar": "karnataka", "hassan": "karnataka", "mandya": "karnataka",
+    "udupi": "karnataka", "kolar": "karnataka", "chikmagalur": "karnataka", "karwar": "karnataka",
+    "ramanagara": "karnataka", "bagalkot": "karnataka", "gadag": "karnataka", "yadgir": "karnataka",
+    "chamarajanagar": "karnataka", "koppal": "karnataka", "chikkaballapur": "karnataka",
+    "kodagu": "karnataka", "madikeri": "karnataka", "haveri": "karnataka",
+
+    # Tamil Nadu
+    "chennai": "tamil nadu", "coimbatore": "tamil nadu", "madurai": "tamil nadu",
+    "tiruchirappalli": "tamil nadu", "trichy": "tamil nadu", "salem": "tamil nadu",
+    "tirunelveli": "tamil nadu", "tiruppur": "tamil nadu", "vellore": "tamil nadu",
+    "erode": "tamil nadu", "thoothukudi": "tamil nadu", "tuticorin": "tamil nadu",
+    "dindigul": "tamil nadu", "thanjavur": "tamil nadu", "ranipet": "tamil nadu",
+    "sivakasi": "tamil nadu", "karur": "tamil nadu", "ooty": "tamil nadu",
+    "udhagamandalam": "tamil nadu", "hosur": "tamil nadu", "nagercoil": "tamil nadu",
+    "kanchipuram": "tamil nadu", "tiruvannamalai": "tamil nadu", "kumbakonam": "tamil nadu",
+    "cuddalore": "tamil nadu", "kanyakumari": "tamil nadu", "namakkal": "tamil nadu",
+    "pudukkottai": "tamil nadu", "nagapattinam": "tamil nadu", "ramanathapuram": "tamil nadu",
+    "theni": "tamil nadu", "dharmapuri": "tamil nadu", "krishnagiri": "tamil nadu",
+    "tiruvallur": "tamil nadu", "tirupathur": "tamil nadu", "chengalpattu": "tamil nadu",
+    "kallakurichi": "tamil nadu", "tenkasi": "tamil nadu",
+
+    # Telangana
+    "hyderabad": "telangana", "warangal": "telangana", "nizamabad": "telangana",
+    "karimnagar": "telangana", "ramagundam": "telangana", "khammam": "telangana",
+    "mahbubnagar": "telangana", "nalgonda": "telangana", "adilabad": "telangana",
+    "suryapet": "telangana", "miryalaguda": "telangana", "siddipet": "telangana",
+    "jagtial": "telangana", "nirmal": "telangana", "kamareddy": "telangana",
+    "kothagudem": "telangana", "mancherial": "telangana", "wanaparthy": "telangana",
+    "nagarkurnool": "telangana", "sangareddy": "telangana", "medak": "telangana",
+    "vikarabad": "telangana", "jangaon": "telangana", "secunderabad": "telangana",
+
+    # Andhra Pradesh
+    "visakhapatnam": "andhra pradesh", "vizag": "andhra pradesh", "vijayawada": "andhra pradesh",
+    "guntur": "andhra pradesh", "nellore": "andhra pradesh", "kurnool": "andhra pradesh",
+    "rajahmundry": "andhra pradesh", "tirupati": "andhra pradesh", "kakinada": "andhra pradesh",
+    "kadapa": "andhra pradesh", "anantapur": "andhra pradesh", "vizianagaram": "andhra pradesh",
+    "eluru": "andhra pradesh", "ongole": "andhra pradesh", "nandyal": "andhra pradesh",
+    "machilipatnam": "andhra pradesh", "adoni": "andhra pradesh", "tenali": "andhra pradesh",
+    "proddatur": "andhra pradesh", "chittoor": "andhra pradesh", "hindupur": "andhra pradesh",
+    "bhimavaram": "andhra pradesh", "madanapalle": "andhra pradesh", "srikakulam": "andhra pradesh",
+
+    # West Bengal
+    "kolkata": "west bengal", "calcutta": "west bengal", "howrah": "west bengal",
+    "durgapur": "west bengal", "asansol": "west bengal", "siliguri": "west bengal",
+    "bardhaman": "west bengal", "burdwan": "west bengal", "malda": "west bengal",
+    "baharampur": "west bengal", "berhampore": "west bengal", "habra": "west bengal",
+    "kharagpur": "west bengal", "shantipur": "west bengal", "haldia": "west bengal",
+    "raiganj": "west bengal", "krishnanagar": "west bengal", "nabadwip": "west bengal",
+    "midnapore": "west bengal", "medinipur": "west bengal", "jalpaiguri": "west bengal",
+    "balurghat": "west bengal", "bankura": "west bengal", "darjeeling": "west bengal",
+    "purulia": "west bengal", "cooch behar": "west bengal", "alipurduar": "west bengal",
+
+    # Odisha
+    "bhubaneswar": "odisha", "cuttack": "odisha", "rourkela": "odisha", "berhampur": "odisha",
+    "sambalpur": "odisha", "puri": "odisha", "balasore": "odisha", "bhadrak": "odisha",
+    "baripada": "odisha", "jharsuguda": "odisha", "jeypore": "odisha", "bargarh": "odisha",
+    "rayagada": "odisha", "bolangir": "odisha", "balangir": "odisha", "dhenkanal": "odisha",
+    "angul": "odisha", "kendujhar": "odisha", "keonjhar": "odisha", "paradip": "odisha", "koraput": "odisha",
+
+    # Punjab
+    "ludhiana": "punjab", "amritsar": "punjab", "jalandhar": "punjab", "patiala": "punjab",
+    "bathinda": "punjab", "mohali": "punjab", "sas nagar": "punjab", "hoshiarpur": "punjab",
+    "batala": "punjab", "pathankot": "punjab", "moga": "punjab", "abohar": "punjab",
+    "malerkotla": "punjab", "khanna": "punjab", "muktsar": "punjab", "barnala": "punjab",
+    "firozpur": "punjab", "phagwara": "punjab", "kapurthala": "punjab", "rajpura": "punjab",
+    "sangrur": "punjab", "fazilka": "punjab", "gurdaspur": "punjab",
+
+    # Kerala
+    "thiruvananthapuram": "kerala", "trivandrum": "kerala", "kochi": "kerala", "cochin": "kerala",
+    "kozhikode": "kerala", "calicut": "kerala", "kollam": "kerala", "quilon": "kerala",
+    "thrissur": "kerala", "kannur": "kerala", "alappuzha": "kerala", "alleppey": "kerala",
+    "kottayam": "kerala", "palakkad": "kerala", "malappuram": "kerala", "kasaragod": "kerala",
+    "wayanad": "kerala", "idukki": "kerala", "pathanamthitta": "kerala", "ernakulam": "kerala",
+
+    # Assam
+    "guwahati": "assam", "silchar": "assam", "dibrugarh": "assam", "jorhat": "assam",
+    "nagaon": "assam", "tinsukia": "assam", "tezpur": "assam", "bongaigaon": "assam",
+    "dhubri": "assam", "diphu": "assam", "karimganj": "assam", "sivasagar": "assam",
+
+    # Uttar Pradesh
+    "lucknow": "uttar pradesh", "kanpur": "uttar pradesh", "varanasi": "uttar pradesh",
+    "agra": "uttar pradesh", "prayagraj": "uttar pradesh", "allahabad": "uttar pradesh",
+    "ghaziabad": "uttar pradesh", "noida": "uttar pradesh", "meerut": "uttar pradesh",
+    "bareilly": "uttar pradesh", "aligarh": "uttar pradesh", "moradabad": "uttar pradesh",
+    "saharanpur": "uttar pradesh", "gorakhpur": "uttar pradesh", "ayodhya": "uttar pradesh",
+    "jhansi": "uttar pradesh", "muzaffarnagar": "uttar pradesh", "mathura": "uttar pradesh",
+
+    # Madhya Pradesh
+    "bhopal": "madhya pradesh", "indore": "madhya pradesh", "jabalpur": "madhya pradesh",
+    "gwalior": "madhya pradesh", "ujjain": "madhya pradesh", "sagar": "madhya pradesh",
+    "rewa": "madhya pradesh", "satna": "madhya pradesh", "ratlam": "madhya pradesh",
+
+    # Rajasthan
+    "jaipur": "rajasthan", "jodhpur": "rajasthan", "kota": "rajasthan", "bikaner": "rajasthan",
+    "ajmer": "rajasthan", "udaipur": "rajasthan", "bhilwara": "rajasthan", "alwar": "rajasthan",
+    "sikar": "rajasthan", "bharatpur": "rajasthan", "pali": "rajasthan", "sri ganganagar": "rajasthan",
+
+    # Bihar
+    "patna": "bihar", "gaya": "bihar", "bhagalpur": "bihar", "muzaffarpur": "bihar",
+    "purnia": "bihar", "darbhanga": "bihar", "bihar sharif": "bihar", "arrah": "bihar",
+    "begusarai": "bihar", "katihar": "bihar",
+
+    # Haryana
+    "gurugram": "haryana", "gurgaon": "haryana", "faridabad": "haryana", "panipat": "haryana",
+    "ambala": "haryana", "yamunanagar": "haryana", "rohtak": "haryana", "hisar": "haryana",
+    "karnal": "haryana", "sonipat": "haryana",
+
+    # Delhi
+    "delhi": "delhi", "new delhi": "delhi"
+}
+
 
 @dataclass
 class AyushmanData:
@@ -1209,7 +1370,7 @@ def extract_ayushman_data(pdf_path: str, password: Optional[str] = None) -> Ayus
                     data.mobile = cand_mob
 
         if not data.village_ward:
-            m_vw = re.search(r'(?:Village/Ward|Village|Ward|गाव/वार्ड|गाँव/वार्ड|ગામ/વોર્ડ|गाव|गाँव|ગામ|വാർഡ്|গ্রাম|గ్రామం|கிராமம்)\s*[:\-]?\s*([^:\n\r]+?)(?=\r?\n|$|Subdivision|Town|District)', page1_text, re.IGNORECASE)
+            m_vw = re.search(r'(?:^|\n)\s*(?:Village/Ward|Village|गाव/वार्ड|गाँव/वार्ड|ગામ/વોર્ડ|गाव|गाँव|ગામ|വാർഡ്|গ্রাম|గ్రామం|கிராமம்)\s*[:\-]\s*([^\n\r]+?)(?=\r?\n|$|Subdivision|Town|District)', page1_text, re.IGNORECASE)
             if m_vw:
                 cand_vw = m_vw.group(1).split('\n')[0].strip()
                 if is_valid_ayushman_value(cand_vw):
@@ -1217,7 +1378,7 @@ def extract_ayushman_data(pdf_path: str, password: Optional[str] = None) -> Ayus
                         data.village_ward = cand_vw
 
         if not data.subdivision_town:
-            m_st = re.search(r'(?:Subdivision/Town|Subdivision|Town|तालुका/शहर|उपखंड/कस्बा|तहसील/शहर|तालुका|તાલુકો/શહેર|તાલુકા/શહેર|মহকুমা|సబ్ డివిజన్)\s*[:\-]?\s*([^:\n\r]+?)(?=\r?\n|$|District|જિલ્લો|જિલ્લા)', page1_text, re.IGNORECASE)
+            m_st = re.search(r'(?:^|\n)\s*(?:Subdivision/Town|Subdivision|Town|तालुका/शहर|उपखंड/कस्बा|तहसील/शहर|तालुका|તાલુકો/શહેર|તાલુકા/શહેર|মহকুমা|సబ్ డివిజన్)\s*[:\-]\s*([^\n\r]+?)(?=\r?\n|$|District|જિલ્લો|જિલ્લા)', page1_text, re.IGNORECASE)
             if m_st:
                 cand_st = m_st.group(1).split('\n')[0].strip()
                 if is_valid_ayushman_value(cand_st):
@@ -1225,14 +1386,14 @@ def extract_ayushman_data(pdf_path: str, password: Optional[str] = None) -> Ayus
                         data.subdivision_town = cand_st
 
         if not data.district:
-            m_dist = re.search(r'(?:District|जिल्हा|ज़िला|जिला|જિલ્લો|જિલ્લા|জেলা|జిల్లా|மாவட்டம்|ਜ਼ਿਲ੍ਹਾ|ಜಿಲ್ಲೆ|ജില്ല)\s*[:/]?\s*([A-Za-z\s]+?)(?=\r?\n|$|State|રાજ્ય|Mobile|PM-JAY)', page1_text, re.IGNORECASE)
+            m_dist = re.search(r'(?:^|\n)\s*(?:District|जिल्हा|ज़िला|जिला|જિલ્લો|જિલ્લા|জেলা|జిల్లా|மாவட்டம்|ਜ਼ਿਲ੍ਹਾ|ಜಿಲ್ಲೆ|ജില്ല)\s*[:/\-]\s*([A-Za-z\s]+?)(?=\r?\n|$|State|રાજ્ય|Mobile|PM-JAY)', page1_text, re.IGNORECASE)
             if m_dist:
                 cand_dist = m_dist.group(1).split('\n')[0].strip().title()
                 if is_valid_ayushman_value(cand_dist):
                     data.district = cand_dist
 
         if not data.state:
-            m_state = re.search(r'(?:State|राज्य|રાજ્ય|రాష్ట్రం|மாநிலம்|রাজ্য|ਰਾਜ|ರಾಜ್ಯ|സംസ്ഥാനം)\s*[:/]?\s*([A-Za-z\s]+?)(?=\r?\n|$|Mobile|PM-JAY|ABHA)', page1_text, re.IGNORECASE)
+            m_state = re.search(r'(?:^|\n)\s*(?:State|राज्य|રાજ્ય|రాష్ట్రం|மாநிலம்|রাজ্য|ਰਾਜ|ರಾಜ್ಯ|സംസ്ഥാനം)\s*[:/\-]\s*([A-Za-z\s]+?)(?=\r?\n|$|Mobile|PM-JAY|ABHA)', page1_text, re.IGNORECASE)
             if m_state:
                 cand_state = m_state.group(1).split('\n')[0].strip().title()
                 if is_valid_ayushman_value(cand_state):
@@ -1256,13 +1417,137 @@ def extract_ayushman_data(pdf_path: str, password: Optional[str] = None) -> Ayus
                 if is_valid_ayushman_value(cand_ration):
                     data.ration_other_id = cand_ration
 
+        # 3b. Positional / Unassigned Line Extraction for Label-less PDFs (JasperReports format etc.)
+        # In Gujarat and other JasperReports cards, demographic values are overlaid as clean lines without field labels.
+        if not (data.village_ward and data.subdivision_town and data.district):
+            known_tokens = set()
+            if data.name:
+                known_tokens.add(data.name.upper())
+                for part in data.name.upper().split():
+                    known_tokens.add(part)
+            if data.yob:
+                known_tokens.add(data.yob)
+            if data.gender:
+                known_tokens.add(data.gender.upper())
+                known_tokens.add("M")
+                known_tokens.add("F")
+            if data.pmjay_id:
+                known_tokens.add(data.pmjay_id.upper())
+            if data.abha_number:
+                known_tokens.add(data.abha_number)
+                known_tokens.add(re.sub(r'[\s\-]', '', data.abha_number))
+            if data.mobile:
+                known_tokens.add(data.mobile)
+            if data.ration_other_id:
+                known_tokens.add(data.ration_other_id.upper())
+
+            unassigned_lines: list[str] = []
+            for l in lines:
+                l_s = l.strip()
+                if not l_s:
+                    continue
+                l_u = l_s.upper()
+                if l_u in known_tokens or any(tok == l_u for tok in known_tokens):
+                    continue
+                if any(kw in l_u for kw in [
+                    "CARD GENERATED", "GENERATED ON", "PAGE 1", "PAGE 2",
+                    "NATIONAL HEALTH AUTHORITY", "AYUSHMAN BHARAT", "PRADHAN MANTRI",
+                    "JAN AROGYA", "GOVERNMENT OF INDIA", "GOVT OF INDIA", "ITEXT", "JASPERREPORTS"
+                ]):
+                    continue
+                if re.match(r'^(?:NAME|YOB|DOB|GENDER|SEX|MALE|FEMALE|MOBILE|PM-?JAY|ABHA|ID|STATE|DISTRICT)\b', l_u):
+                    continue
+                unassigned_lines.append(l_s)
+
+            # 1. State line detection in unassigned lines
+            for u in list(unassigned_lines):
+                u_clean = u.strip().lower()
+                if u_clean in STATE_LANGUAGE_MAP and u_clean != "default_hindi":
+                    if not data.state:
+                        data.state = u.strip().title()
+                    unassigned_lines.remove(u)
+                    break
+
+            # 2. Village / Ward line detection
+            if not data.village_ward:
+                for u in list(unassigned_lines):
+                    u_u = u.upper()
+                    if any(kw in u_u for kw in [
+                        "WARD", "VILLAGE", "GAON", "GRAM", "M CORP", "MUNICIPAL",
+                        "NAGAR", "COLONY", "SECTOR", "BLOCK", "FLAT", "HOUSE",
+                        "STREET", "ROAD", "NO.", "(M CORP.)", "RURAL", "URBAN"
+                    ]):
+                        data.village_ward = u.strip()
+                        unassigned_lines.remove(u)
+                        break
+
+            # 3. District / Subdivision resolution using DISTRICT_STATE_MAP
+            for u in list(unassigned_lines):
+                u_clean = re.sub(r'[^a-zA-Z\s]', '', u).strip().lower()
+                if u_clean in DISTRICT_STATE_MAP:
+                    mapped_state = DISTRICT_STATE_MAP[u_clean].title()
+                    if not data.district:
+                        data.district = u.strip().title()
+                        if not data.state:
+                            data.state = mapped_state
+                        unassigned_lines.remove(u)
+                    elif not data.subdivision_town:
+                        data.subdivision_town = u.strip().title()
+                        if not data.state:
+                            data.state = mapped_state
+                        unassigned_lines.remove(u)
+
+            # 4. Fill remaining missing address fields from leftover unassigned lines
+            if unassigned_lines:
+                if not data.village_ward:
+                    data.village_ward = unassigned_lines.pop(0).strip()
+                elif not data.subdivision_town:
+                    data.subdivision_town = unassigned_lines.pop(0).strip().title()
+                elif not data.district:
+                    data.district = unassigned_lines.pop(0).strip().title()
+
+            # 5. Clean & cross-fill subdivision / district
+            if not data.subdivision_town and data.district:
+                data.subdivision_town = data.district
+            elif not data.district and data.subdivision_town:
+                data.district = data.subdivision_town
+
         # 4. State & Local Language Scheme Mapping
         detected_lang = None
         state_key = (data.state or "").lower().strip()
         
-        if state_key in STATE_LANGUAGE_MAP:
+        if state_key in STATE_LANGUAGE_MAP and state_key != "default_hindi":
             detected_lang = STATE_LANGUAGE_MAP[state_key]
 
+        # Resolution Layer A: Check district in DISTRICT_STATE_MAP
+        if not detected_lang and data.district:
+            d_clean = re.sub(r'[^a-zA-Z\s]', '', data.district).strip().lower()
+            if d_clean in DISTRICT_STATE_MAP:
+                s_name = DISTRICT_STATE_MAP[d_clean]
+                if s_name in STATE_LANGUAGE_MAP:
+                    detected_lang = STATE_LANGUAGE_MAP[s_name]
+                    data.state = s_name.title()
+
+        # Resolution Layer B: Check subdivision_town in DISTRICT_STATE_MAP
+        if not detected_lang and data.subdivision_town:
+            st_clean = re.sub(r'[^a-zA-Z\s]', '', data.subdivision_town).strip().lower()
+            if st_clean in DISTRICT_STATE_MAP:
+                s_name = DISTRICT_STATE_MAP[st_clean]
+                if s_name in STATE_LANGUAGE_MAP:
+                    detected_lang = STATE_LANGUAGE_MAP[s_name]
+                    data.state = s_name.title()
+
+        # Resolution Layer C: Check village_ward for city keywords
+        if not detected_lang and data.village_ward:
+            vw_lower = data.village_ward.lower()
+            for city_key, s_name in DISTRICT_STATE_MAP.items():
+                if len(city_key) >= 4 and city_key in vw_lower:
+                    if s_name in STATE_LANGUAGE_MAP:
+                        detected_lang = STATE_LANGUAGE_MAP[s_name]
+                        data.state = s_name.title()
+                        break
+
+        # Resolution Layer D: Check full text for state names
         if not detected_lang:
             text_lower = full_text.lower()
             for s_key in STATE_LANGUAGE_MAP:
@@ -1271,6 +1556,26 @@ def extract_ayushman_data(pdf_path: str, password: Optional[str] = None) -> Ayus
                     data.state = s_key.title()
                     break
 
+        # Resolution Layer E: Check full text for any city in DISTRICT_STATE_MAP
+        if not detected_lang:
+            text_lower = full_text.lower()
+            for city_key, s_name in DISTRICT_STATE_MAP.items():
+                if len(city_key) >= 4 and re.search(r'\b' + re.escape(city_key) + r'\b', text_lower):
+                    if s_name in STATE_LANGUAGE_MAP:
+                        detected_lang = STATE_LANGUAGE_MAP[s_name]
+                        data.state = s_name.title()
+                        break
+
+        # Resolution Layer F: State helplines & scheme branding
+        if not detected_lang:
+            if any(kw in full_text for kw in ["1800 233 1022", "18002331022", "MUKHYAMANTRI AMRUTUM", "AMRUTUM", "MAA YOJANA"]):
+                detected_lang = STATE_LANGUAGE_MAP["gujarat"]
+                data.state = "Gujarat"
+            elif any(kw in full_text for kw in ["MJPJAY", "MAHATMA JYOTIRAO PHULE", "महाराष्ट्र", "मुंबई", "धुळे", "पुणे", "नासिक"]):
+                detected_lang = STATE_LANGUAGE_MAP["maharashtra"]
+                data.state = "Maharashtra"
+
+        # Resolution Layer G: Unicode script detection
         if not detected_lang:
             if re.search(r'[\u0A80-\u0AFF]', full_text):
                 detected_lang = STATE_LANGUAGE_MAP["gujarat"]
@@ -1304,7 +1609,7 @@ def extract_ayushman_data(pdf_path: str, password: Optional[str] = None) -> Ayus
                     detected_lang = STATE_LANGUAGE_MAP["default_hindi"]
                     data.state = "Uttar Pradesh"
 
-        # Heuristic fallback
+        # Resolution Layer H: Name heuristics
         if not detected_lang:
             if any(kw in data.name.upper() for kw in ["BHAI", "BEN", "PATEL", "SHAH", "SOLANKI", "PARMAR", "JADAV", "RATHOD", "CHAUHAN", "MAKWANA", "SURAT", "RAJKOT"]):
                 detected_lang = STATE_LANGUAGE_MAP["gujarat"]

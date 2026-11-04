@@ -1,6 +1,8 @@
 import os
 import json
 import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 sys.stdout.reconfigure(encoding='utf-8')
 
 from engine.ayushman_extractor import extract_ayushman_data
@@ -9,8 +11,8 @@ from engine.card_renderer import render_card
 
 def test_both_pdfs():
     pdfs = [
-        ("PDF 1 (Nishad Ganeshbhai)", r"C:\Users\NANO\.gemini\antigravity-ide\brain\843a6757-c64b-4e1a-82fc-3b111039ee96\.user_uploaded\media_1787310140549.pdf"),
-        ("PDF 2 (Patil Mangal Naval)", r"C:\Users\NANO\.gemini\antigravity-ide\brain\843a6757-c64b-4e1a-82fc-3b111039ee96\.user_uploaded\media_1787321147539.pdf")
+        ("PDF 1 (Current Upload)", r"C:\Users\NANO\.gemini\antigravity\brain\7ea1a93d-7ea4-442d-a150-3f2da8dbe098\.user_uploaded\media_1793785792241_2cc07199.pdf"),
+        ("PDF 2 (Nishad Ganeshbhai)", os.path.join(os.path.dirname(__file__), "test_ayushman.pdf"))
     ]
     
     for label, pdf_path in pdfs:
