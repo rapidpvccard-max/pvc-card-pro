@@ -62,7 +62,14 @@ def run_layout_audit():
     bottom_pixels = [sheet_img.getpixel((x, 1799)) for x in range(0, 1200, 50)]
     assert all(p == (255, 255, 255) for p in bottom_pixels), "Bottom row in 4x6_12 is cut off!"
 
-    print("ALL TESTS PASSED: 4x6 12-Photo Sheet is 100% complete, unclipped, and verified!")
+    # Verify 4x6_12 option is removed from templates/index.html UI
+    with open("templates/index.html", "r", encoding="utf-8") as f:
+        html = f.read()
+    assert 'data-layout="4x6_12"' not in html, "4x6_12 option still found in index.html!"
+    assert 'value="4x6_12"' not in html, "value='4x6_12' radio still found in index.html!"
+
+    print("ALL TESTS PASSED: 4x6 12-Photo Sheet option completely removed from UI and backend verified!")
 
 if __name__ == "__main__":
     run_layout_audit()
+
