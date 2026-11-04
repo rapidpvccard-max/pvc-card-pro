@@ -506,21 +506,53 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Passport Studio Options: Background Swatches Selection
-    document.querySelectorAll('.passport-color-option').forEach(opt => {
-        opt.addEventListener('click', () => {
-            document.querySelectorAll('.passport-color-option').forEach(o => {
-                o.classList.remove('active');
-                o.style.borderColor = '#e2e8f0';
-                o.style.background = '#f8fafc';
-            });
-            opt.classList.add('active');
-            opt.style.borderColor = '#3b82f6';
-            opt.style.background = '#eff6ff';
-            const rad = opt.querySelector('input[type="radio"]');
+    // Passport Studio Options: Background Swatches Selection (Single-Line Swatches Bar)
+    const swatchItems = document.querySelectorAll('.passport-swatch-item, .passport-color-option');
+    const colorBadge = document.getElementById('selected-passport-color-badge');
+    const customPicker = document.getElementById('passport-custom-picker');
+    const customRadio = document.getElementById('passport-custom-radio');
+    const customDisc = document.getElementById('custom-swatch-display');
+    const customCheck = document.getElementById('custom-check-icon');
+
+    swatchItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            const colorCode = item.getAttribute('data-color');
+            const colorName = item.getAttribute('data-name');
+
+            if (colorCode === 'custom') {
+                if (customPicker) {
+                    customPicker.click();
+                }
+                return;
+            }
+
+            swatchItems.forEach(s => s.classList.remove('active'));
+            item.classList.add('active');
+
+            const rad = item.querySelector('input[type="radio"]');
             if (rad) rad.checked = true;
+
+            if (colorBadge && colorName) {
+                colorBadge.textContent = colorName;
+            }
         });
     });
+
+    if (customPicker) {
+        customPicker.addEventListener('input', (e) => {
+            const hex = e.target.value;
+            const customItem = document.querySelector('.swatch-custom-item');
+            if (customItem && customRadio && customDisc) {
+                swatchItems.forEach(s => s.classList.remove('active'));
+                customItem.classList.add('active');
+                customRadio.value = hex;
+                customRadio.checked = true;
+                customDisc.style.background = hex;
+                if (customCheck) customCheck.style.display = 'block';
+                if (colorBadge) colorBadge.textContent = `Custom Color (${hex.toUpperCase()})`;
+            }
+        });
+    }
 
     // Passport Studio Options: Layout Selection
     document.querySelectorAll('.passport-layout-option').forEach(opt => {

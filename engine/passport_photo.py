@@ -36,11 +36,15 @@ SHEET_A4_H = 3508
 # Standard Background Color Palette
 COLOR_PALETTE = {
     "white": (255, 255, 255),
-    "light_blue": (180, 215, 255),    # Classic Indian exam & school light studio blue
-    "studio_blue": (75, 156, 211),   # Standard studio blue
-    "navy_blue": (30, 58, 138),      # Dark formal blue
-    "red": (220, 38, 38),            # Standard red background
-    "light_grey": (229, 231, 235),   # Visa & embassy standard grey
+    "light_blue": (180, 215, 255),    # Classic Indian exam & school light studio blue (#b4d7ff)
+    "studio_blue": (75, 156, 211),   # Standard studio blue (#4b9cd3)
+    "navy_blue": (30, 58, 138),      # Dark formal blue (#1e3a8a)
+    "sky_blue": (186, 230, 253),     # Soft sky blue (#bae6fd)
+    "light_grey": (229, 231, 235),   # Visa & embassy standard grey (#e5e7eb)
+    "cream": (254, 249, 195),        # Warm off-white / cream (#fef9c3)
+    "light_green": (187, 247, 208),  # Soft pastel green (#bbf7d0)
+    "red": (220, 38, 38),            # Standard red background (#dc2626)
+    "original": None,                # Keep original photo background
     "transparent": None
 }
 
@@ -211,6 +215,10 @@ def remove_and_replace_background(
     Removes background using AI (rembg) and replaces it with the requested studio color.
     Falls back gracefully to original background if rembg is not available or fails.
     """
+    # If original background is explicitly requested, skip rembg
+    if bg_color_name and bg_color_name.lower() in ("original", "keep_original", "none"):
+        return pil_img.convert("RGB")
+
     target_color = (180, 215, 255)  # default light blue
     if custom_hex and custom_hex.startswith("#") and len(custom_hex) == 7:
         try:
@@ -220,12 +228,20 @@ def remove_and_replace_background(
             target_color = (r, g, b)
         except Exception:
             pass
+    elif bg_color_name and bg_color_name.startswith("#") and len(bg_color_name) == 7:
+        try:
+            r = int(bg_color_name[1:3], 16)
+            g = int(bg_color_name[3:5], 16)
+            b = int(bg_color_name[5:7], 16)
+            target_color = (r, g, b)
+        except Exception:
+            pass
     elif bg_color_name.lower() in COLOR_PALETTE:
         val = COLOR_PALETTE[bg_color_name.lower()]
         if val is not None:
             target_color = val
         else:
-            # transparent requested
+            # transparent or original requested
             target_color = None
 
     # Try AI removal via rembg

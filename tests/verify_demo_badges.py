@@ -60,3 +60,4 @@ def test_demo_badges():
 
 if __name__ == "__main__":
     test_demo_badges()
+

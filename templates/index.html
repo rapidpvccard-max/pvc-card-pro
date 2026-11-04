@@ -232,6 +232,146 @@
         }
     }
 
+    /* Passport Studio Background Color - Single Line Swatches Bar */
+    .passport-bg-color-wrapper {
+        margin-bottom: 20px;
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 12px 14px;
+    }
+
+    .passport-bg-color-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .passport-section-label {
+        font-size: 0.82rem;
+        font-weight: 800;
+        color: #334155;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+    }
+
+    .selected-color-pill {
+        background: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
+        padding: 2px 10px;
+        border-radius: 8px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: none;
+        letter-spacing: normal;
+        display: inline-block;
+        transition: all 0.2s ease;
+    }
+
+    .passport-bg-subhint {
+        font-size: 0.72rem;
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    .passport-color-swatches-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+        padding: 6px 4px 8px 4px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e1 transparent;
+        flex-wrap: nowrap;
+    }
+
+    .passport-color-swatches-row::-webkit-scrollbar {
+        height: 5px;
+    }
+    .passport-color-swatches-row::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+
+    .passport-swatch-item {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        user-select: none;
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        flex-shrink: 0;
+        position: relative;
+    }
+
+    .passport-swatch-item input[type="radio"] {
+        display: none;
+    }
+
+    .passport-swatch-item:hover {
+        transform: translateY(-2px);
+    }
+
+    .swatch-disc {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: 2.5px solid #cbd5e1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        box-sizing: border-box;
+    }
+
+    .swatch-check-icon {
+        width: 18px;
+        height: 18px;
+        opacity: 0;
+        transform: scale(0.6);
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+    }
+
+    /* Active state */
+    .passport-swatch-item.active .swatch-disc {
+        transform: scale(1.1);
+        border-color: #2563eb !important;
+        box-shadow: 0 0 0 3px #ffffff, 0 0 0 5.5px #2563eb, 0 6px 14px rgba(37, 99, 235, 0.35);
+    }
+
+    .passport-swatch-item.active .swatch-check-icon {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    .swatch-caption {
+        font-size: 0.70rem;
+        font-weight: 700;
+        color: #64748b;
+        transition: color 0.2s ease;
+        white-space: nowrap;
+    }
+
+    .passport-swatch-item.active .swatch-caption {
+        color: #1d4ed8;
+        font-weight: 800;
+    }
+
     /* Generator Layout Grid */
     .generator-workspace-grid {
         display: grid;
@@ -1107,41 +1247,116 @@
                         </span>
                     </div>
 
-                    <!-- 1. Background Color Selection -->
-                    <div style="margin-bottom: 18px;">
-                        <label style="display: block; font-size: 0.82rem; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
-                            🎨 Studio Background Color
-                        </label>
-                        <div class="passport-bg-palette" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                            <label class="passport-color-option active" data-color="light_blue" style="cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 8px 14px; border: 2px solid #3b82f6; border-radius: 12px; background: #eff6ff; font-size: 0.85rem; font-weight: 700; color: #1e40af; transition: all 0.2s;">
-                                <input type="radio" name="passport_bg_color" value="light_blue" checked style="display: none;">
-                                <span style="width: 20px; height: 20px; border-radius: 50%; background: #b4d7ff; border: 1.5px solid #93c5fd; display: inline-block;"></span>
-                                <span>Light Blue (Indian Standard)</span>
+                    <!-- 1. Background Color Selection (Clean Single-Line Swatches) -->
+                    <div class="passport-bg-color-wrapper">
+                        <div class="passport-bg-color-header">
+                            <label class="passport-section-label">
+                                🎨 Studio Background Color:
+                                <span id="selected-passport-color-badge" class="selected-color-pill">Light Blue (Indian Standard)</span>
                             </label>
-                            <label class="passport-color-option" data-color="white" style="cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 8px 14px; border: 2px solid #e2e8f0; border-radius: 12px; background: #f8fafc; font-size: 0.85rem; font-weight: 700; color: #334155; transition: all 0.2s;">
-                                <input type="radio" name="passport_bg_color" value="white" style="display: none;">
-                                <span style="width: 20px; height: 20px; border-radius: 50%; background: #ffffff; border: 1.5px solid #cbd5e1; display: inline-block;"></span>
-                                <span>Pure White (Visa/Passport)</span>
+                            <span class="passport-bg-subhint">1-Click AI Color Swatches</span>
+                        </div>
+
+                        <!-- 1-LINE HORIZONTAL SCROLLABLE SWATCHES -->
+                        <div class="passport-color-swatches-row">
+                            <!-- 1. Light Blue (Indian Standard / Exams) -->
+                            <label class="passport-swatch-item passport-color-option active" data-color="light_blue" data-name="Light Blue (Indian Standard / Govt Exams)" title="Light Blue (Indian Standard / SSC / Police / Railway)">
+                                <input type="radio" name="passport_bg_color" value="light_blue" checked>
+                                <span class="swatch-disc" style="background: #b4d7ff; border-color: #93c5fd;">
+                                    <svg class="swatch-check-icon" viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="swatch-caption">Light Blue</span>
                             </label>
-                            <label class="passport-color-option" data-color="studio_blue" style="cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 8px 14px; border: 2px solid #e2e8f0; border-radius: 12px; background: #f8fafc; font-size: 0.85rem; font-weight: 700; color: #334155; transition: all 0.2s;">
-                                <input type="radio" name="passport_bg_color" value="studio_blue" style="display: none;">
-                                <span style="width: 20px; height: 20px; border-radius: 50%; background: #4b9cd3; border: 1.5px solid #38bdf8; display: inline-block;"></span>
-                                <span>Studio Blue</span>
+
+                            <!-- 2. Pure White (Visa / Passport) -->
+                            <label class="passport-swatch-item passport-color-option" data-color="white" data-name="Pure White (Visa / International Passport)" title="Pure White (Visa & Global Passports)">
+                                <input type="radio" name="passport_bg_color" value="white">
+                                <span class="swatch-disc" style="background: #ffffff; border-color: #cbd5e1;">
+                                    <svg class="swatch-check-icon" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="swatch-caption">White</span>
                             </label>
-                            <label class="passport-color-option" data-color="navy_blue" style="cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 8px 14px; border: 2px solid #e2e8f0; border-radius: 12px; background: #f8fafc; font-size: 0.85rem; font-weight: 700; color: #334155; transition: all 0.2s;">
-                                <input type="radio" name="passport_bg_color" value="navy_blue" style="display: none;">
-                                <span style="width: 20px; height: 20px; border-radius: 50%; background: #1e3a8a; border: 1.5px solid #1e40af; display: inline-block;"></span>
-                                <span>Navy Blue</span>
+
+                            <!-- 3. Studio Blue (Classic) -->
+                            <label class="passport-swatch-item passport-color-option" data-color="studio_blue" data-name="Studio Blue (Classic Studio)" title="Classic Studio Blue">
+                                <input type="radio" name="passport_bg_color" value="studio_blue">
+                                <span class="swatch-disc" style="background: #4b9cd3; border-color: #38bdf8;">
+                                    <svg class="swatch-check-icon" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="swatch-caption">Studio Blue</span>
                             </label>
-                            <label class="passport-color-option" data-color="red" style="cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 8px 14px; border: 2px solid #e2e8f0; border-radius: 12px; background: #f8fafc; font-size: 0.85rem; font-weight: 700; color: #334155; transition: all 0.2s;">
-                                <input type="radio" name="passport_bg_color" value="red" style="display: none;">
-                                <span style="width: 20px; height: 20px; border-radius: 50%; background: #dc2626; border: 1.5px solid #ef4444; display: inline-block;"></span>
-                                <span>Red</span>
+
+                            <!-- 4. Navy Blue (Formal) -->
+                            <label class="passport-swatch-item passport-color-option" data-color="navy_blue" data-name="Navy Blue (Dark Formal)" title="Dark Formal Navy Blue">
+                                <input type="radio" name="passport_bg_color" value="navy_blue">
+                                <span class="swatch-disc" style="background: #1e3a8a; border-color: #1e40af;">
+                                    <svg class="swatch-check-icon" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="swatch-caption">Navy Blue</span>
                             </label>
-                            <label class="passport-color-option" data-color="light_grey" style="cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 8px 14px; border: 2px solid #e2e8f0; border-radius: 12px; background: #f8fafc; font-size: 0.85rem; font-weight: 700; color: #334155; transition: all 0.2s;">
-                                <input type="radio" name="passport_bg_color" value="light_grey" style="display: none;">
-                                <span style="width: 20px; height: 20px; border-radius: 50%; background: #e5e7eb; border: 1.5px solid #d1d5db; display: inline-block;"></span>
-                                <span>Light Grey</span>
+
+                            <!-- 5. Sky Blue (Soft Pastel) -->
+                            <label class="passport-swatch-item passport-color-option" data-color="sky_blue" data-name="Sky Blue (Soft Pastel Sky)" title="Soft Pastel Sky Blue">
+                                <input type="radio" name="passport_bg_color" value="sky_blue">
+                                <span class="swatch-disc" style="background: #bae6fd; border-color: #7dd3fc;">
+                                    <svg class="swatch-check-icon" viewBox="0 0 24 24" fill="none" stroke="#0369a1" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="swatch-caption">Sky Blue</span>
+                            </label>
+
+                            <!-- 6. Light Grey (European Embassy) -->
+                            <label class="passport-swatch-item passport-color-option" data-color="light_grey" data-name="Light Grey (Schengen / European Embassy)" title="Light Grey (Visa & Embassy)">
+                                <input type="radio" name="passport_bg_color" value="light_grey">
+                                <span class="swatch-disc" style="background: #e5e7eb; border-color: #d1d5db;">
+                                    <svg class="swatch-check-icon" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="swatch-caption">Light Grey</span>
+                            </label>
+
+                            <!-- 7. Warm Cream (Off-White) -->
+                            <label class="passport-swatch-item passport-color-option" data-color="cream" data-name="Warm Cream (Off-White)" title="Warm Cream / Off-White">
+                                <input type="radio" name="passport_bg_color" value="cream">
+                                <span class="swatch-disc" style="background: #fef9c3; border-color: #fde047;">
+                                    <svg class="swatch-check-icon" viewBox="0 0 24 24" fill="none" stroke="#854d0e" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="swatch-caption">Cream</span>
+                            </label>
+
+                            <!-- 8. Soft Green -->
+                            <label class="passport-swatch-item passport-color-option" data-color="light_green" data-name="Soft Green" title="Soft Pastel Green">
+                                <input type="radio" name="passport_bg_color" value="light_green">
+                                <span class="swatch-disc" style="background: #bbf7d0; border-color: #86efac;">
+                                    <svg class="swatch-check-icon" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="swatch-caption">Green</span>
+                            </label>
+
+                            <!-- 9. Red (Asian Passport) -->
+                            <label class="passport-swatch-item passport-color-option" data-color="red" data-name="Red (Asian Passport / Foreign ID)" title="Red (Foreign ID & Passports)">
+                                <input type="radio" name="passport_bg_color" value="red">
+                                <span class="swatch-disc" style="background: #dc2626; border-color: #ef4444;">
+                                    <svg class="swatch-check-icon" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="swatch-caption">Red</span>
+                            </label>
+
+                            <!-- 10. Original Background (No AI change) -->
+                            <label class="passport-swatch-item passport-color-option" data-color="original" data-name="Original Photo (Keep Original BG)" title="Keep Original Photo Background (No AI Change)">
+                                <input type="radio" name="passport_bg_color" value="original">
+                                <span class="swatch-disc" style="background: linear-gradient(135deg, #f8fafc 50%, #cbd5e1 50%); border-color: #94a3b8;">
+                                    <svg class="swatch-check-icon" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="swatch-caption">Original</span>
+                            </label>
+
+                            <!-- 11. Custom Color Picker -->
+                            <label class="passport-swatch-item swatch-custom-item" data-color="custom" data-name="Custom Color Picker" title="Choose Custom Hex Color">
+                                <input type="radio" name="passport_bg_color" id="passport-custom-radio" value="#93c5fd">
+                                <input type="color" id="passport-custom-picker" value="#93c5fd" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;">
+                                <span class="swatch-disc" id="custom-swatch-display" style="background: conic-gradient(from 0deg, #ef4444, #f59e0b, #10b981, #06b6d4, #3b82f6, #8b5cf6, #ec4899, #ef4444); border-color: #cbd5e1;">
+                                    <svg class="swatch-check-icon" id="custom-check-icon" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.5" style="display:none;"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="swatch-caption">Custom</span>
                             </label>
                         </div>
                     </div>
