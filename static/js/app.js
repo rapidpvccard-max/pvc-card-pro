@@ -267,6 +267,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const resSubtitle = document.getElementById('result-subtitle');
 
         if (type === 'passport') {
+            if (pdfPasswordInput) {
+                pdfPasswordInput.required = false;
+                pdfPasswordInput.value = '';
+            }
+            if (fileInput) {
+                fileInput.required = false;
+            }
             if (inputDoc) inputDoc.value = 'passport';
             if (inputStyle) inputStyle.value = 'default';
             if (btnPassport) btnPassport.classList.add('active');
@@ -814,7 +821,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
+    let isPassportSubmitting = false;
     async function handlePassportPhotoSubmit() {
+        if (isPassportSubmitting) return;
+
         if (!fileInput || fileInput.files.length === 0) {
             window.showToast('Please select a photo or selfie image.', 'warning');
             return;
@@ -832,6 +842,8 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('layout_type', selectedLayout);
         formData.append('candidate_name', candName);
         formData.append('date_of_photo', photoDate);
+
+        isPassportSubmitting = true;
 
         // Enter Processing UI
         uploadSection.style.display = 'none';
@@ -905,12 +917,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const countBadge = document.getElementById('passport-photo-count-badge');
             if (countBadge) {
-                countBadge.textContent = `${data.photo_count} Photos • 300 DPI`;
+                countBadge.textContent = `${data.photo_count} ${data.photo_count === 1 ? 'Photo' : 'Photos'} • 300 DPI`;
             }
 
             const sheetTitle = document.getElementById('passport-sheet-title');
             if (sheetTitle) {
-                sheetTitle.textContent = data.layout_type.startsWith('a4') ? 'PRINT SHEET (A4 PAPER)' : 'PRINT SHEET (4×6 GLOSSY)';
+                if (data.layout_type === 'single') {
+                    sheetTitle.textContent = 'SINGLE MASTER PHOTO (300 DPI)';
+                } else if (data.layout_type.startsWith('a4')) {
+                    sheetTitle.textContent = 'PRINT SHEET (A4 PAPER)';
+                } else {
+                    sheetTitle.textContent = 'PRINT SHEET (4×6 GLOSSY)';
+                }
             }
 
             const sampleNotice = document.getElementById('sample-card-notice');
@@ -933,7 +951,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (processingSection) processingSection.style.display = 'none';
             uploadSection.style.display = 'block';
             window.showToast(err.message || 'Error creating passport photos', 'error');
+        } finally {
+            isPassportSubmitting = false;
         }
+    }
+
+    // Direct Upload Button Click Handler to guarantee trigger
+    if (uploadBtn) {
+        uploadBtn.addEventListener('click', (e) => {
+            const currentDocType = (document.getElementById('selected-document-type')?.value || 'aadhaar').toLowerCase();
+            if (currentDocType === 'passport') {
+                e.preventDefault();
+                handlePassportPhotoSubmit();
+            }
+        });
     }
 
     uploadForm.addEventListener('submit', async (e) => {

@@ -281,9 +281,15 @@ def add_name_and_dop(
 
     # Draw Name and Date
     if candidate_name and date_of_photo:
-        # Two lines
+        font_size = 22
         name_bbox = draw.textbbox((0, 0), candidate_name.upper(), font=font_name)
         nw = name_bbox[2] - name_bbox[0]
+        while nw > (PHOTO_WIDTH - 20) and font_size > 13 and os.path.exists(font_path):
+            font_size -= 2
+            font_name = ImageFont.truetype(font_path, font_size)
+            name_bbox = draw.textbbox((0, 0), candidate_name.upper(), font=font_name)
+            nw = name_bbox[2] - name_bbox[0]
+
         draw.text(((PHOTO_WIDTH - nw) // 2, strip_top + 6), candidate_name.upper(), fill=(0, 0, 0), font=font_name)
 
         dop_str = f"DOP: {date_of_photo}" if not date_of_photo.upper().startswith("DOP") else date_of_photo
@@ -317,12 +323,13 @@ def add_cutting_border(photo: Image.Image) -> Image.Image:
 
 def generate_print_sheet(
     photo: Image.Image,
-    layout_type: str = "4x6_8",  # "4x6_8", "4x6_6", "4x6_12", "a4_30", "a4_36"
+    layout_type: str = "4x6_8",  # "4x6_8", "4x6_6", "4x6_12", "a4_30", "a4_36", "single"
     include_cutting_marks: bool = True
 ) -> Image.Image:
     """
     Arranges the passport photo into a high-density 300 DPI print-ready sheet.
     Layouts:
+    - single : Single Photo centered on 4x6 (for single photo printing / online application copy)
     - 4x6_8  : 4x6 inch paper (1800x1200) -> 8 Photos (4 cols x 2 rows) - Most popular for cyber cafes
     - 4x6_6  : 4x6 inch paper (1800x1200) -> 6 Photos (3 cols x 2 rows)
     - 4x6_12 : 4x6 inch paper (1800x1200) -> 12 Photos (4 cols x 3 rows, stamp size)
@@ -331,7 +338,10 @@ def generate_print_sheet(
     """
     photo_bordered = add_cutting_border(photo)
 
-    if layout_type.startswith("4x6"):
+    if layout_type == "single":
+        sheet_w, sheet_h = SHEET_4X6_W, SHEET_4X6_H
+        cols, rows = 1, 1
+    elif layout_type.startswith("4x6"):
         sheet_w, sheet_h = SHEET_4X6_W, SHEET_4X6_H
         if layout_type == "4x6_6":
             cols, rows = 3, 2
@@ -474,7 +484,8 @@ def process_passport_studio(
     sheet_img.save(pdf_path, "PDF", resolution=300.0)
 
     photo_count = 8
-    if layout_type == "4x6_6": photo_count = 6
+    if layout_type == "single": photo_count = 1
+    elif layout_type == "4x6_6": photo_count = 6
     elif layout_type == "4x6_12": photo_count = 12
     elif layout_type == "a4_30": photo_count = 30
     elif layout_type == "a4_36": photo_count = 36

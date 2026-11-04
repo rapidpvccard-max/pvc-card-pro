@@ -958,7 +958,7 @@
                 </div>
             </div>
 
-            <form id="upload-form">
+            <form id="upload-form" novalidate>
                 <input type="hidden" name="document_type" id="selected-document-type" value="aadhaar">
                 <input type="hidden" name="template_style" id="selected-template-style" value="default">
                 
@@ -970,7 +970,7 @@
                     <div class="dropzone-title" id="upload-zone-text">Upload Aadhaar PDF</div>
                     <div class="dropzone-subtitle" id="upload-zone-sub">Drag & drop your file here or <span style="color: #2563eb; font-weight: 700;">Browse Files</span></div>
                     <div class="dropzone-limit" id="upload-zone-limit">Sirf official UIDAI website se downloaded password-protected e-Aadhaar PDF (Max: 10MB)</div>
-                    <input type="file" id="pdf-file" class="form-input" name="file" accept="image/jpeg,image/png,image/webp,image/jpg,application/pdf" required style="display:none;">
+                    <input type="file" id="pdf-file" class="form-input" name="file" accept="image/jpeg,image/png,image/webp,image/jpg,application/pdf" style="display:none;">
                 </label>
 
                 <!-- File Selected Info Banner -->
@@ -1590,5 +1590,5 @@
         input.type = input.type === 'password' ? 'text' : 'password';
     }
 </script>
-<script src="/static/js/app.js?v=29"></script>
+<script src="/static/js/app.js?v=31"></script>
 {% endblock %}
