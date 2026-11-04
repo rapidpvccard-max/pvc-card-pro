@@ -27,7 +27,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 24px 38px 28px;
+            padding: 22px 38px 22px;
             overflow: hidden;
         }
 
@@ -37,9 +37,9 @@
             top: 48%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 330px;
-            height: 330px;
-            opacity: 0.06;
+            width: 360px;
+            height: 360px;
+            opacity: 0.05;
             pointer-events: none;
             z-index: 0;
         }
@@ -47,44 +47,44 @@
         /* ── TOP HEADING ── */
         .back-heading {
             text-align: center;
-            margin-bottom: 12px;
+            margin-bottom: 6px;
             z-index: 5;
             position: relative;
         }
         .heading-orange {
             font-family: 'Nirmala UI', 'Noto Sans Gujarati', 'Noto Sans Devanagari', 'Noto Sans Telugu', 'Noto Sans Tamil', 'Noto Sans Kannada', 'Noto Sans Bengali', 'Roboto', sans-serif;
-            font-size: 34px;
+            font-size: 35px;
             font-weight: 900;
             color: #ea580c;
             line-height: 1.1;
             letter-spacing: -0.2px;
         }
 
-        /* ── NUMBERED INSTRUCTIONS (Larger text & generous vertical spread) ── */
+        /* ── NUMBERED INSTRUCTIONS (Evenly spread & filling the vertical area) ── */
         .instructions {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            justify-content: space-between;
             z-index: 5;
             position: relative;
             flex: 1;
-            margin-top: 4px;
-            margin-bottom: 12px;
+            margin-top: 6px;
+            margin-bottom: 10px;
         }
 
         .instr-item {
             display: flex;
             align-items: flex-start;
-            gap: 12px;
+            gap: 14px;
         }
 
         .item-num {
-            font-size: 21px;
+            font-size: 23px;
             font-weight: 900;
-            color: #111827;
+            color: #ea580c;
             line-height: 1.35;
             flex-shrink: 0;
-            width: 26px;
+            width: 28px;
         }
 
         .item-text {
@@ -93,11 +93,11 @@
 
         .text-local {
             font-family: 'Nirmala UI', 'Noto Sans Gujarati', 'Noto Sans Devanagari', 'Noto Sans Telugu', 'Noto Sans Tamil', 'Noto Sans Kannada', 'Noto Sans Bengali', 'Roboto', sans-serif;
-            font-size: 16.5px;
+            font-size: 18px;
             font-weight: 800;
             color: #111827;
             line-height: 1.38;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
 
         .text-en {
@@ -105,14 +105,14 @@
             font-size: 15px;
             font-weight: 500;
             color: #374151;
-            line-height: 1.4;
+            line-height: 1.35;
         }
 
         /* ── ORANGE SEPARATOR ── */
         .separator {
             height: 2.5px;
             background: #ea580c;
-            margin: 12px 0 14px;
+            margin: 8px 0 12px;
             z-index: 5;
             position: relative;
             flex-shrink: 0;
@@ -264,6 +264,15 @@
             <div class="item-text">
                 <div class="text-local">{{ scheme.point3_local or ('યોજના સંબંધિત ફરિયાદની જાણ કરવા અથવા તમારી નજીકના AB PMJAY એમ્પેનલ્ડ હોસ્પિટલો વિશે વધુ જાણકારી મેળવવા, કૃપા કરીને અમારો સંપર્ક કરો. (ટોલ ફ્રી નં- ૧૮૦૦ ૨૩૩ ૧૦૨૨)' if person.state == 'Gujarat' else ('तक्रार नोंदवण्यासाठी किंवा जवळच्या रुग्णालयांची माहिती मिळवण्यासाठी आमच्या टोल फ्री नंबर १४५५५ वर संपर्क साधा.' if person.state == 'Maharashtra' else 'किसी भी सहायता या शिकायत के लिए हमारे टोल फ्री नंबर 14555 पर संपर्क करें।')) }}</div>
                 <div class="text-en">For any help, to report a grievance or to know more about AB PM-JAY empanelled hospitals near you, please reach out to us. (Toll Free No- 1800 233 1022)</div>
+            </div>
+        </div>
+
+        <!-- Point 4 -->
+        <div class="instr-item">
+            <div class="item-num">4.</div>
+            <div class="item-text">
+                <div class="text-local">{{ scheme.point4_local or ('આ કાર્ડ સમગ્ર દેશમાં માન્ય છે. હોસ્પિટલમાં દાખલ થતી વખતે લાભાર્થીએ આ કાર્ડ સાથે માન્ય સરકારી ઓળખપત્ર (જેમ કે આધાર કાર્ડ) રજૂ કરવું અનિવાર્ય છે.' if person.state == 'Gujarat' else ('हे कार्ड देशभरात वैध आहे. रुग्णालयात दाखल होताना लाभार्थ्यांनी या कार्डसह वैध ओळखपत्र (जसे की आधार कार्ड) सादर करणे आवश्यक आहे.' if person.state == 'Maharashtra' else 'यह कार्ड पूरे देश में मान्य है। अस्पताल में भर्ती के समय लाभार्थी को इस कार्ड के साथ मान्य सरकारी पहचान पत्र (जैसे आधार कार्ड) प्रस्तुत करना अनिवार्य है।')) }}</div>
+                <div class="text-en">{{ scheme.point4_en or 'This card is valid pan-India. Beneficiaries must produce this card along with a valid government photo ID (such as Aadhaar Card) at the hospital.' }}</div>
             </div>
         </div>
 
