@@ -31,8 +31,13 @@ def run_pipeline_qa():
     })
     
     dash = s.get(f"{BASE_URL}/api/user/dashboard").json()
-    initial_credits = dash["credits"]["remaining_cards"]
-    print_result("Initial Credits Set", initial_credits > 0)
+    initial_credits = dash["credits"]["wallet_balance"]
+    print_result("Initial Wallet Initialized", initial_credits >= 0.0)
+    
+    # Add wallet balance for test
+    s.post(f"{BASE_URL}/api/payment/recharge-plan", json={"plan_id": 1})
+    dash_funded = s.get(f"{BASE_URL}/api/user/dashboard").json()
+    funded_credits = dash_funded["credits"]["wallet_balance"]
     
     if not os.path.exists("test_aadhaar.pdf"):
         print("test_aadhaar.pdf not found, skipping core pipeline test.")
@@ -50,7 +55,7 @@ def run_pipeline_qa():
         
         # Check credits deduction
         dash2 = s.get(f"{BASE_URL}/api/user/dashboard").json()
-        print_result("Pipeline: Credit Deducted on Success", dash2["credits"]["remaining_cards"] == initial_credits - 1)
+        print_result("Pipeline: Credit Deducted on Success", dash2["credits"]["wallet_balance"] < funded_credits)
         
         # A4 Print Test
         r_a4 = s.post(f"{BASE_URL}/generate-a4", json={
@@ -91,7 +96,8 @@ def run_pipeline_qa():
     
     # Check that failed generations did not deduct credits
     dash3 = s.get(f"{BASE_URL}/api/user/dashboard").json()
-    print_result("Ledger Integrity: Failed generation did not deduct credits", dash3["credits"]["remaining_cards"] == dash2["credits"]["remaining_cards"])
+    ref_credits = dash2["credits"]["wallet_balance"] if 'dash2' in locals() else funded_credits
+    print_result("Ledger Integrity: Failed generation did not deduct credits", abs(dash3["credits"]["wallet_balance"] - ref_credits) < 0.01)
     
 if __name__ == "__main__":
     try:

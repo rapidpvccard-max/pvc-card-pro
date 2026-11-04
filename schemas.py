@@ -29,6 +29,7 @@ class UserCreditsResponse(BaseModel):
     sample_aadhaar_color: Optional[bool] = True
     sample_ayushman: Optional[bool] = True
     sample_crop: Optional[bool] = True
+    sample_passport: Optional[bool] = True
     
     class Config:
         from_attributes = True

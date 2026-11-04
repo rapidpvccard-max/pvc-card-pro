@@ -32,14 +32,14 @@ def run_tests():
     
     dash_u = s_user.get(f"{BASE_URL}/api/user/dashboard").json()
     user_id = dash_u["user"]["id"]
-    initial_credits = dash_u["credits"]["remaining_cards"]
+    initial_credits = dash_u["credits"]["wallet_balance"]
     
     # 1. Create Order manually in DB for webhook test (bypassing stripe.checkout.Session.create since we don't have real keys here)
     conn = sqlite3.connect("app.db")
     c = conn.cursor()
     order_id = str(uuid.uuid4())
     c.execute("INSERT INTO orders (id, user_id, provider_order_id, plan_id, amount, currency, status) VALUES (?, ?, ?, ?, ?, ?, ?)", 
-              (order_id, user_id, f"cs_test_{uuid.uuid4().hex}", 1, 5.0, "USD", "pending"))
+              (order_id, user_id, f"cs_test_{uuid.uuid4().hex}", 1, 20.0, "INR", "pending"))
     conn.commit()
     conn.close()
     
@@ -67,13 +67,13 @@ def run_tests():
     log(2, "Valid webhook accepted", r_wh1.status_code == 200)
 
     dash_u2 = s_user.get(f"{BASE_URL}/api/user/dashboard").json()
-    credits_after_pay = dash_u2["credits"]["remaining_cards"]
-    log(3, "Credits incremented correctly (purchase)", credits_after_pay == initial_credits + 10)
+    credits_after_pay = dash_u2["credits"]["wallet_balance"]
+    log(3, "Credits incremented correctly (purchase)", abs(credits_after_pay - (initial_credits + 20)) < 0.01)
     
     # 4. Idempotency test (resend same webhook)
     r_wh2 = requests.post(f"{BASE_URL}/api/payment/webhook", data=payload, headers=headers)
     dash_u3 = s_user.get(f"{BASE_URL}/api/user/dashboard").json()
-    log(4, "Duplicate webhook idempotency (credits not duplicated)", dash_u3["credits"]["remaining_cards"] == credits_after_pay)
+    log(4, "Duplicate webhook idempotency (credits not duplicated)", abs(dash_u3["credits"]["wallet_balance"] - credits_after_pay) < 0.01)
 
     # 5. Invalid signature test
     bad_headers = {"stripe-signature": "t=123,v1=bad_sig"}
@@ -95,13 +95,13 @@ def run_tests():
     log(6, "Valid refund webhook accepted", r_wh_refund.status_code == 200)
 
     dash_u4 = s_user.get(f"{BASE_URL}/api/user/dashboard").json()
-    credits_after_refund = dash_u4["credits"]["remaining_cards"]
-    log(7, "Credits decremented correctly (refund)", credits_after_refund == initial_credits)
+    credits_after_refund = dash_u4["credits"]["wallet_balance"]
+    log(7, "Credits decremented correctly (refund)", abs(credits_after_refund - initial_credits) < 0.01)
     
     # 8. Refund idempotency
     requests.post(f"{BASE_URL}/api/payment/webhook", data=refund_payload, headers=refund_headers)
     dash_u5 = s_user.get(f"{BASE_URL}/api/user/dashboard").json()
-    log(8, "Duplicate refund idempotency", dash_u5["credits"]["remaining_cards"] == initial_credits)
+    log(8, "Duplicate refund idempotency", abs(dash_u5["credits"]["wallet_balance"] - initial_credits) < 0.01)
 
     print("\n--- RESULTS ---")
     print("\n".join(report))

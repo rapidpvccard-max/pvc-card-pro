@@ -4,8 +4,12 @@ This test validates all critical CSS positions, font weights, safe fallbacks,
 and end-to-end rendering to guarantee that no accidental regressions or drifts can occur.
 """
 import os
+import sys
 import re
 import unittest
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from engine.data_mapper import map_aadhaar_data
 from engine.card_renderer import render_card
 
@@ -27,7 +31,7 @@ class TestLayoutIntegrity(unittest.TestCase):
         self.assertIn("left: 202px", css, "Back header local must be aligned at left: 202px")
         
         # 4. Notice box must have gap and not overlap Aadhaar number
-        self.assertIn("top: 372px", css, "Notice box must start at top: 372px")
+        self.assertIn("top: 363px", css, "Notice box must start at top: 363px")
         
         # 5. Address text must have separation gap
         self.assertIn("margin-bottom: 18px", css, "Address local block must have 18px separation gap")

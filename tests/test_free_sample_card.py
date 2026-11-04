@@ -146,6 +146,7 @@ def test_all_4_services_independent_free_samples():
     assert app.is_service_sample_available(user.credits, "aadhaar") == True
     assert app.is_service_sample_available(user.credits, "aadhaar_color") == True
     assert app.is_service_sample_available(user.credits, "ayushman") == True
+    assert app.is_service_sample_available(user.credits, "passport") == True
 
     # Consume Aadhaar demo
     app.consume_service_sample(user.credits, "aadhaar")
@@ -153,20 +154,28 @@ def test_all_4_services_independent_free_samples():
     assert app.is_service_sample_available(user.credits, "aadhaar") == False
     assert app.is_service_sample_available(user.credits, "aadhaar_color") == True
     assert app.is_service_sample_available(user.credits, "ayushman") == True
+    assert app.is_service_sample_available(user.credits, "passport") == True
 
     # Consume Colourful Aadhaar demo
     app.consume_service_sample(user.credits, "aadhaar_color")
     db.commit()
     assert app.is_service_sample_available(user.credits, "aadhaar_color") == False
     assert app.is_service_sample_available(user.credits, "ayushman") == True
+    assert app.is_service_sample_available(user.credits, "passport") == True
 
     # Consume Ayushman demo
     app.consume_service_sample(user.credits, "ayushman")
     db.commit()
     assert app.is_service_sample_available(user.credits, "ayushman") == False
+    assert app.is_service_sample_available(user.credits, "passport") == True
+
+    # Consume Passport demo
+    app.consume_service_sample(user.credits, "passport")
+    db.commit()
+    assert app.is_service_sample_available(user.credits, "passport") == False
     assert app.is_service_sample_available(user.credits, "crop") == False
     assert user.credits.free_sample_available == False
-    print("✅ All 4 service sample flags independently tracked & consumed!")
+    print("✅ All 5 service sample flags independently tracked & consumed!")
 
 if __name__ == "__main__":
     test_watermark_engine_direct()

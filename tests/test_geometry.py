@@ -1,9 +1,19 @@
+import os
+import sys
 from playwright.sync_api import sync_playwright
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import auth
 
 def run():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        page = browser.new_page()
+        context = browser.new_context()
+        token = auth.create_access_token({"sub": "admin@rapidpvc.online"})
+        context.add_cookies([
+            {"name": "access_token", "value": token, "domain": "127.0.0.1", "path": "/"}
+        ])
+        page = context.new_page()
         page.goto("http://127.0.0.1:8000/generator")
         
         # Get bounding client rects

@@ -38,7 +38,7 @@ def run_tests():
     # Get user_id for test
     dash_u = s_user.get(f"{BASE_URL}/api/user/dashboard").json()
     user_id = dash_u["user"]["id"]
-    initial_credits = dash_u["credits"]["remaining_cards"]
+    initial_credits = dash_u["credits"]["wallet_balance"]
     
     # 1 & 2. Normal user accessing admin API/Dashboard -> rejected
     r_u_dash = s_user.get(f"{BASE_URL}/api/admin/dashboard")
@@ -54,7 +54,7 @@ def run_tests():
     
     # Validate ledger via User dashboard
     dash_u2 = s_user.get(f"{BASE_URL}/api/user/dashboard").json()
-    log(5.1, "Credit balance updated successfully", dash_u2["credits"]["remaining_cards"] == initial_credits + 50)
+    log(5.1, "Credit balance updated successfully", abs(dash_u2["credits"]["wallet_balance"] - (initial_credits + 50)) < 0.01)
     
     txs = dash_u2["transactions"]
     has_admin_adj = any(t["transaction_type"] == "admin_adjustment" and t["amount"] == 50 for t in txs)
@@ -63,8 +63,9 @@ def run_tests():
     # 6. Admin credit removal -> ledger entry created
     r_rem = s_admin.post(f"{BASE_URL}/api/admin/users/{user_id}/credits", json={"amount": -10, "reason": "penalty"})
     dash_u3 = s_user.get(f"{BASE_URL}/api/user/dashboard").json()
-    has_rem = any(t["transaction_type"] == "admin_adjustment" and t["amount"] == -10 for t in txs) # txs needs reload
-    log(6, "Admin credit removal -> ledger entry created", dash_u3["credits"]["remaining_cards"] == initial_credits + 40)
+    txs3 = dash_u3["transactions"]
+    has_rem = any(t["transaction_type"] == "admin_adjustment" and t["amount"] == -10 for t in txs3)
+    log(6, "Admin credit removal -> ledger entry created", abs(dash_u3["credits"]["wallet_balance"] - (initial_credits + 40)) < 0.01)
     
     # Audit log check
     r_audit = s_admin.get(f"{BASE_URL}/api/admin/audit").json()

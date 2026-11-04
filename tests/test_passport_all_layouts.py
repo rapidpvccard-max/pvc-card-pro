@@ -36,7 +36,7 @@ def run_layout_audit():
         print(f"Layout '{l_type}': Size={w}x{h}, Top & Bottom Margins Clean! ZERO CLIPPING!")
 
     # Test full studio pipeline with 4x6_12
-    out_dir = "tests/test_out_4x6_12"
+    out_dir = "tests_output/test_passport_layouts"
     os.makedirs(out_dir, exist_ok=True)
     temp_in = os.path.join(out_dir, "input.png")
     test_photo.save(temp_in)

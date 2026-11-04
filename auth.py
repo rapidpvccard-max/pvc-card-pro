@@ -60,7 +60,10 @@ def get_current_user(request: Request, db: Session = Depends(database.get_db)):
             detail="Could not validate credentials"
         )
         
-    user = db.query(models.User).filter(models.User.id == int(user_id)).first()
+    if str(user_id).isdigit():
+        user = db.query(models.User).filter(models.User.id == int(user_id)).first()
+    else:
+        user = db.query(models.User).filter(models.User.email == str(user_id)).first()
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -128,7 +131,10 @@ def verify_password_reset_token(token: str, db: Session) -> Optional[models.User
         fp = payload.get("fp")
         if not user_id or fp is None:
             return None
-        user = db.query(models.User).filter(models.User.id == int(user_id)).first()
+        if str(user_id).isdigit():
+            user = db.query(models.User).filter(models.User.id == int(user_id)).first()
+        else:
+            user = db.query(models.User).filter(models.User.email == str(user_id)).first()
         if not user:
             return None
         current_fp = (user.hashed_password or "")[-10:]
