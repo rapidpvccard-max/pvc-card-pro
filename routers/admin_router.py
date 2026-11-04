@@ -1,6 +1,7 @@
 import os
 import json
 import datetime
+import time
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -8,7 +9,7 @@ import database
 import models
 import schemas
 import auth
-from services.email_service import send_password_reset_email, send_test_email
+from services.email_service import send_password_reset_email, send_test_email, send_campaign_email
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -402,6 +403,184 @@ def admin_test_smtp(
         "sent": sent,
         "message": msg,
         "target_email": target
+    }
+
+@router.get("/campaign/stats")
+def get_campaign_stats(
+    current_admin: models.User = Depends(auth.get_current_admin),
+    db: Session = Depends(database.get_db)
+):
+    all_users_count = db.query(models.User).filter(models.User.is_admin == False, models.User.status != "deleted").count()
+    
+    paid_user_ids = {
+        row[0] for row in db.query(models.Order.user_id)
+        .filter(models.Order.status == "paid", models.Order.user_id.isnot(None))
+        .distinct().all()
+    }
+    
+    paid_count = db.query(models.User).filter(
+        models.User.id.in_(paid_user_ids),
+        models.User.is_admin == False,
+        models.User.status != "deleted"
+    ).count() if paid_user_ids else 0
+    
+    if paid_user_ids:
+        unpaid_count = db.query(models.User).filter(
+            ~models.User.id.in_(paid_user_ids),
+            models.User.is_admin == False,
+            models.User.status != "deleted"
+        ).count()
+    else:
+        unpaid_count = all_users_count
+        
+    gen_user_ids = {
+        row[0] for row in db.query(models.GenerationHistory.user_id)
+        .filter(models.GenerationHistory.status == "success", models.GenerationHistory.user_id.isnot(None))
+        .distinct().all()
+    }
+    if gen_user_ids:
+        zero_cards_count = db.query(models.User).filter(
+            ~models.User.id.in_(gen_user_ids),
+            models.User.is_admin == False,
+            models.User.status != "deleted"
+        ).count()
+    else:
+        zero_cards_count = all_users_count
+        
+    return {
+        "all": all_users_count,
+        "unpaid": unpaid_count,
+        "paid": paid_count,
+        "zero_cards": zero_cards_count
+    }
+
+@router.post("/campaign/send")
+def send_campaign_broadcast(
+    payload: schemas.AdminCampaignSendRequest,
+    current_admin: models.User = Depends(auth.get_current_admin),
+    db: Session = Depends(database.get_db)
+):
+    subject = (payload.subject or "").strip()
+    raw_message = (payload.message or "").strip()
+    audience = (payload.audience or "unpaid").strip().lower()
+    action_text = (payload.action_text or "").strip()
+    action_url = (payload.action_url or "").strip() or "https://rapidpvc.online"
+    
+    if not subject:
+        raise HTTPException(status_code=400, detail="Campaign Subject line is required.")
+    if not raw_message:
+        raise HTTPException(status_code=400, detail="Campaign Message body is required.")
+        
+    # Handle Test Only preview
+    if audience == "test_only":
+        target_email = (payload.test_email or "").strip() or current_admin.email
+        if not target_email or "@" not in target_email:
+            raise HTTPException(status_code=400, detail="Valid test recipient email is required.")
+            
+        personalized_msg = raw_message.replace("{name}", current_admin.name or "Operator").replace("{email}", target_email)
+        ok, err = send_campaign_email(
+            to_email=target_email,
+            user_name=current_admin.name or "Admin Tester",
+            subject=f"[PREVIEW] {subject}",
+            message_content=personalized_msg,
+            action_button_text=action_text,
+            action_button_url=action_url
+        )
+        if not ok:
+            raise HTTPException(status_code=500, detail=f"Failed to dispatch test preview: {err}")
+            
+        log_admin_action(db, current_admin.id, "CAMPAIGN_TEST_SENT", details=f"Target: {target_email}, Subject: {subject}")
+        return {
+            "success": True,
+            "mode": "test",
+            "targeted": 1,
+            "sent": 1,
+            "failed": 0,
+            "message": f"Test campaign preview successfully delivered to {target_email}."
+        }
+
+    # Query target users from database
+    query = db.query(models.User).filter(models.User.is_admin == False, models.User.status != "deleted")
+    
+    if audience in ["unpaid", "paid"]:
+        paid_user_ids = {
+            row[0] for row in db.query(models.Order.user_id)
+            .filter(models.Order.status == "paid", models.Order.user_id.isnot(None))
+            .distinct().all()
+        }
+        if audience == "unpaid":
+            if paid_user_ids:
+                query = query.filter(~models.User.id.in_(paid_user_ids))
+        elif audience == "paid":
+            if paid_user_ids:
+                query = query.filter(models.User.id.in_(paid_user_ids))
+            else:
+                query = query.filter(models.User.id == -1)
+    elif audience == "zero_cards":
+        gen_user_ids = {
+            row[0] for row in db.query(models.GenerationHistory.user_id)
+            .filter(models.GenerationHistory.status == "success", models.GenerationHistory.user_id.isnot(None))
+            .distinct().all()
+        }
+        if gen_user_ids:
+            query = query.filter(~models.User.id.in_(gen_user_ids))
+            
+    target_users = query.all()
+    if not target_users:
+        return {
+            "success": True,
+            "targeted": 0,
+            "sent": 0,
+            "failed": 0,
+            "message": "No users found matching the selected audience criteria."
+        }
+        
+    sent_count = 0
+    failed_count = 0
+    failed_recipients = []
+    
+    for u in target_users:
+        if not u.email or "@" not in u.email:
+            failed_count += 1
+            continue
+            
+        display_name = u.name or "Operator"
+        user_msg = raw_message.replace("{name}", display_name).replace("{email}", u.email)
+        user_sub = subject.replace("{name}", display_name).replace("{email}", u.email)
+        
+        try:
+            ok, msg_res = send_campaign_email(
+                to_email=u.email,
+                user_name=display_name,
+                subject=user_sub,
+                message_content=user_msg,
+                action_button_text=action_text,
+                action_button_url=action_url
+            )
+            if ok:
+                sent_count += 1
+            else:
+                failed_count += 1
+                failed_recipients.append(u.email)
+        except Exception as ex:
+            failed_count += 1
+            failed_recipients.append(u.email)
+            print(f"[Campaign Broadcast Error] {u.email}: {ex}")
+            
+        time.sleep(0.12)  # smooth pacing
+        
+    log_admin_action(
+        db, current_admin.id, "CAMPAIGN_BROADCAST_SENT",
+        details=f"Audience: {audience}, Targeted: {len(target_users)}, Sent: {sent_count}, Failed: {failed_count}, Subject: {subject}"
+    )
+    
+    return {
+        "success": True,
+        "targeted": len(target_users),
+        "sent": sent_count,
+        "failed": failed_count,
+        "failed_recipients": failed_recipients[:10],
+        "message": f"Campaign completed! Successfully delivered to {sent_count} of {len(target_users)} users."
     }
 
 @router.post("/orders/{order_id}/mark-paid")

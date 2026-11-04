@@ -176,3 +176,11 @@ class AdminResetPasswordRequest(BaseModel):
 
 class AdminTestSmtpRequest(BaseModel):
     target_email: Optional[str] = None
+
+class AdminCampaignSendRequest(BaseModel):
+    audience: str = "unpaid"  # "unpaid", "paid", "zero_cards", "all", "test_only"
+    subject: str
+    message: str
+    action_text: Optional[str] = "Recharge Wallet Now"
+    action_url: Optional[str] = "https://rapidpvc.online/recharge"
+    test_email: Optional[str] = None

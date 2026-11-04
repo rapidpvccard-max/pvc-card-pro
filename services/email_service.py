@@ -717,3 +717,117 @@ Start printing PVC cards: https://rapidpvc.online/generator
         print(f"[Email Service Error] Failed to send payment invoice to {to_email}: {msg_str}")
         return False, msg_str
 
+def send_campaign_email(
+    to_email: str,
+    user_name: str,
+    subject: str,
+    message_content: str,
+    action_button_text: str = "Visit Rapid PVC Pro",
+    action_button_url: str = "https://rapidpvc.online"
+) -> tuple[bool, str]:
+    """
+    Sends an automated, branded HTML promotional or announcement campaign email to an operator.
+    Supports variable replacement {name} and {email}.
+    """
+    config = get_smtp_config()
+    display_name = user_name or "Valued Operator"
+    
+    # Process message content into formatted paragraphs
+    paragraphs = [p.strip() for p in (message_content or "").split("\n") if p.strip()]
+    formatted_body_html = "".join([f'<p style="margin: 0 0 16px 0; line-height: 1.6; font-size: 15px; color: #334155;">{p}</p>' for p in paragraphs])
+    
+    btn_html = ""
+    if action_button_text and action_button_url:
+        btn_html = f"""
+        <div style="text-align: center; margin: 28px 0 20px 0;">
+            <a href="{action_button_url}" style="display: inline-block; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 700; font-size: 16px; letter-spacing: 0.3px; box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);">
+                {action_button_text} &rarr;
+            </a>
+        </div>
+        """
+
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{subject}</title>
+    </head>
+    <body style="margin: 0; padding: 30px 15px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f1f5f9; color: #1e293b;">
+        <div style="max-width: 580px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0;">
+            <!-- Brand Header -->
+            <div style="background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); padding: 32px 24px; text-align: center;">
+                <div style="display: inline-block; background: rgba(255, 255, 255, 0.2); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; color: #ffffff; letter-spacing: 0.8px; margin-bottom: 10px; text-transform: uppercase;">
+                    Rapid PVC Card Pro
+                </div>
+                <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">
+                    {subject}
+                </h1>
+                <p style="color: #e0e7ff; margin: 8px 0 0 0; font-size: 14px;">
+                    Professional CR80 PVC Card & Passport Photo Automation
+                </p>
+            </div>
+
+            <!-- Main Content -->
+            <div style="padding: 32px 28px;">
+                <div style="font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 16px;">
+                    Hello {display_name},
+                </div>
+
+                <div style="color: #334155; font-size: 15px;">
+                    {formatted_body_html}
+                </div>
+
+                {btn_html}
+
+                <!-- Feature Highlights Box -->
+                <div style="background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1; padding: 16px; margin-top: 24px;">
+                    <div style="font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+                        Why Operators Choose Rapid PVC Pro:
+                    </div>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #64748b; line-height: 1.6;">
+                        <li><strong>1-Click Instant Generation:</strong> Aadhaar, Ayushman Golden Card & Passport Photo 300 DPI sheets.</li>
+                        <li><strong>Perfect CR80 Sizing:</strong> Ready to print on standard plastic cards and glossy photo papers.</li>
+                        <li><strong>Instant 24x7 Wallet Recharge:</strong> Secure payments with instant credit activation.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div style="background-color: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; line-height: 1.5;">
+                <div>&copy; 2026 Rapid PVC Pro. All rights reserved.</div>
+                <div style="margin-top: 4px;">You received this email because you are a registered operator on <a href="https://rapidpvc.online" style="color: #4f46e5; text-decoration: none;">rapidpvc.online</a>.</div>
+                <div style="margin-top: 6px; color: #94a3b8; font-size: 11px;">Rapid PVC Card Pro • India's #1 Automated Card Printing Suite for Cyber Cafes & CSC Centers</div>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    plain_text = f"""
+Hello {display_name},
+
+{message_content}
+
+Visit Rapid PVC Pro: {action_button_url}
+
+-- Rapid PVC Card Pro Team
+https://rapidpvc.online
+"""
+
+    if not config["is_configured"]:
+        return False, "SMTP credentials not configured."
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = f"{config['from_name']} <{config['from_email']}>"
+    msg["To"] = to_email
+    msg["Date"] = formatdate(localtime=True)
+    msg["Message-ID"] = make_msgid(domain="rapidpvc.online")
+
+    msg.attach(MIMEText(plain_text, "plain"))
+    msg.attach(MIMEText(html_content, "html"))
+
+    return _dispatch_smtp_message(msg, [to_email], config)
+

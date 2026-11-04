@@ -1806,6 +1806,106 @@
         </div>
     </div>
 
+    <!-- Email Campaign & Broadcast Modal -->
+    <div id="campaign-modal" class="modal-backdrop">
+        <div class="modal-window" style="max-width: 680px; max-height: 92vh; display: flex; flex-direction: column;">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 14px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(79, 70, 229, 0.2) 100%); color: #6366f1; display: flex; align-items: center; justify-content: center;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    </div>
+                    <div>
+                        <div class="modal-title" style="font-size: 1.15rem; font-weight: 800;">Bulk Email Campaign Studio</div>
+                        <div style="font-size: 0.78rem; color: var(--text-muted);">Reach unpaid users, offer discounts, or announce new features</div>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeCampaignModal()">✕</button>
+            </div>
+
+            <div style="overflow-y: auto; padding: 18px 0; flex: 1;">
+                <!-- 1. Audience Selection -->
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label class="form-label" style="font-weight: 700; margin: 0;">1. Target Audience</label>
+                        <span id="campaign-audience-badge" style="font-size: 0.75rem; font-weight: 700; background: #e0e7ff; color: #4338ca; padding: 2px 8px; border-radius: 12px;">Loading stats...</span>
+                    </div>
+                    <select id="campaign-audience" class="form-control" onchange="onCampaignAudienceChange()" style="cursor: pointer; font-weight: 600;">
+                        <option value="unpaid">🎯 Unpaid Operators (Registered but ₹0 Spent / 0 Topups)</option>
+                        <option value="zero_cards">🃏 Zero Cards Produced (Never created a card yet)</option>
+                        <option value="paid">💳 Active Paid Customers (1+ Topups / Paid Orders)</option>
+                        <option value="all">📢 All Registered Operators (Entire Customer Base)</option>
+                        <option value="test_only">🧪 Send Test Preview Only (Safe Review)</option>
+                    </select>
+                </div>
+
+                <!-- Test Recipient Input (Shown if test_only or test button clicked) -->
+                <div id="campaign-test-email-box" class="form-group" style="margin-bottom: 16px; display: none; background: #fffbeb; border: 1px dashed #fde68a; padding: 12px; border-radius: 8px;">
+                    <label class="form-label" style="font-weight: 700; color: #b45309;">Test Recipient Email</label>
+                    <input type="email" id="campaign-test-email" class="form-control" placeholder="your_email@gmail.com">
+                    <span style="font-size: 0.75rem; color: #b45309; margin-top: 4px; display: block;">Only this email will receive the preview. No other users will be contacted.</span>
+                </div>
+
+                <!-- 2. Pre-made Ready Templates -->
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label class="form-label" style="font-weight: 700;">2. Select Ready-to-Use Template (1-Click Fill)</label>
+                    <select id="campaign-template-select" class="form-control" onchange="applyCampaignTemplate(this.value)" style="cursor: pointer;">
+                        <option value="">-- Choose High-Converting Template or Write Custom --</option>
+                        <option value="unpaid_discount">🎉 Special 20% First Recharge Bonus (Recommended for Unpaid Users)</option>
+                        <option value="free_welcome">⚡ Welcome & Quick Start: Generate Ayushman & Aadhaar Today</option>
+                        <option value="ayushman_update">🚀 New Update Live: Ayushman Golden Card 2.0 & AI Passport Photo Ready</option>
+                        <option value="low_wallet_reminder">💡 Cyber Cafe Special: Instant ₹0.95/card Printing Suite</option>
+                        <option value="custom">💬 Custom Blank Message</option>
+                    </select>
+                </div>
+
+                <!-- 3. Subject Line -->
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label class="form-label" style="font-weight: 700;">3. Email Subject Line</label>
+                    <input type="text" id="campaign-subject" class="form-control" placeholder="e.g. Special Offer: First Recharge par 20% Extra Credits payein!">
+                </div>
+
+                <!-- 4. Action Button (CTA) -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label" style="font-weight: 700;">Button Text (Call to Action)</label>
+                        <input type="text" id="campaign-action-text" class="form-control" value="Recharge Wallet Now">
+                    </div>
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label" style="font-weight: 700;">Button URL</label>
+                        <input type="text" id="campaign-action-url" class="form-control" value="https://rapidpvc.online/recharge">
+                    </div>
+                </div>
+
+                <!-- 5. Message Content -->
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label class="form-label" style="font-weight: 700; margin: 0;">4. Email Message Body</label>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">Use <code>{name}</code> for recipient's name</span>
+                    </div>
+                    <textarea id="campaign-message" class="form-control" rows="6" style="resize: vertical; font-family: inherit; font-size: 0.9rem; line-height: 1.5;" placeholder="Aapka message yaha likhein..."></textarea>
+                </div>
+
+                <!-- Status Feedback -->
+                <div id="campaign-feedback" style="display: none; padding: 12px 16px; border-radius: var(--radius-sm); margin-top: 12px; font-size: 0.88rem; line-height: 1.5;"></div>
+            </div>
+
+            <!-- Modal Footer Actions -->
+            <div class="modal-actions" style="border-top: 1px solid var(--border-subtle); padding-top: 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                <button class="btn-modal secondary" type="button" onclick="sendTestPreviewCampaign()" id="btn-campaign-test" title="Send a single test email to check how it looks in Gmail">
+                    🧪 Send Test Preview
+                </button>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-modal secondary" onclick="closeCampaignModal()">Cancel</button>
+                    <button class="btn-modal primary" id="btn-campaign-send" onclick="executeCampaignBroadcast()" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                        <span>Send Broadcast Now</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Sidebar Navigation -->
     <aside class="admin-sidebar" id="sidebar">
         <div class="sidebar-brand">
@@ -2117,10 +2217,15 @@
                             <span class="filter-chip active" data-filter="all" onclick="setUserStatusFilter('all')">All Users (<span id="count-all-users">0</span>)</span>
                             <span class="filter-chip" data-filter="active" onclick="setUserStatusFilter('active')">Active</span>
                             <span class="filter-chip" data-filter="inactive" onclick="setUserStatusFilter('inactive')">Inactive</span>
+                            <span class="filter-chip" data-filter="unpaid" onclick="setUserStatusFilter('unpaid')">Unpaid (₹0 Spent)</span>
                             <span class="filter-chip" data-filter="admin" onclick="setUserStatusFilter('admin')">Admins</span>
                             <button class="table-btn primary" onclick="exportUsersCSV()" title="Export CSV" style="margin-left: 8px;">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                 <span>Export CSV</span>
+                            </button>
+                            <button class="table-btn" onclick="openCampaignModal()" title="Send Bulk Email Campaign to Users" style="margin-left: 8px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #ffffff; border: none; font-weight: 700; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                <span>Send Campaign</span>
                             </button>
                         </div>
                     </div>
@@ -3128,6 +3233,8 @@
                 if (currentUserFilter === 'active' && u.status !== 'active') return false;
                 if (currentUserFilter === 'inactive' && u.status !== 'inactive') return false;
                 if (currentUserFilter === 'admin' && !u.is_admin) return false;
+                if (currentUserFilter === 'unpaid' && (Number(u.total_spent || 0) > 0 || Number(u.paid_orders_count || 0) > 0)) return false;
+                if (currentUserFilter === 'paid' && (Number(u.total_spent || 0) <= 0 && Number(u.paid_orders_count || 0) <= 0)) return false;
 
                 // Search query match
                 if (!query) return true;
@@ -3798,6 +3905,251 @@
             }
         }
 
+
+        // ==========================================
+        // EMAIL CAMPAIGN & BROADCAST STUDIO LOGIC
+        // ==========================================
+        let campaignAudienceStats = { all: 0, unpaid: 0, paid: 0, zero_cards: 0 };
+
+        const CAMPAIGN_TEMPLATES = {
+            unpaid_discount: {
+                subject: "🎉 Special Welcome Offer: Recharge karein aur payein 20% Extra Credits!",
+                action_text: "Recharge & Claim Offer Now",
+                action_url: "https://rapidpvc.online/recharge",
+                message: "Namaste {name},\n\nAapne Rapid PVC Pro par account banaya hai, lekin abhi tak aapne card generation service ko fully use nahi kiya hai!\n\nAapke Cyber Cafe aur CSC center ke kaam ko aasan aur fast banane ke liye hum aapko de rahe hain Special First Recharge Bonus: Kisi bhi recharge plan par payein 20% Extra Credits bilkul Free!\n\nAadhaar, Ayushman Golden Card 2.0 aur AI Passport Photo sheet sirf 1 click me 300 DPI high-quality CR80 format me print karein.\n\nOffer limited time ke liye active hai. Niche diye gaye button par click karke turant recharge karein!"
+            },
+            free_welcome: {
+                subject: "⚡ Quick Start Guide: Rapid PVC Pro se 1-Click me PVC Card banayein",
+                action_text: "Open Card Generator",
+                action_url: "https://rapidpvc.online/generator",
+                message: "Hello {name},\n\nWelcome to Rapid PVC Pro - India's most advanced automated card generator for CSC & Cyber Cafe operators.\n\nAb aap in 3 simple steps me cards create kar sakte hain:\n1. Generator page par jayein aur document type (Aadhaar / Ayushman / Passport) select karein.\n2. PDF upload karein - hamara AI system automatically photo, QR code aur text extract kar lega.\n3. Single click me 300 DPI CR80 PVC Print-Ready PDF download karein!\n\nAaj hi try karein aur apne customers ko high-speed service dein."
+            },
+            ayushman_update: {
+                subject: "🚀 Big Update: Ayushman Golden Card 2.0 & AI Passport Photo Studio Live!",
+                action_text: "Try Ayushman Card Generator",
+                action_url: "https://rapidpvc.online/generator?type=ayushman",
+                message: "Namaste {name},\n\nGood news! Rapid PVC Pro par naya upgraded Ayushman Golden Card 2.0 system live ho chuka hai.\n\nNaye features:\n• Multi-state dynamic language detection (Gujarati, Hindi, Marathi, etc.)\n• Thickened 85px High-Definition Official Green Strip\n• Complete 4-point national security back layout with zero empty space\n• 35x45mm Biometric AI Passport Photo 4x6 / A4 Studio Sheet generator\n\nAbhi login karein aur naye features ka fayda uthayein!"
+            },
+            low_wallet_reminder: {
+                subject: "💡 Cyber Cafe Operators: Sabse saste rate par PVC Card Printing shuru karein",
+                action_text: "View Recharge Plans",
+                action_url: "https://rapidpvc.online/recharge",
+                message: "Hello {name},\n\nKya aap jante hain ki Rapid PVC Pro par aap sirf ₹0.95 me high-definition 300 DPI PVC Card generate kar sakte hain?\n\n• Zero Photoshop or editing required\n• Automatic CR80 sizing & mirror duplex for A4 photo paper\n• Instant 24x7 automated wallet recharge\n\nApne center ka munafa badhayein aur clients ko premium plastic card prints dein. Aaj hi apna wallet recharge karein!"
+            },
+            custom: {
+                subject: "",
+                action_text: "Visit Rapid PVC Pro",
+                action_url: "https://rapidpvc.online",
+                message: ""
+            }
+        };
+
+        async function openCampaignModal(defaultAudience = 'unpaid') {
+            const modal = document.getElementById('campaign-modal');
+            if (!modal) return;
+            
+            const fb = document.getElementById('campaign-feedback');
+            if (fb) fb.style.display = 'none';
+
+            const audSelect = document.getElementById('campaign-audience');
+            if (audSelect) {
+                audSelect.value = defaultAudience;
+            }
+            onCampaignAudienceChange();
+
+            if (defaultAudience === 'unpaid') {
+                const templSelect = document.getElementById('campaign-template-select');
+                if (templSelect) templSelect.value = 'unpaid_discount';
+                applyCampaignTemplate('unpaid_discount');
+            }
+
+            modal.classList.add('active');
+
+            try {
+                const stats = await apiCall('/api/admin/campaign/stats');
+                if (stats) {
+                    campaignAudienceStats = stats;
+                    updateCampaignAudienceBadge();
+                }
+            } catch (e) {
+                console.error('Failed to load campaign stats', e);
+            }
+        }
+
+        function closeCampaignModal() {
+            const modal = document.getElementById('campaign-modal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        function updateCampaignAudienceBadge() {
+            const aud = document.getElementById('campaign-audience').value;
+            const badge = document.getElementById('campaign-audience-badge');
+            if (!badge) return;
+
+            if (aud === 'unpaid') {
+                badge.innerText = `${campaignAudienceStats.unpaid || 0} Unpaid Operators Selected`;
+                badge.style.background = '#fef3c7';
+                badge.style.color = '#92400e';
+            } else if (aud === 'paid') {
+                badge.innerText = `${campaignAudienceStats.paid || 0} Paid Customers Selected`;
+                badge.style.background = '#dcfce7';
+                badge.style.color = '#166534';
+            } else if (aud === 'zero_cards') {
+                badge.innerText = `${campaignAudienceStats.zero_cards || 0} Operators with 0 Cards`;
+                badge.style.background = '#fee2e2';
+                badge.style.color = '#991b1b';
+            } else if (aud === 'all') {
+                badge.innerText = `${campaignAudienceStats.all || 0} All Operators Selected`;
+                badge.style.background = '#e0e7ff';
+                badge.style.color = '#3730a3';
+            } else if (aud === 'test_only') {
+                badge.innerText = `1 Test Recipient Only`;
+                badge.style.background = '#f1f5f9';
+                badge.style.color = '#475569';
+            }
+        }
+
+        function onCampaignAudienceChange() {
+            const aud = document.getElementById('campaign-audience').value;
+            const testBox = document.getElementById('campaign-test-email-box');
+            if (testBox) {
+                testBox.style.display = (aud === 'test_only') ? 'block' : 'none';
+            }
+            updateCampaignAudienceBadge();
+        }
+
+        function applyCampaignTemplate(key) {
+            const tmpl = CAMPAIGN_TEMPLATES[key];
+            if (!tmpl) return;
+
+            document.getElementById('campaign-subject').value = tmpl.subject;
+            document.getElementById('campaign-action-text').value = tmpl.action_text;
+            document.getElementById('campaign-action-url').value = tmpl.action_url;
+            document.getElementById('campaign-message').value = tmpl.message;
+        }
+
+        async function sendTestPreviewCampaign() {
+            const subject = (document.getElementById('campaign-subject').value || '').trim();
+            const message = (document.getElementById('campaign-message').value || '').trim();
+            const action_text = (document.getElementById('campaign-action-text').value || '').trim();
+            const action_url = (document.getElementById('campaign-action-url').value || '').trim();
+            const test_email = (document.getElementById('campaign-test-email').value || '').trim();
+
+            if (!subject || !message) {
+                showToast('Please fill Subject and Message first.', 'warning');
+                return;
+            }
+
+            const testBtn = document.getElementById('btn-campaign-test');
+            testBtn.disabled = true;
+            testBtn.innerText = 'Sending Test...';
+
+            const fb = document.getElementById('campaign-feedback');
+            fb.style.display = 'block';
+            fb.style.background = '#eff6ff';
+            fb.style.border = '1px solid #bfdbfe';
+            fb.style.color = '#1e40af';
+            fb.innerHTML = '⏳ Sending test preview email to admin...';
+
+            try {
+                const res = await apiCall('/api/admin/campaign/send', 'POST', {
+                    audience: 'test_only',
+                    subject: subject,
+                    message: message,
+                    action_text: action_text,
+                    action_url: action_url,
+                    test_email: test_email
+                });
+
+                if (res && res.success) {
+                    fb.style.background = '#f0fdf4';
+                    fb.style.border = '1px solid #bbf7d0';
+                    fb.style.color = '#15803d';
+                    fb.innerHTML = `✓ <strong>Test Email Delivered!</strong> ${res.message}<br><span style="font-size: 0.8rem;">Check your Gmail inbox/spam folder to see the exact formatting.</span>`;
+                    showToast('Test preview sent successfully!', 'success');
+                } else {
+                    fb.style.background = '#fef2f2';
+                    fb.style.border = '1px solid #fecaca';
+                    fb.style.color = '#b91c1c';
+                    fb.innerHTML = `✕ <strong>Delivery Failed:</strong> ${(res && res.detail) || 'Check SMTP configuration'}`;
+                }
+            } catch (e) {
+                fb.style.background = '#fef2f2';
+                fb.style.border = '1px solid #fecaca';
+                fb.style.color = '#b91c1c';
+                fb.innerHTML = `✕ <strong>Error:</strong> ${e.message || 'Network error'}`;
+            } finally {
+                testBtn.disabled = false;
+                testBtn.innerText = '🧪 Send Test Preview';
+            }
+        }
+
+        async function executeCampaignBroadcast() {
+            const audience = document.getElementById('campaign-audience').value;
+            const subject = (document.getElementById('campaign-subject').value || '').trim();
+            const message = (document.getElementById('campaign-message').value || '').trim();
+            const action_text = (document.getElementById('campaign-action-text').value || '').trim();
+            const action_url = (document.getElementById('campaign-action-url').value || '').trim();
+            const test_email = (document.getElementById('campaign-test-email').value || '').trim();
+
+            if (!subject) {
+                showToast('Campaign Subject line is required.', 'warning');
+                return;
+            }
+            if (!message) {
+                showToast('Campaign Message body is required.', 'warning');
+                return;
+            }
+
+            const countDesc = document.getElementById('campaign-audience-badge').innerText;
+            if (audience !== 'test_only') {
+                const confirmed = confirm(`Are you sure you want to send this broadcast email to:\n\n${countDesc}?\n\nSubject: ${subject}`);
+                if (!confirmed) return;
+            }
+
+            const sendBtn = document.getElementById('btn-campaign-send');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = `<span>Sending Broadcast...</span>`;
+
+            const fb = document.getElementById('campaign-feedback');
+            fb.style.display = 'block';
+            fb.style.background = '#eff6ff';
+            fb.style.border = '1px solid #bfdbfe';
+            fb.style.color = '#1e40af';
+            fb.innerHTML = '⏳ <strong>Broadcasting emails...</strong> Please wait while emails are securely delivered to inboxes...';
+
+            try {
+                const res = await apiCall('/api/admin/campaign/send', 'POST', {
+                    audience: audience,
+                    subject: subject,
+                    message: message,
+                    action_text: action_text,
+                    action_url: action_url,
+                    test_email: test_email
+                });
+
+                if (res && res.success) {
+                    fb.style.background = '#f0fdf4';
+                    fb.style.border = '1px solid #bbf7d0';
+                    fb.style.color = '#15803d';
+                    fb.innerHTML = `🎉 <strong>Broadcast Completed!</strong><br>${res.message}<br>Targeted: ${res.targeted} | Successfully Sent: <strong>${res.sent}</strong> | Failed: ${res.failed}`;
+                    showToast(`Broadcast completed: ${res.sent} sent`, 'success');
+                } else {
+                    fb.style.background = '#fef2f2';
+                    fb.style.border = '1px solid #fecaca';
+                    fb.style.color = '#b91c1c';
+                    fb.innerHTML = `✕ <strong>Campaign Failed:</strong> ${(res && res.detail) || 'Error sending campaign'}`;
+                }
+            } catch (e) {
+                fb.style.background = '#fef2f2';
+                fb.style.border = '1px solid #fecaca';
+                fb.style.color = '#b91c1c';
+                fb.innerHTML = `✕ <strong>Error:</strong> ${e.message || 'Network error'}`;
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg><span>Send Broadcast Now</span>`;
+            }
+        }
         // Keyboard Shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
