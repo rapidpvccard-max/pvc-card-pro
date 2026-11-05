@@ -484,12 +484,13 @@ def _process_payu_payment_success(data: dict, db: Session) -> tuple[bool, str, f
         db.add(tx)
         db.commit()
 
-        # Dispatch Payment Receipt & Tax Invoice Email
+        # Dispatch Payment Receipt & Tax Invoice Email to User & Alert to Admin
         try:
-            from services.email_service import send_payment_invoice_email
+            from services.email_service import send_payment_invoice_email, send_admin_payment_notification
             paid_user: Any = db.query(models.User).filter(models.User.id == order.user_id).first()
             if paid_user and paid_user.email:
                 plan_name_val = plan.name if plan and getattr(plan, 'name', None) else f"Plan #{order.plan_id}"
+                # 1. Customer Tax Invoice
                 send_payment_invoice_email(
                     to_email=str(paid_user.email),
                     user_name=str(paid_user.name or "Operator"),
@@ -499,6 +500,17 @@ def _process_payu_payment_success(data: dict, db: Session) -> tuple[bool, str, f
                     new_wallet_balance=float(user_credits.wallet_balance or 0.0),
                     cost_per_card=float(user_credits.cost_per_card or 0.95),
                     mihpayid=str(mihpayid) if mihpayid else None
+                )
+                # 2. Dedicated Admin Sales Notification directly to Admin Inbox
+                send_admin_payment_notification(
+                    user_name=str(paid_user.name or "Operator"),
+                    user_email=str(paid_user.email),
+                    txnid=str(txnid),
+                    amount=float(recharge_amount),
+                    plan_name=str(plan_name_val),
+                    new_wallet_balance=float(user_credits.wallet_balance or 0.0),
+                    gateway="PayU",
+                    gateway_ref=str(mihpayid) if mihpayid else None
                 )
         except Exception as email_err:
             print(f"[Payment Invoice Email Dispatch Error] {email_err}")
@@ -673,12 +685,13 @@ def _process_cashfree_payment_success(
     db.add(tx)
     db.commit()
 
-    # Dispatch Payment Receipt & Tax Invoice Email
+    # Dispatch Payment Receipt & Tax Invoice Email to User & Alert to Admin
     try:
-        from services.email_service import send_payment_invoice_email
+        from services.email_service import send_payment_invoice_email, send_admin_payment_notification
         paid_user: Any = db.query(models.User).filter(models.User.id == order.user_id).first()
         if paid_user and paid_user.email:
             plan_name_val = plan.name if plan and getattr(plan, 'name', None) else f"Plan #{order.plan_id}"
+            # 1. Customer Tax Invoice
             send_payment_invoice_email(
                 to_email=str(paid_user.email),
                 user_name=str(paid_user.name or "Operator"),
@@ -687,6 +700,17 @@ def _process_cashfree_payment_success(
                 plan_name=str(plan_name_val),
                 new_wallet_balance=float(user_credits.wallet_balance or 0.0),
                 cost_per_card=float(user_credits.cost_per_card or 0.95),
+                gateway="Cashfree",
+                gateway_ref=str(order.provider_payment_id)
+            )
+            # 2. Dedicated Admin Sales Notification directly to Admin Inbox
+            send_admin_payment_notification(
+                user_name=str(paid_user.name or "Operator"),
+                user_email=str(paid_user.email),
+                txnid=str(order.provider_order_id),
+                amount=float(recharge_amount),
+                plan_name=str(plan_name_val),
+                new_wallet_balance=float(user_credits.wallet_balance or 0.0),
                 gateway="Cashfree",
                 gateway_ref=str(order.provider_payment_id)
             )

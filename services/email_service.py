@@ -717,6 +717,150 @@ Start printing PVC cards: https://rapidpvc.online/generator
         print(f"[Email Service Error] Failed to send payment invoice to {to_email}: {msg_str}")
         return False, msg_str
 
+
+def send_admin_payment_notification(
+    user_name: str,
+    user_email: str,
+    txnid: str,
+    amount: float,
+    plan_name: str,
+    new_wallet_balance: float,
+    gateway: str = "PayU",
+    gateway_ref: str = None
+) -> tuple[bool, str]:
+    """
+    Sends an instant, dedicated alert email directly to the Admin's Inbox
+    whenever a payment is completed on PayU or Cashfree.
+    Guarantees delivery to primary Inbox (unlike envelope BCC which Gmail routes to Sent).
+    """
+    import datetime
+    dummy_patterns = ["@example.com", "@test.com", "cf_tester_", "payu_test_"]
+    if any(pat in (user_email or "").lower() for pat in dummy_patterns) or os.environ.get("TESTING") == "1":
+        print(f"[Email Service] Skipped admin notification for test payment: {user_email}")
+        return True, "Test admin notification skipped."
+
+    config = get_smtp_config()
+    if not config["is_configured"]:
+        return False, "SMTP credentials not configured."
+
+    # Collect all admin recipient addresses
+    admin_emails_env = os.environ.get("ADMIN_EMAILS", "rapidpvccard@gmail.com")
+    admin_list = [e.strip() for e in admin_emails_env.split(",") if e.strip() and "@" in e]
+    for fallback in ["rapidpvccard@gmail.com", "patilavinash900@gmail.com"]:
+        if fallback not in admin_list:
+            admin_list.append(fallback)
+
+    gw_clean = (gateway or "PayU").strip()
+    is_cashfree = gw_clean.lower() == "cashfree"
+    gw_name = "Cashfree" if is_cashfree else "PayU"
+    ref_id = gateway_ref or txnid or "N/A"
+    current_time_str = datetime.datetime.now().strftime("%d %b %Y, %I:%M %p IST")
+
+    subject = f"💰 [NEW SALE] ₹{amount:.2f} received from {user_name} ({gw_name})"
+
+    plain_text = f"""
+NEW PAYMENT RECEIVED ON RAPID PVC PRO
+==================================================
+Amount: ₹{amount:.2f}
+Customer: {user_name} ({user_email})
+Plan: {plan_name}
+Gateway: {gw_name}
+Transaction ID: {txnid}
+Gateway Reference: {ref_id}
+Customer Balance After: ₹{new_wallet_balance:.2f}
+Date & Time: {current_time_str}
+
+View live admin ledger: https://rapidpvc.online/admin
+==================================================
+"""
+
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"></head>
+    <body style="margin: 0; padding: 24px 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f1f5f9; color: #1e293b;">
+        <div style="max-width: 540px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08); border: 1px solid #e2e8f0;">
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); padding: 24px 20px; text-align: center; color: #ffffff;">
+                <div style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9;">
+                    💰 New Sale Alert • Rapid PVC Pro
+                </div>
+                <div style="font-size: 32px; font-weight: 800; margin-top: 8px;">
+                    ₹{amount:.2f}
+                </div>
+                <div style="font-size: 13px; opacity: 0.95; margin-top: 4px;">
+                    Payment successfully credited via {gw_name}
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div style="padding: 24px 22px;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding: 10px 0; color: #64748b;">Customer Name:</td>
+                        <td style="padding: 10px 0; font-weight: 700; text-align: right; color: #0f172a;">{user_name}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding: 10px 0; color: #64748b;">Customer Email:</td>
+                        <td style="padding: 10px 0; font-weight: 600; text-align: right; color: #2563eb;">{user_email}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding: 10px 0; color: #64748b;">Plan Purchased:</td>
+                        <td style="padding: 10px 0; font-weight: 700; text-align: right; color: #059669;">{plan_name}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding: 10px 0; color: #64748b;">Payment Gateway:</td>
+                        <td style="padding: 10px 0; font-weight: 600; text-align: right; color: #475569;">{gw_name}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding: 10px 0; color: #64748b;">Txn / Order ID:</td>
+                        <td style="padding: 10px 0; font-family: monospace; font-size: 12px; text-align: right; color: #64748b;">{txnid}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding: 10px 0; color: #64748b;">Updated Wallet Balance:</td>
+                        <td style="padding: 10px 0; font-weight: 700; text-align: right; color: #059669;">₹{new_wallet_balance:.2f}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px 0; color: #64748b;">Date & Time:</td>
+                        <td style="padding: 10px 0; font-size: 12px; text-align: right; color: #64748b;">{current_time_str}</td>
+                    </tr>
+                </table>
+
+                <div style="text-align: center; margin-top: 24px;">
+                    <a href="https://rapidpvc.online/admin" style="display: inline-block; background: #0f172a; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 700; font-size: 14px;">
+                        Open Admin Ledger →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    any_success = False
+    for admin_to in admin_list:
+        try:
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = subject
+            msg["From"] = f"{config['from_name']} <{config['from_email']}>"
+            msg["To"] = admin_to
+            msg["Date"] = formatdate(localtime=True)
+            msg["Message-ID"] = make_msgid(domain="rapidpvc.online")
+            msg.attach(MIMEText(plain_text, "plain"))
+            msg.attach(MIMEText(html_content, "html"))
+
+            ok, err_str = _dispatch_smtp_message(msg, [admin_to], config)
+            if ok:
+                any_success = True
+                print(f"[Admin Sale Alert] Successfully delivered to admin: {admin_to}")
+            else:
+                print(f"[Admin Sale Alert Warning] Failed for admin {admin_to}: {err_str}")
+        except Exception as ex:
+            print(f"[Admin Sale Alert Exception] {admin_to}: {ex}")
+
+    return any_success, "Admin sale alerts processed."
+
+
 def send_campaign_email(
     to_email: str,
     user_name: str,
