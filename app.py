@@ -68,6 +68,12 @@ async def cleanup_temporary_files():
 async def lifespan(app: FastAPI):
     # Startup
     task = asyncio.create_task(cleanup_temporary_files())
+    # Pre-warm AI passport model in background thread for instant response
+    try:
+        from engine.passport_photo import _get_rembg_session
+        asyncio.create_task(run_in_threadpool(_get_rembg_session))
+    except Exception:
+        pass
     yield
     # Shutdown
     task.cancel()

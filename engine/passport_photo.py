@@ -52,15 +52,15 @@ COLOR_PALETTE = {
 _REMBG_SESSION = None
 
 def _get_rembg_session() -> Any:
-    """Returns a cached, lightweight rembg session (silueta or u2netp)."""
+    """Returns a cached, lightweight rembg session (u2netp or silueta)."""
     global _REMBG_SESSION
     if _REMBG_SESSION is None:
         try:
             from rembg import new_session
             try:
-                _REMBG_SESSION = new_session("silueta")
-            except Exception:
                 _REMBG_SESSION = new_session("u2netp")
+            except Exception:
+                _REMBG_SESSION = new_session("silueta")
         except Exception:
             _REMBG_SESSION = None
     return _REMBG_SESSION
@@ -206,6 +206,31 @@ def detect_and_frame_face(pil_img: Image.Image) -> Image.Image:
     return final_framed
 
 
+def _resolve_bg_color(bg_color_name: str = "light_blue", custom_hex: Optional[str] = None):
+    """Resolves studio color name or hex into RGB tuple or None."""
+    target_color = (180, 215, 255)  # default light blue
+    if custom_hex and custom_hex.startswith("#") and len(custom_hex) == 7:
+        try:
+            r = int(custom_hex[1:3], 16)
+            g = int(custom_hex[3:5], 16)
+            b = int(custom_hex[5:7], 16)
+            return (r, g, b)
+        except Exception:
+            pass
+    elif bg_color_name and bg_color_name.startswith("#") and len(bg_color_name) == 7:
+        try:
+            r = int(bg_color_name[1:3], 16)
+            g = int(bg_color_name[3:5], 16)
+            b = int(bg_color_name[5:7], 16)
+            return (r, g, b)
+        except Exception:
+            pass
+    elif bg_color_name and bg_color_name.lower() in COLOR_PALETTE:
+        val = COLOR_PALETTE[bg_color_name.lower()]
+        return val
+    return target_color
+
+
 def remove_and_replace_background(
     pil_img: Image.Image,
     bg_color_name: str = "light_blue",
@@ -219,30 +244,7 @@ def remove_and_replace_background(
     if bg_color_name and bg_color_name.lower() in ("original", "keep_original", "none"):
         return pil_img.convert("RGB")
 
-    target_color = (180, 215, 255)  # default light blue
-    if custom_hex and custom_hex.startswith("#") and len(custom_hex) == 7:
-        try:
-            r = int(custom_hex[1:3], 16)
-            g = int(custom_hex[3:5], 16)
-            b = int(custom_hex[5:7], 16)
-            target_color = (r, g, b)
-        except Exception:
-            pass
-    elif bg_color_name and bg_color_name.startswith("#") and len(bg_color_name) == 7:
-        try:
-            r = int(bg_color_name[1:3], 16)
-            g = int(bg_color_name[3:5], 16)
-            b = int(bg_color_name[5:7], 16)
-            target_color = (r, g, b)
-        except Exception:
-            pass
-    elif bg_color_name.lower() in COLOR_PALETTE:
-        val = COLOR_PALETTE[bg_color_name.lower()]
-        if val is not None:
-            target_color = val
-        else:
-            # transparent or original requested
-            target_color = None
+    target_color = _resolve_bg_color(bg_color_name, custom_hex)
 
     # Try AI removal via rembg
     try:
@@ -474,18 +476,77 @@ def process_passport_studio(
         pix = page.get_pixmap(dpi=300)
         img_bytes = pix.tobytes("png")
         doc.close()
-        raw_pil = Image.open(io.BytesIO(img_bytes))
+        raw_pil = Image.open(io.BytesIO(img_bytes)).convert("RGB")
     else:
-        raw_pil = Image.open(input_file_path)
+        raw_pil = Image.open(input_file_path).convert("RGB")
 
-    # 2. Smart Face Framing (35x45mm ratio)
-    framed = detect_and_frame_face(raw_pil)
+    orig_w, orig_h = raw_pil.size
 
-    # 3. AI Background Removal & Color Replacement
-    colored = remove_and_replace_background(framed, bg_color_name, custom_hex)
+    # Ultra-Fast High-Performance Pipeline:
+    # Scale down oversized images (e.g. 12MP phone photos) to max 1200px.
+    # Standard 35x45mm at 300 DPI is only 413x531 px, so 1200px guarantees 100% full detail.
+    max_dim = 1200
+    if max(orig_w, orig_h) > max_dim:
+        scale = max_dim / max(orig_w, orig_h)
+        proc_w, proc_h = int(orig_w * scale), int(orig_h * scale)
+        proc_img = raw_pil.resize((proc_w, proc_h), Image.Resampling.BILINEAR)
+    else:
+        proc_img = raw_pil
+
+    is_original_bg = bg_color_name and str(bg_color_name).lower() in ("original", "keep_original", "none")
+
+    if is_original_bg:
+        # Original background requested: quick face framing only (0 AI overhead)
+        final_single = detect_and_frame_face(proc_img)
+    else:
+        # SINGLE PASS AI: run rembg EXACTLY ONCE
+        sess = _get_rembg_session()
+        try:
+            from rembg import remove
+            cutout = remove(proc_img, session=sess) if sess is not None else remove(proc_img)
+            
+            # Find subject silhouette directly from alpha channel
+            alpha = np.array(cutout)[:, :, 3]
+            y_indices, x_indices = np.where(alpha > 30)
+            
+            if len(y_indices) > 50 and len(x_indices) > 50:
+                min_x, max_x = int(np.min(x_indices)), int(np.max(x_indices))
+                min_y, max_y = int(np.min(y_indices)), int(np.max(y_indices))
+                
+                person_w = max_x - min_x
+                person_h = max_y - min_y
+                person_cx = (min_x + max_x) // 2
+                
+                target_ratio = PHOTO_WIDTH / PHOTO_HEIGHT
+                est_head_h = int(person_w * 0.95) if person_w > 0 else int(person_h * 0.35)
+                target_h = int(est_head_h / 0.65)
+                target_w = int(target_h * target_ratio)
+                
+                crop_top = max(0, int(min_y - target_h * 0.08))
+                crop_bottom = min(proc_img.height, crop_top + target_h)
+                crop_left = max(0, int(person_cx - target_w // 2))
+                crop_right = min(proc_img.width, crop_left + target_w)
+                
+                if (crop_right - crop_left) > 50 and (crop_bottom - crop_top) > 50:
+                    cropped_cutout = cutout.crop((crop_left, crop_top, crop_right, crop_bottom))
+                else:
+                    cropped_cutout = cutout
+            else:
+                cropped_cutout = cutout
+                
+            target_color = _resolve_bg_color(bg_color_name, custom_hex)
+            if target_color is not None:
+                bg = Image.new("RGBA", cropped_cutout.size, target_color + (255,))
+                composited = Image.alpha_composite(bg, cropped_cutout).convert("RGB")
+            else:
+                composited = cropped_cutout.convert("RGB")
+                
+            final_single = composited.resize((PHOTO_WIDTH, PHOTO_HEIGHT), Image.Resampling.LANCZOS)
+        except Exception as e:
+            print(f"[PassportStudio Error] {e}, falling back to framed original")
+            final_single = detect_and_frame_face(proc_img)
 
     # 4. Optional Name & DOP Strip
-    final_single = add_name_and_dop(colored, candidate_name, date_of_photo)
 
     # 5. Save Single Master Photo
     single_path = os.path.join(output_dir, "passport_single.png")
