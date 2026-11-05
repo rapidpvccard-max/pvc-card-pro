@@ -330,12 +330,17 @@ def add_name_and_dop(
     return result
 
 
-def add_cutting_border(photo: Image.Image) -> Image.Image:
-    """Adds a crisp 1px light-grey cutting border around the passport photo."""
+def add_cutting_border(
+    photo: Image.Image,
+    border_color: Tuple[int, int, int] = (0, 0, 0),
+    border_width: int = 2
+) -> Image.Image:
+    """Adds a crisp, dark cutting border around the passport photo for easy scissor/guillotine cutting."""
     result = photo.copy().convert("RGB")
     draw = ImageDraw.Draw(result)
     w, h = result.size
-    draw.rectangle([(0, 0), (w - 1, h - 1)], outline=(180, 180, 180), width=1)
+    for i in range(border_width):
+        draw.rectangle([(i, i), (w - 1 - i, h - 1 - i)], outline=border_color)
     return result
 
 
@@ -354,8 +359,6 @@ def generate_print_sheet(
     - a4_30  : A4 paper (2480x3508)       -> 30 Photos (5 cols x 6 rows)
     - a4_36  : A4 paper (2480x3508)       -> 36 Photos (6 cols x 6 rows)
     """
-    photo_bordered = add_cutting_border(photo)
-
     if layout_type == "single":
         sheet_w, sheet_h = SHEET_4X6_W, SHEET_4X6_H
         cols, rows = 1, 1
@@ -382,20 +385,20 @@ def generate_print_sheet(
         sheet_w, sheet_h = SHEET_4X6_W, SHEET_4X6_H
         cols, rows = 4, 2
 
-    # Scale photo if needed for 12 or 36 layouts
+    # Scale photo if needed for 12 or 36 layouts, then apply dark cutting border
     if layout_type == "4x6_12":
-        # 3 cols x 4 rows on 1200 x 1800 canvas:
-        # 4 rows * 416px + 3 * 20px gaps = 1724px height (< 1800px, 38px top/bottom margins)
-        # 3 cols * 323px + 2 * 24px gaps = 1017px width (< 1200px, 91px left/right margins)
         cur_h = 416
         cur_w = int(PHOTO_WIDTH * (cur_h / PHOTO_HEIGHT))
-        unit_photo = photo_bordered.resize((cur_w, cur_h), Image.Resampling.LANCZOS)
+        unit_photo = photo.resize((cur_w, cur_h), Image.Resampling.LANCZOS)
     elif layout_type == "a4_36":
         cur_w, cur_h = int(PHOTO_WIDTH * 0.90), int(PHOTO_HEIGHT * 0.90)
-        unit_photo = photo_bordered.resize((cur_w, cur_h), Image.Resampling.LANCZOS)
+        unit_photo = photo.resize((cur_w, cur_h), Image.Resampling.LANCZOS)
     else:
         cur_w, cur_h = PHOTO_WIDTH, PHOTO_HEIGHT
-        unit_photo = photo_bordered
+        unit_photo = photo
+
+    # Apply crisp, dark 2px black cutting border around every unit photo
+    unit_photo = add_cutting_border(unit_photo, border_color=(0, 0, 0), border_width=2)
 
     sheet = Image.new("RGB", (sheet_w, sheet_h), (255, 255, 255))
     draw = ImageDraw.Draw(sheet)
@@ -422,11 +425,11 @@ def generate_print_sheet(
             # Draw corner/cutting guide marks between photos
             if include_cutting_marks:
                 # Top-left cutting mark
-                draw.line([(x - 8, y), (x - 2, y)], fill=(210, 210, 210), width=1)
-                draw.line([(x, y - 8), (x, y - 2)], fill=(210, 210, 210), width=1)
+                draw.line([(x - 8, y), (x - 2, y)], fill=(120, 120, 120), width=1)
+                draw.line([(x, y - 8), (x, y - 2)], fill=(120, 120, 120), width=1)
                 # Bottom-right cutting mark
-                draw.line([(x + cur_w + 2, y + cur_h), (x + cur_w + 8, y + cur_h)], fill=(210, 210, 210), width=1)
-                draw.line([(x + cur_w, y + cur_h + 2), (x + cur_w, y + cur_h + 8)], fill=(210, 210, 210), width=1)
+                draw.line([(x + cur_w + 2, y + cur_h), (x + cur_w + 8, y + cur_h)], fill=(120, 120, 120), width=1)
+                draw.line([(x + cur_w, y + cur_h + 2), (x + cur_w, y + cur_h + 8)], fill=(120, 120, 120), width=1)
 
     return sheet
 
