@@ -344,6 +344,13 @@ def map_ayushman_data(engine_data: dict) -> dict:
             return ""
         return val_str
 
+    footer_loc = get_str("scheme_footer_local") or "आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना"
+    if "ज्योतिराव" in footer_loc or len(footer_loc) > 55:
+        footer_loc = "आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना"
+    footer_en = get_str("scheme_footer_en") or "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA"
+    if "JYOTIRAO" in footer_en.upper() or len(footer_en) > 60:
+        footer_en = "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA"
+
     return {
         "success": True,
         "document_type": "ayushman",
@@ -384,8 +391,8 @@ def map_ayushman_data(engine_data: dict) -> dict:
             "card_title_local": get_str("card_title_local") or "आयुष्मान कार्ड",
             "coverage_amount_local": get_str("coverage_amount_local") or "₹ ५ लाख तक",
             "treatment_text_local": get_str("treatment_text_local") or "मुफ्त उपचार",
-            "scheme_footer_local": get_str("scheme_footer_local") or "आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना",
-            "scheme_footer_en": get_str("scheme_footer_en") or "AYUSHMAN BHARAT PRADHAN MANTRI JAN AROGYA YOJANA",
+            "scheme_footer_local": footer_loc,
+            "scheme_footer_en": footer_en,
             "back_header_local": get_str("back_header_local") or "स्वास्थ्य का वरदान, आयुष्मान",
             "point1_local": get_str("point1_local"),
             "point2_local": get_str("point2_local"),
