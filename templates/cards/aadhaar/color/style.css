@@ -1,3 +1,15 @@
+@font-face {
+    font-family: 'Nirmala UI';
+    src: url('https://local.fonts/Nirmala.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Nirmala UI';
+    src: url('https://local.fonts/NirmalaB.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
 {% if font_reg_b64 %}
 @font-face {
     font-family: 'Nirmala UI';

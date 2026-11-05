@@ -446,7 +446,7 @@ async def extract_pdf(
             style = "color"
 
         if doc_type == "ayushman":
-            result = extract_ayushman_data(filepath, password=password)
+            result = await run_in_threadpool(extract_ayushman_data, filepath, password=password)
             data = result.to_json_safe_dict()
             if data.get("source") == "failed":
                 err_msg, err_code = format_extraction_error(data)
@@ -465,7 +465,7 @@ async def extract_pdf(
             except: pass
             return {"success": True, "detect_res": detect_res, "document_type": "crop"}
         else:
-            result = extract_aadhaar_data(filepath, password=password)
+            result = await run_in_threadpool(extract_aadhaar_data, filepath, password=password)
             data = result.to_json_safe_dict()
             if data.get("source") == "failed":
                 err_msg, err_code = format_extraction_error(data)
@@ -573,7 +573,7 @@ async def generate_pipeline(
         
     try:
         if doc_type == "ayushman":
-            result = extract_ayushman_data(filepath, password=password)
+            result = await run_in_threadpool(extract_ayushman_data, filepath, password=password)
             engine_data = result.to_json_safe_dict()
             if engine_data.get("source") == "failed":
                 history.status = "failed"
@@ -690,7 +690,7 @@ async def generate_pipeline(
                 "wallet_balance": current_user.credits.wallet_balance if current_user.credits else 0.0
             }
         else:
-            result = extract_aadhaar_data(filepath, password=password)
+            result = await run_in_threadpool(extract_aadhaar_data, filepath, password=password)
             engine_data = result.to_json_safe_dict()
             if engine_data.get("source") == "failed":
                 history.status = "failed"
@@ -868,8 +868,8 @@ async def crop_upload_preview(
                         }
                     )
                 
-            preview_img, orig_w, orig_h = generate_page_preview(filepath, page_number=0, password=password, target_width=900)
-            detect_res = smart_detect_card_layout(filepath, page_number=0, password=password)
+            preview_img, orig_w, orig_h = await run_in_threadpool(generate_page_preview, filepath, page_number=0, password=password, target_width=900)
+            detect_res = await run_in_threadpool(smart_detect_card_layout, filepath, page_number=0, password=password)
         else:
             from PIL import Image as PILImage
             with PILImage.open(filepath) as pil_img:

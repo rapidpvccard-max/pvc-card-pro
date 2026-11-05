@@ -196,11 +196,19 @@ def _cold_start_render_html(front_html: str, back_html: str, front_path: str, ba
             args=CHROMIUM_STABLE_ARGS
         )
         c = b.new_context(viewport={"width": 1016, "height": 638}, device_scale_factor=1)
-        pg = c.new_page()
-        pg.set_content(front_html, wait_until="domcontentloaded", timeout=10000)
-        pg.screenshot(path=front_path, type="png")
-        pg.set_content(back_html, wait_until="domcontentloaded", timeout=10000)
-        pg.screenshot(path=back_path, type="png")
+        fonts_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "static", "fonts"))
+        reg_font_file = os.path.join(fonts_dir, "Nirmala.ttf")
+        bold_font_file = os.path.join(fonts_dir, "NirmalaB.ttf")
+        if os.path.exists(reg_font_file):
+            c.route("https://local.fonts/Nirmala.ttf", lambda r: r.fulfill(path=reg_font_file, content_type="font/ttf"))
+        if os.path.exists(bold_font_file):
+            c.route("https://local.fonts/NirmalaB.ttf", lambda r: r.fulfill(path=bold_font_file, content_type="font/ttf"))
+        pg_f = c.new_page()
+        pg_b = c.new_page()
+        pg_f.set_content(front_html, wait_until="domcontentloaded", timeout=10000)
+        pg_f.screenshot(path=front_path, type="png")
+        pg_b.set_content(back_html, wait_until="domcontentloaded", timeout=10000)
+        pg_b.screenshot(path=back_path, type="png")
         b.close()
     return front_path, back_path
 
@@ -287,12 +295,12 @@ def render_card(mapped_data: dict, engine_data: dict, output_dir: str, document_
     template_front_base64 = _get_template_b64(images_dir, doc_type, "front", style)
     template_back_base64 = _get_template_b64(images_dir, doc_type, "back", style)
 
-    font_reg_b64, font_bold_b64 = _get_fonts_b64()
+    # Fonts are served directly via high-speed Playwright routes, saving 4MB Base64 per request
     context = {
         "document_type": doc_type,
         "template_style": style,
-        "font_reg_b64": font_reg_b64,
-        "font_bold_b64": font_bold_b64,
+        "font_reg_b64": "",
+        "font_bold_b64": "",
         "language": mapped_data.get("language", {}),
         "person": mapped_data.get("person", {}),
         "identity": mapped_data.get("identity", {}),
@@ -318,3 +326,16 @@ def render_card(mapped_data: dict, engine_data: dict, output_dir: str, document_
     back_path = os.path.join(output_dir, "back.png")
 
     return _worker.render(front_html, back_html, front_path, back_path)
+
+def _prewarm_template_cache():
+    for doc in ["aadhaar", "ayushman"]:
+        for style in ["default", "color"]:
+            img_dir = os.path.join(_template_dir, "cards", doc, style, "images")
+            if os.path.exists(img_dir):
+                _get_template_b64(img_dir, doc, "front", style)
+                _get_template_b64(img_dir, doc, "back", style)
+
+try:
+    _prewarm_template_cache()
+except Exception:
+    pass

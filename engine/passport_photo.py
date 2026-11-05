@@ -100,6 +100,14 @@ def detect_and_frame_face(pil_img: Image.Image) -> Image.Image:
                 minNeighbors=4,
                 minSize=(60, 60)
             )
+            if len(faces) == 0:
+                # Fast secondary pass for tilted/angled faces or low-contrast portraits
+                faces = classifier.detectMultiScale(
+                    gray,
+                    scaleFactor=1.05,
+                    minNeighbors=3,
+                    minSize=(40, 40)
+                )
         except Exception:
             faces = []
 
@@ -146,60 +154,17 @@ def detect_and_frame_face(pil_img: Image.Image) -> Image.Image:
             cropped = img_rgb.crop((crop_left, crop_top, crop_right, crop_bottom))
 
     else:
-        # Fallback: Intelligent portrait framing from silhouette if rembg is available
-        framed_via_mask = False
-        try:
-            from rembg import remove
-            # Quick small preview to find silhouette
-            preview = img_rgb.copy()
-            preview.thumbnail((500, 500))
-            sess = _get_rembg_session()
-            cutout = remove(preview, session=sess) if sess is not None else remove(preview)
-            alpha = np.array(cutout)[:, :, 3]
-            y_indices, x_indices = np.where(alpha > 35)
-            if len(y_indices) > 50 and len(x_indices) > 50:
-                scale_x = orig_w / preview.width
-                scale_y = orig_h / preview.height
-                
-                min_x = int(np.min(x_indices) * scale_x)
-                max_x = int(np.max(x_indices) * scale_x)
-                min_y = int(np.min(y_indices) * scale_y)
-                max_y = int(np.max(y_indices) * scale_y)
-                
-                # Person center and width
-                person_cx = (min_x + max_x) // 2
-                person_w = max_x - min_x
-                person_h = max_y - min_y
-                
-                # Estimate head height from person bounding box
-                est_head_h = int(person_w * 0.95) if person_w > 0 else int(person_h * 0.35)
-                target_photo_h = int(est_head_h / 0.65)
-                target_photo_w = int(target_photo_h * (PHOTO_WIDTH / PHOTO_HEIGHT))
-                
-                # Top margin 8% above head top
-                crop_top = max(0, int(min_y - target_photo_h * 0.08))
-                crop_bottom = min(orig_h, crop_top + target_photo_h)
-                crop_left = max(0, int(person_cx - target_photo_w / 2))
-                crop_right = min(orig_w, crop_left + target_photo_w)
-                
-                if (crop_right - crop_left) > 50 and (crop_bottom - crop_top) > 50:
-                    cropped = img_rgb.crop((crop_left, crop_top, crop_right, crop_bottom))
-                    framed_via_mask = True
-        except Exception as e:
-            pass
-
-        if not framed_via_mask:
-            # Fallback: Center crop to 35:45 aspect ratio
-            current_ratio = orig_w / orig_h
-            target_ratio = PHOTO_WIDTH / PHOTO_HEIGHT
-            if current_ratio > target_ratio:
-                new_w = int(orig_h * target_ratio)
-                left = (orig_w - new_w) // 2
-                cropped = img_rgb.crop((left, 0, left + new_w, orig_h))
-            else:
-                new_h = int(orig_w / target_ratio)
-                top = int((orig_h - new_h) * 0.15)  # Keep upper 85% for head and shoulders
-                cropped = img_rgb.crop((0, top, orig_w, top + new_h))
+        # Fallback: Instant smart portrait framing (35mm x 45mm ratio with head & shoulders bias)
+        current_ratio = orig_w / orig_h
+        target_ratio = PHOTO_WIDTH / PHOTO_HEIGHT
+        if current_ratio > target_ratio:
+            new_w = int(orig_h * target_ratio)
+            left = (orig_w - new_w) // 2
+            cropped = img_rgb.crop((left, 0, left + new_w, orig_h))
+        else:
+            new_h = int(orig_w / target_ratio)
+            top = int((orig_h - new_h) * 0.15)  # Keep upper 85% for head and shoulders
+            cropped = img_rgb.crop((0, top, orig_w, top + new_h))
 
     # Resize to exact standard dimensions at 300 DPI
     final_framed = cropped.resize((PHOTO_WIDTH, PHOTO_HEIGHT), Image.Resampling.LANCZOS)
