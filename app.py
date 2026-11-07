@@ -87,6 +87,7 @@ try:
     from engine.a4_print import create_a4_print_pdf
     from engine.watermark import apply_card_watermark
     from engine.passport_photo import process_passport_studio
+    from engine.bg_remover import process_background_removal
     from engine.card_cropper import (
         PRESETS,
         generate_page_preview,
@@ -130,7 +131,8 @@ def is_service_sample_available(user_credits, category: str) -> bool:
         "aadhaar_color": "sample_aadhaar_color",
         "ayushman": "sample_ayushman",
         "crop": "sample_crop",
-        "passport": "sample_passport"
+        "passport": "sample_passport",
+        "bg_remover": "sample_bg_remover"
     }
     col_name = col_map.get(category)
     if col_name and hasattr(user_credits, col_name):
@@ -146,7 +148,8 @@ def consume_service_sample(user_credits, category: str):
         "aadhaar_color": "sample_aadhaar_color",
         "ayushman": "sample_ayushman",
         "crop": "sample_crop",
-        "passport": "sample_passport"
+        "passport": "sample_passport",
+        "bg_remover": "sample_bg_remover"
     }
     col_name = col_map.get(category)
     if col_name and hasattr(user_credits, col_name):
@@ -155,7 +158,7 @@ def consume_service_sample(user_credits, category: str):
     # Check if any demo remains across all services
     has_remaining = any(
         bool(getattr(user_credits, c, False))
-        for c in ["sample_aadhaar", "sample_aadhaar_color", "sample_ayushman", "sample_crop", "sample_passport"]
+        for c in ["sample_aadhaar", "sample_aadhaar_color", "sample_ayushman", "sample_crop", "sample_passport", "sample_bg_remover"]
         if hasattr(user_credits, c)
     )
     user_credits.free_sample_available = has_remaining
@@ -1424,6 +1427,209 @@ async def download_passport_file(
             content={"success": False, "error": "File session expired. For zero-retention privacy, temporary files are permanently purged after 5 minutes."}
         )
 
+    return FileResponse(
+        path=file_path,
+        filename=download_name,
+        media_type=media_type
+    )
+
+# =========================================================
+# AI IMAGE BACKGROUND REMOVAL API & DOWNLOADS
+# =========================================================
+
+@app.post("/api/bg-remover/generate")
+async def generate_bg_remover(
+    file: UploadFile = File(...),
+    bg_color: str = Form("transparent"),
+    custom_hex: Optional[str] = Form(None),
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    service_category = "bg_remover"
+    user_rate = float(getattr(current_user.credits, 'cost_per_card', 0.95) or 0.95) if current_user.credits else 0.95
+    wallet_balance = float(getattr(current_user.credits, 'wallet_balance', 0.0) or 0.0) if current_user.credits else 0.0
+    sample_available = is_service_sample_available(current_user.credits, service_category)
+
+    is_sample_generation = False
+    if wallet_balance < user_rate:
+        if sample_available:
+            is_sample_generation = True
+        else:
+            return JSONResponse(
+                status_code=402,
+                content={"success": False, "error": f"Insufficient wallet balance to generate AI Background Remover. Required: ₹{user_rate:.2f} (Demo already used)."}
+            )
+
+    content_type = (file.content_type or "").lower()
+    allowed_types = ["image/jpeg", "image/png", "image/webp", "image/jpg"]
+    filename_lower = (file.filename or "").lower()
+    has_valid_ext = any(filename_lower.endswith(ext) for ext in [".jpg", ".jpeg", ".png", ".webp"])
+    
+    if content_type not in allowed_types and not has_valid_ext:
+        return JSONResponse(status_code=400, content={"success": False, "error": "Only JPG, PNG, or WEBP image files are supported for AI Background Remover."})
+
+    content = await file.read(MAX_FILE_SIZE + 1)
+    if len(content) > MAX_FILE_SIZE:
+        return JSONResponse(status_code=413, content={"success": False, "error": "File size exceeds the 10 MB limit."})
+
+    run_id = str(uuid.uuid4())
+    ext = os.path.splitext(file.filename)[1].lower() if file.filename else ".png"
+    if not ext: ext = ".png"
+    temp_filepath = os.path.join(UPLOAD_DIR, f"bgrem_{run_id}{ext}")
+
+    doc_label = "bg_remover"
+    if is_sample_generation:
+        doc_label += " [SAMPLE DEMO]"
+
+    history = models.GenerationHistory(
+        id=run_id,
+        user_id=current_user.id,
+        run_id=run_id,
+        document_type=doc_label,
+        is_sample=is_sample_generation,
+        status="processing"
+    )
+    db.add(history)
+    db.commit()
+
+    try:
+        with open(temp_filepath, "wb") as f:
+            f.write(content)
+    except Exception as e:
+        history.status = "failed"
+        db.commit()
+        return JSONResponse(status_code=500, content={"success": False, "error": "Could not save uploaded image."})
+
+    output_dir = os.path.join("static", "renders", run_id)
+    os.makedirs(output_dir, exist_ok=True)
+
+    try:
+        bg_res = await run_in_threadpool(
+            process_background_removal,
+            input_file_path=temp_filepath,
+            output_dir=output_dir,
+            bg_color_name=bg_color,
+            custom_hex=custom_hex
+        )
+
+        try:
+            os.remove(temp_filepath)
+        except Exception:
+            pass
+
+        if is_sample_generation:
+            try:
+                apply_card_watermark(bg_res["transparent_path"])
+                if bg_res.get("colored_path"):
+                    apply_card_watermark(bg_res["colored_path"])
+            except Exception:
+                pass
+            consume_service_sample(current_user.credits, service_category)
+            current_user.credits.total_generated += 1
+            history.status = "success"
+            history.is_sample = True
+            history.completed_at = datetime.datetime.utcnow()
+            history.output_file = bg_res.get("transparent_path")
+
+            tx = models.CreditTransaction(
+                user_id=current_user.id,
+                amount=0.0,
+                transaction_type="free_sample",
+                reference_id=run_id,
+                balance_after=current_user.credits.wallet_balance
+            )
+            db.add(tx)
+            db.commit()
+        else:
+            current_user.credits.wallet_balance -= user_rate
+            current_user.credits.total_generated += 1
+            history.status = "success"
+            history.completed_at = datetime.datetime.utcnow()
+            history.output_file = bg_res.get("transparent_path")
+
+            tx = models.CreditTransaction(
+                user_id=current_user.id,
+                amount=-user_rate,
+                transaction_type="generation_usage",
+                reference_id=run_id,
+                balance_after=current_user.credits.wallet_balance
+            )
+            db.add(tx)
+            db.commit()
+
+        return {
+            "success": True,
+            "run_id": run_id,
+            "transparent_url": f"/download-bg-remover/{run_id}/transparent",
+            "colored_url": f"/download-bg-remover/{run_id}/colored" if bg_res.get("has_color") else None,
+            "has_color": bool(bg_res.get("has_color")),
+            "width": bg_res.get("width"),
+            "height": bg_res.get("height"),
+            "original_width": bg_res.get("original_width"),
+            "original_height": bg_res.get("original_height"),
+            "transparent_size_kb": bg_res.get("transparent_size_kb"),
+            "colored_size_kb": bg_res.get("colored_size_kb"),
+            "processing_time_sec": bg_res.get("processing_time_sec"),
+            "is_sample": is_sample_generation,
+            "wallet_balance": current_user.credits.wallet_balance if current_user.credits else 0.0
+        }
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        history.status = "failed"
+        history.completed_at = datetime.datetime.utcnow()
+        db.commit()
+        try:
+            os.remove(temp_filepath)
+        except Exception:
+            pass
+        return JSONResponse(status_code=500, content={"success": False, "error": f"AI Background removal failed: {str(e)}"})
+
+
+@app.get("/download-bg-remover/{run_id}/{file_type}")
+async def download_bg_remover_file(
+    run_id: str,
+    file_type: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    history = db.query(models.GenerationHistory).filter(
+        models.GenerationHistory.run_id == run_id,
+        models.GenerationHistory.user_id == current_user.id
+    ).first()
+
+    if not history:
+        return JSONResponse(status_code=403, content={"success": False, "error": "Access denied or run_id not found."})
+
+    run_dir = os.path.join("static", "renders", run_id)
+    if file_type == "transparent":
+        file_path = os.path.join(run_dir, "transparent.png")
+        download_name = f"Cutout_HD_Transparent_{run_id[:8]}.png"
+        media_type = "image/png"
+    elif file_type == "colored":
+        file_path = os.path.join(run_dir, "colored.jpg")
+        download_name = f"Cutout_HD_Color_{run_id[:8]}.jpg"
+        media_type = "image/jpeg"
+    else:
+        return JSONResponse(status_code=400, content={"success": False, "error": "Invalid background removal file type requested."})
+
+    is_expired = False
+    if history.created_at:
+        elapsed = (datetime.datetime.utcnow() - history.created_at).total_seconds()
+        if elapsed > 300:
+            is_expired = True
+    elif os.path.exists(file_path) and (time.time() - os.path.getmtime(file_path) > 300):
+        is_expired = True
+
+    if is_expired or not os.path.exists(file_path):
+        if os.path.exists(run_dir):
+            shutil.rmtree(run_dir, ignore_errors=True)
+        return JSONResponse(
+            status_code=410,
+            content={"success": False, "error": "File session expired. For zero-retention privacy, temporary files are permanently purged after 5 minutes."}
+        )
+
+    from fastapi.responses import FileResponse
     return FileResponse(
         path=file_path,
         filename=download_name,

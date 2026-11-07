@@ -768,7 +768,8 @@
                 'aadhaar_color': 'Aadhaar (Colourful)',
                 'ayushman': 'Ayushman PVC Card',
                 'crop': 'Auto Card Cropper',
-                'passport': 'AI Passport Photo Studio'
+                'passport': 'AI Passport Photo Studio',
+                'bg_remover': 'AI Background Remover'
             };
 
             const demoAvailable = {
@@ -776,7 +777,8 @@
                 'aadhaar_color': Boolean(data.sample_aadhaar_color),
                 'ayushman': Boolean(data.sample_ayushman),
                 'crop': Boolean(data.sample_crop),
-                'passport': Boolean(data.sample_passport !== undefined ? data.sample_passport : data.free_sample_available)
+                'passport': Boolean(data.sample_passport !== undefined ? data.sample_passport : data.free_sample_available),
+                'bg_remover': Boolean(data.sample_bg_remover !== undefined ? data.sample_bg_remover : true)
             };
 
             // 1. Update switcher tab badges on generator page
@@ -802,6 +804,7 @@
             updateTabBadge('badge-tab-ayushman', demoAvailable['ayushman'], '₹' + rate, {bg: 'rgba(241,245,249,0.9)', color: '#475569'});
             updateTabBadge('badge-tab-crop', demoAvailable['crop'], 'Hot 🔥', {bg: '#f5f3ff', color: '#7c3aed', border: '1px solid #ddd6fe'});
             updateTabBadge('badge-tab-passport', demoAvailable['passport'], 'New ✨', {bg: '#fdf2f8', color: '#db2777', border: '1px solid #fbcfe8'});
+            updateTabBadge('badge-tab-bg-remover', demoAvailable['bg_remover'], 'New 🪄', {bg: '#ecfeff', color: '#0891b2', border: '1px solid #a5f3fc'});
 
             // 2. Update service price badges on home dashboard
             const updateHomeBadge = (id, available) => {
@@ -826,6 +829,7 @@
             updateHomeBadge('badge-home-ayushman', demoAvailable['ayushman']);
             updateHomeBadge('badge-home-crop', demoAvailable['crop']);
             updateHomeBadge('badge-home-passport', demoAvailable['passport']);
+            updateHomeBadge('badge-home-bg-remover', demoAvailable['bg_remover']);
 
             // 3. Determine active service category for generator workspace
             let active = category;
@@ -833,7 +837,8 @@
                 const docInput = document.getElementById('selected-document-type');
                 const styleInput = document.getElementById('selected-template-style');
                 if (docInput) {
-                    if (docInput.value === 'passport') active = 'passport';
+                    if (docInput.value === 'bg_remover') active = 'bg_remover';
+                    else if (docInput.value === 'passport') active = 'passport';
                     else if (docInput.value === 'crop') active = 'crop';
                     else if (docInput.value === 'ayushman') active = 'ayushman';
                     else if (styleInput && styleInput.value === 'color') active = 'aadhaar_color';

@@ -302,10 +302,37 @@
     /* Service Cards (Aadhaar, Ayushman, Colourful Aadhaar, Cropper, Passport) - 5 in 1 Line */
     .services-showcase-grid {
         display: grid;
-        grid-template-columns: repeat(5, minmax(0, 1fr));
-        gap: 14px;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 12px;
         margin-bottom: 36px;
         align-items: stretch;
+    }
+
+    .service-showcase-card.card-bg-remover:hover {
+        border-color: #0891b2;
+        box-shadow: 0 16px 30px -5px rgba(8, 145, 178, 0.2);
+    }
+
+    .service-badge-pill.teal-badge {
+        background: #ecfeff;
+        color: #0891b2;
+        border: 1px solid #a5f3fc;
+    }
+
+    .service-price-pill.teal {
+        background: #ecfeff;
+        color: #0e7490;
+        border: 1px solid #a5f3fc;
+    }
+
+    .service-icon-box.teal {
+        background: linear-gradient(135deg, #06b6d4, #0891b2);
+        color: #ffffff;
+        box-shadow: 0 4px 10px -2px rgba(8, 145, 178, 0.35);
+    }
+
+    .service-launch-link.teal {
+        color: #0891b2;
     }
 
     .service-showcase-card {
@@ -684,7 +711,7 @@
     }
 
     /* Responsive Mobile CSS */
-    @media (max-width: 1100px) {
+    @media (max-width: 1350px) {
         .services-showcase-grid {
             grid-template-columns: repeat(3, 1fr);
             gap: 14px;
@@ -1121,6 +1148,48 @@
             <span>Studio Photo Suite</span>
             <span class="service-launch-link pink">
                 Create Passport Photos &rarr;
+            </span>
+        </div>
+    </div>
+
+    <!-- 6. AI Background Remover -->
+    <div class="service-showcase-card card-bg-remover" onclick="window.location.href='/generator?type=bg_remover'">
+        <div>
+            <div class="service-card-top">
+                <div class="service-icon-box teal">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+                </div>
+                <div class="service-badges-wrap">
+                    <span class="service-badge-pill teal-badge">New 🪄</span>
+                    <span class="service-price-pill teal" id="badge-home-bg-remover">₹0.95</span>
+                </div>
+            </div>
+
+            <div class="service-title-box">
+                <h3 class="service-name">AI BG Remover</h3>
+                <p class="service-subtitle">Instant 1-Click Cutout & Transparent PNG</p>
+            </div>
+            
+            <div class="service-features-list">
+                <div class="service-feature-item">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>1-Click AI Neural Cutout (High-Res)</span>
+                </div>
+                <div class="service-feature-item">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>100% Transparent PNG & Alpha Export</span>
+                </div>
+                <div class="service-feature-item">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Studio Colors (White, Blue, Red, Custom)</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="service-card-footer">
+            <span>HD Image Studio</span>
+            <span class="service-launch-link teal">
+                Remove Background &rarr;
             </span>
         </div>
     </div>

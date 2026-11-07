@@ -229,6 +229,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnCrop) btnCrop.classList.remove('active');
         const btnPassport = document.getElementById('doc-btn-passport');
         if (btnPassport) btnPassport.classList.remove('active');
+        const btnBgRemover = document.getElementById('doc-btn-bg-remover');
+        if (btnBgRemover) btnBgRemover.classList.remove('active');
 
         const instantCropContainer = document.getElementById('instant-autocrop-container');
         if (instantCropContainer) {
@@ -240,9 +242,14 @@ document.addEventListener('DOMContentLoaded', () => {
             passportStudioContainer.style.display = (type === 'passport') ? 'block' : 'none';
         }
 
+        const bgRemoverContainer = document.getElementById('bg-remover-container');
+        if (bgRemoverContainer) {
+            bgRemoverContainer.style.display = (type === 'bg_remover' || type === 'bgremover' || type === 'bg-remover') ? 'block' : 'none';
+        }
+
         const pwContainer = document.getElementById('password-group-container');
         if (pwContainer) {
-            pwContainer.style.display = (type === 'passport') ? 'none' : 'block';
+            pwContainer.style.display = (type === 'passport' || type === 'bg_remover' || type === 'bgremover' || type === 'bg-remover') ? 'none' : 'block';
         }
 
         const uploadLimit = document.getElementById('upload-zone-limit');
@@ -266,7 +273,43 @@ document.addEventListener('DOMContentLoaded', () => {
         const resTitle = document.getElementById('result-title');
         const resSubtitle = document.getElementById('result-subtitle');
 
-        if (type === 'passport') {
+        if (type === 'bg_remover' || type === 'bgremover' || type === 'bg-remover') {
+            if (pdfPasswordInput) {
+                pdfPasswordInput.required = false;
+                pdfPasswordInput.value = '';
+            }
+            if (fileInput) {
+                fileInput.required = false;
+                fileInput.accept = "image/jpeg,image/png,image/webp,image/jpg,image/*";
+            }
+            if (inputDoc) inputDoc.value = 'bg_remover';
+            if (inputStyle) inputStyle.value = 'default';
+            if (btnBgRemover) btnBgRemover.classList.add('active');
+            if (uploadText) uploadText.textContent = 'Upload Any Photo or Image (JPG, PNG, WEBP)';
+            if (uploadSubText) uploadSubText.innerHTML = 'Drag & drop image here or <span style="color: #0891b2; font-weight: 700;">Browse Images</span>';
+            if (uploadLimit) uploadLimit.textContent = 'JPG, PNG, WEBP, Portrait, Product, Selfie ya Document Photo (Max: 15MB)';
+            if (heroTitle) heroTitle.textContent = 'AI Background Remover & HD Cutout 🪄';
+            if (heroDesc) heroDesc.textContent = 'Instant 1-Click Neural AI Background Removal. Export 100% Transparent PNG or Solid Studio Color.';
+            if (btnGenText) btnGenText.textContent = 'Remove Background (-₹0.95)';
+
+            // Update Left Stepper for BG Remover Mode
+            if (s1Title) s1Title.textContent = 'Upload Image';
+            if (s1Sub) s1Sub.textContent = 'JPG, PNG or photo';
+            if (s2Title) s2Title.textContent = 'Neural AI Cutout';
+            if (s2Sub) s2Sub.textContent = 'Deep edge segmentation';
+            if (s3Title) s3Title.textContent = 'Alpha Channel';
+            if (s3Sub) s3Sub.textContent = 'Pixel-perfect transparency';
+            if (s4Title) s4Title.textContent = 'Studio Composite';
+            if (s4Sub) s4Sub.textContent = 'Transparent or solid color';
+            if (s5Title) s5Title.textContent = 'HD Download';
+            if (s5Sub) s5Sub.textContent = 'Crisp full-resolution export';
+
+            if (guideTitle) guideTitle.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> Cutout Export Tips`;
+            if (guideDesc) guideDesc.innerHTML = 'Download <strong>Transparent PNG</strong> for direct overlay on banners, posters, and ID templates without background artifacts.';
+            if (rateBadge) rateBadge.textContent = '⚡ Rate: ₹0.95 / Cutout';
+            if (resTitle) resTitle.textContent = '🎉 AI Background Cutout Ready!';
+            if (resSubtitle) resSubtitle.textContent = 'HD transparent cutout and color composite generated successfully.';
+        } else if (type === 'passport') {
             if (pdfPasswordInput) {
                 pdfPasswordInput.required = false;
                 pdfPasswordInput.value = '';
@@ -506,6 +549,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const docBtnBgRemover = document.getElementById('doc-btn-bg-remover');
+    if (docBtnBgRemover) {
+        docBtnBgRemover.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.setDocumentType('bg_remover');
+        });
+    }
+
     // Passport Studio Options: Background Swatches Selection (Modern Studio Tile Bar)
     const swatchCards = document.querySelectorAll('.passport-swatch-card, .passport-color-option');
     const activeColorDot = document.getElementById('active-color-dot');
@@ -591,6 +642,69 @@ document.addEventListener('DOMContentLoaded', () => {
                     const yyyy = today.getFullYear();
                     dopInput.value = `${dd}/${mm}/${yyyy}`;
                 }
+            }
+        });
+    }
+
+    // AI Background Remover Options: Background Swatches Selection
+    const bgRemCards = document.querySelectorAll('.bgrem-color-option, .bgrem-custom-item');
+    const bgRemActiveDot = document.getElementById('active-bgrem-dot');
+    const bgRemActiveText = document.getElementById('active-bgrem-text');
+    const bgRemCustomPicker = document.getElementById('bgrem-custom-picker');
+    const bgRemCustomRadio = document.getElementById('bgrem-custom-radio');
+    const bgRemCustomDisplay = document.getElementById('bgrem-custom-display');
+    const bgRemCustomCheck = document.getElementById('bgrem-custom-check');
+
+    bgRemCards.forEach(card => {
+        card.addEventListener('click', (e) => {
+            const colorCode = card.getAttribute('data-color');
+            const colorName = card.getAttribute('data-name');
+            const colorHex = card.getAttribute('data-hex');
+
+            if (colorCode === 'custom') {
+                if (bgRemCustomPicker) {
+                    bgRemCustomPicker.click();
+                }
+                return;
+            }
+
+            bgRemCards.forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+
+            const rad = card.querySelector('input[type="radio"]');
+            if (rad) rad.checked = true;
+
+            if (bgRemActiveDot) {
+                if (colorCode === 'transparent') {
+                    bgRemActiveDot.style.background = '#ffffff';
+                    bgRemActiveDot.style.borderColor = '#0891b2';
+                } else if (colorHex) {
+                    bgRemActiveDot.style.background = colorHex;
+                    bgRemActiveDot.style.borderColor = colorHex;
+                }
+            }
+            if (bgRemActiveText && colorName) {
+                bgRemActiveText.textContent = colorName;
+            }
+        });
+    });
+
+    if (bgRemCustomPicker) {
+        bgRemCustomPicker.addEventListener('input', (e) => {
+            const hex = e.target.value;
+            const customCard = document.querySelector('.bgrem-custom-item');
+            if (customCard && bgRemCustomRadio && bgRemCustomDisplay) {
+                bgRemCards.forEach(c => c.classList.remove('active'));
+                customCard.classList.add('active');
+                bgRemCustomRadio.value = hex;
+                bgRemCustomRadio.checked = true;
+                bgRemCustomDisplay.style.background = hex;
+                if (bgRemCustomCheck) bgRemCustomCheck.style.display = 'flex';
+                if (bgRemActiveDot) {
+                    bgRemActiveDot.style.background = hex;
+                    bgRemActiveDot.style.borderColor = hex;
+                }
+                if (bgRemActiveText) bgRemActiveText.textContent = `Custom (${hex.toUpperCase()})`;
             }
         });
     }
@@ -994,6 +1108,140 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    let isBgRemoverSubmitting = false;
+    async function handleBgRemoverSubmit() {
+        if (isBgRemoverSubmitting) return;
+
+        if (!fileInput || fileInput.files.length === 0) {
+            window.showToast('Please select an image to remove background.', 'warning');
+            return;
+        }
+
+        const selectedRadio = document.querySelector('input[name="bgrem_color"]:checked');
+        const radioVal = selectedRadio ? selectedRadio.value : 'transparent';
+        
+        let bgColor = 'transparent';
+        let customHex = '';
+        if (radioVal && radioVal.startsWith('#')) {
+            bgColor = 'custom';
+            customHex = radioVal;
+        } else {
+            bgColor = radioVal || 'transparent';
+        }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        formData.append('bg_color', bgColor);
+        if (customHex) {
+            formData.append('custom_hex', customHex);
+        }
+
+        isBgRemoverSubmitting = true;
+
+        // Enter Processing UI
+        uploadSection.style.display = 'none';
+        if (processingSection) processingSection.style.display = 'block';
+        document.getElementById('workflow-indicator').style.display = 'flex';
+        resetProgress();
+        setStepState(0, 'completed');
+        setStepState(1, 'active');
+
+        try {
+            const response = await fetch('/api/bg-remover/generate', {
+                method: 'POST',
+                body: formData
+            });
+
+            setStepState(1, 'completed');
+            setStepState(2, 'completed');
+            setStepState(3, 'completed');
+            setStepState(4, 'active');
+
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+            if (response.status === 402) {
+                let errJson = null;
+                try { errJson = await response.json(); } catch(e){}
+                throw new Error(errJson?.error || "Insufficient wallet balance to remove image background. Please recharge your wallet.");
+            }
+
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || "Failed to process background removal.");
+            }
+
+            setStepState(4, 'completed');
+
+            // Show results
+            if (processingSection) processingSection.style.display = 'none';
+            resultSection.style.display = 'block';
+
+            // Hide standard card dual-grid, master A4 box, and passport content
+            const dualGrid = document.querySelector('.dual-preview-grid');
+            const masterA4 = document.querySelector('.master-a4-box');
+            const passportResContent = document.getElementById('passport-result-content');
+            const bgRemResContent = document.getElementById('bg-remover-result-content');
+
+            if (dualGrid) dualGrid.style.display = 'none';
+            if (masterA4) masterA4.style.display = 'none';
+            if (passportResContent) passportResContent.style.display = 'none';
+            if (bgRemResContent) bgRemResContent.style.display = 'block';
+
+            // Set previews and download links
+            const cutoutPreview = document.getElementById('bgrem-cutout-preview');
+            const btnTransparent = document.getElementById('btn-dl-bgrem-transparent');
+            const btnColored = document.getElementById('btn-dl-bgrem-colored');
+
+            if (cutoutPreview) cutoutPreview.src = data.transparent_url;
+            if (btnTransparent) btnTransparent.href = data.transparent_url;
+
+            if (data.has_color && data.colored_url) {
+                if (btnColored) {
+                    btnColored.style.display = 'inline-flex';
+                    btnColored.href = data.colored_url;
+                }
+            } else {
+                if (btnColored) btnColored.style.display = 'none';
+            }
+
+            // Badges
+            const resBadge = document.getElementById('bgrem-res-badge');
+            const timeBadge = document.getElementById('bgrem-time-badge');
+            const sizeInfo = document.getElementById('bgrem-size-info');
+
+            const w = data.width || 0;
+            const h = data.height || 0;
+            if (resBadge) resBadge.textContent = `${w} × ${h} • HD Cutout`;
+            if (timeBadge) timeBadge.textContent = `⚡ ${(data.processing_time_sec || 1.2).toFixed(1)}s`;
+            if (sizeInfo) sizeInfo.textContent = `Cutout Size: ${data.transparent_size_kb || 0} KB`;
+
+            const sampleNotice = document.getElementById('sample-card-notice');
+            if (sampleNotice) {
+                sampleNotice.style.display = data.is_sample ? 'block' : 'none';
+            }
+
+            if (data.wallet_balance !== undefined && typeof window.refreshUserCredits === 'function') {
+                window.refreshUserCredits();
+            }
+
+            if (typeof startExpiryTimer === 'function') {
+                startExpiryTimer(300, data.run_id);
+            }
+
+            window.showToast('AI Background removed successfully!', 'success');
+
+        } catch (err) {
+            console.error("Background removal error:", err);
+            if (processingSection) processingSection.style.display = 'none';
+            uploadSection.style.display = 'block';
+            window.showToast(err.message || 'Error removing background', 'error');
+        } finally {
+            isBgRemoverSubmitting = false;
+        }
+    }
+
     // Direct Upload Button Click Handler to guarantee trigger
     if (uploadBtn) {
         uploadBtn.addEventListener('click', (e) => {
@@ -1001,6 +1249,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentDocType === 'passport') {
                 e.preventDefault();
                 handlePassportPhotoSubmit();
+            } else if (currentDocType === 'bg_remover' || currentDocType === 'bgremover' || currentDocType === 'bg-remover') {
+                e.preventDefault();
+                handleBgRemoverSubmit();
             }
         });
     }
@@ -1014,6 +1265,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const docType = (document.getElementById('selected-document-type')?.value || 'aadhaar').toLowerCase();
+
+        // AI Background Remover Pipeline
+        if (docType === 'bg_remover' || docType === 'bgremover' || docType === 'bg-remover') {
+            await handleBgRemoverSubmit();
+            return;
+        }
 
         // AI Passport Photo Studio Pipeline
         if (docType === 'passport') {
@@ -1460,6 +1717,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (singleImg) singleImg.src = '';
         if (sheetImg) sheetImg.src = '';
 
+        // Reset bg-remover previews
+        const cutoutPreview = document.getElementById('bgrem-cutout-preview');
+        if (cutoutPreview) cutoutPreview.src = '';
+        const bgRemResContent = document.getElementById('bg-remover-result-content');
+        if (bgRemResContent) bgRemResContent.style.display = 'none';
+
         window.clearPasswordError();
         updateFileInfo();
         
@@ -1483,6 +1746,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnPassportStartOver = document.getElementById('btn-passport-start-over');
     if (btnPassportStartOver) {
         btnPassportStartOver.addEventListener('click', () => {
+            btnStartOver.click();
+            const mainCard = document.getElementById('main-card');
+            if (mainCard) mainCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    }
+
+    const btnBgRemStartOver = document.getElementById('btn-bgrem-start-over');
+    if (btnBgRemStartOver) {
+        btnBgRemStartOver.addEventListener('click', () => {
             btnStartOver.click();
             const mainCard = document.getElementById('main-card');
             if (mainCard) mainCard.scrollIntoView({ behavior: 'smooth', block: 'start' });

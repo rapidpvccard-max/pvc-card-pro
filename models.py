@@ -37,6 +37,7 @@ class UserCredits(Base):
     sample_ayushman = Column(Boolean, default=True)       # 1 Free Demo for Ayushman PMJAY Card
     sample_crop = Column(Boolean, default=True)           # 1 Free Demo for Auto Card Cropper (Voter, PAN, e-Shram, DL)
     sample_passport = Column(Boolean, default=True)       # 1 Free Demo for AI Passport Photo Studio
+    sample_bg_remover = Column(Boolean, default=True)     # 1 Free Demo for AI Background Remover
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
     user = relationship("User", back_populates="credits")

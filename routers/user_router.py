@@ -174,13 +174,17 @@ def get_user_credits(current_user: models.User = Depends(auth.get_current_user),
             "sample_aadhaar": True,
             "sample_aadhaar_color": True,
             "sample_ayushman": True,
-            "sample_crop": True
+            "sample_crop": True,
+            "sample_passport": True,
+            "sample_bg_remover": True
         }
     sample_aadhaar = bool(getattr(credits, "sample_aadhaar", True))
     sample_aadhaar_color = bool(getattr(credits, "sample_aadhaar_color", True))
     sample_ayushman = bool(getattr(credits, "sample_ayushman", True))
     sample_crop = bool(getattr(credits, "sample_crop", True))
-    has_any = sample_aadhaar or sample_aadhaar_color or sample_ayushman or sample_crop
+    sample_passport = bool(getattr(credits, "sample_passport", True))
+    sample_bg_remover = bool(getattr(credits, "sample_bg_remover", True))
+    has_any = sample_aadhaar or sample_aadhaar_color or sample_ayushman or sample_crop or sample_passport or sample_bg_remover
     return {
         "wallet_balance": credits.wallet_balance, 
         "total_generated": credits.total_generated,
@@ -189,7 +193,9 @@ def get_user_credits(current_user: models.User = Depends(auth.get_current_user),
         "sample_aadhaar": sample_aadhaar,
         "sample_aadhaar_color": sample_aadhaar_color,
         "sample_ayushman": sample_ayushman,
-        "sample_crop": sample_crop
+        "sample_crop": sample_crop,
+        "sample_passport": sample_passport,
+        "sample_bg_remover": sample_bg_remover
     }
 
 @router.post("/update-profile")
