@@ -821,6 +821,34 @@ document.addEventListener('DOMContentLoaded', () => {
             const file = fileInput.files[0];
             const currentDocType = (document.getElementById('selected-document-type')?.value || 'aadhaar').toLowerCase();
             
+            if (currentDocType === 'bg_remover' || currentDocType === 'bgremover' || currentDocType === 'bg-remover') {
+                const isImg = file.type.startsWith('image/') || /\.(png|jpe?g|webp|bmp|tiff)$/i.test(file.name);
+                if (!isImg) {
+                    window.showToast('Please select a valid image file (JPG, PNG, WEBP).', 'error');
+                    fileInput.value = '';
+                    fileDropArea.classList.remove('has-file');
+                    fileInfo.style.display = 'none';
+                    uploadBtn.disabled = true;
+                    return;
+                }
+                const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                if (file.size > 15 * 1024 * 1024) {
+                    window.showToast('Image size is larger than the 15 MB limit.', 'error');
+                    fileInput.value = '';
+                    fileDropArea.classList.remove('has-file');
+                    fileInfo.style.display = 'none';
+                    uploadBtn.disabled = true;
+                    return;
+                }
+                filenameDisplay.textContent = file.name;
+                filesizeDisplay.textContent = `${fileSizeMB} MB • Image Ready 🪄`;
+                fileDropArea.classList.add('has-file');
+                Array.from(fileDropArea.children).forEach(c => { if(c.tagName !== 'INPUT') c.style.display = 'none'; });
+                fileInfo.style.display = 'flex';
+                uploadBtn.disabled = false;
+                return;
+            }
+
             if (currentDocType === 'passport') {
                 const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
                 const isImg = file.type.startsWith('image/') || /\.(png|jpe?g|webp|bmp)$/i.test(file.name);

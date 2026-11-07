@@ -109,3 +109,4 @@ def process_background_removal(
         "processing_time_sec": round(proc_time, 2),
         "bg_color": clean_color_name
     }
+

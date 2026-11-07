@@ -865,7 +865,15 @@
                 if (bannerDesc) bannerDesc.textContent = `Aap bina kisi recharge ke 1 Sample ${cardName} bana kar print quality test kar sakte hain (Watermark included).`;
                 if (bannerBadge) bannerBadge.textContent = '1 Free Demo';
                 
-                if (btnGenText) btnGenText.textContent = `✨ Generate Free ${cardName} Sample (Demo)`;
+                if (btnGenText) {
+                    if (active === 'bg_remover') {
+                        btnGenText.textContent = `✨ Remove Background (Demo Free Trial)`;
+                    } else if (active === 'passport') {
+                        btnGenText.textContent = `✨ Generate Free Passport Photo Sample (Demo)`;
+                    } else {
+                        btnGenText.textContent = `✨ Generate Free ${cardName} Sample (Demo)`;
+                    }
+                }
                 if (btnSubmitCrop) {
                     const span = btnSubmitCrop.querySelector('span');
                     if (span) span.textContent = `✨ Crop & Generate Free ${cardName} Sample (Demo)`;
@@ -881,6 +889,8 @@
                 if (btnGenText) {
                     if (active === 'passport') {
                         btnGenText.textContent = 'Generate Passport Photos (-₹' + rate + ')';
+                    } else if (active === 'bg_remover') {
+                        btnGenText.textContent = 'Remove Background (-₹' + rate + ')';
                     } else {
                         btnGenText.textContent = 'Generate PVC Card (-₹' + rate + ')';
                     }
@@ -895,6 +905,8 @@
                     rateBadge.style.borderColor = '#a7f3d0';
                     if (active === 'passport') {
                         rateBadge.innerHTML = '⚡ Rate: ₹' + rate + ' / Print Sheet';
+                    } else if (active === 'bg_remover') {
+                        rateBadge.innerHTML = '⚡ Rate: ₹' + rate + ' / Cutout';
                     } else {
                         rateBadge.innerHTML = '⚡ Rate: ₹' + rate + ' / Card';
                     }
