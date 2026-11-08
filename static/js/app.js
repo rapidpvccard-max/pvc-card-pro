@@ -1774,7 +1774,11 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Resume generation error:", err);
             if (processingSection) processingSection.style.display = 'none';
             uploadSection.style.display = 'block';
-            window.showToast(err.message || 'Error generating resume', 'error');
+            let errMsg = err.message || 'Error generating resume';
+            if (errMsg.includes('NetworkError') || errMsg.includes('Failed to fetch') || errMsg.includes('Load failed')) {
+                errMsg = 'Server offline ya connect nahi ho raha hai. Please ensure server (port 8000) is running.';
+            }
+            window.showToast(errMsg, 'error');
         } finally {
             isResumeSubmitting = false;
         }
@@ -1792,7 +1796,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (uploadBtn) {
         uploadBtn.addEventListener('click', (e) => {
             const currentDocType = (document.getElementById('selected-document-type')?.value || 'aadhaar').toLowerCase();
-            if (currentDocType === 'passport') {
+            if (currentDocType === 'resume') {
+                e.preventDefault();
+                handleResumeSubmit();
+            } else if (currentDocType === 'passport') {
                 e.preventDefault();
                 handlePassportPhotoSubmit();
             } else if (currentDocType === 'bg_remover' || currentDocType === 'bgremover' || currentDocType === 'bg-remover') {
@@ -1805,12 +1812,13 @@ document.addEventListener('DOMContentLoaded', () => {
     uploadForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        if (fileInput.files.length === 0) {
-            window.showToast('Please select a file to upload.', 'warning');
+        const docType = (document.getElementById('selected-document-type')?.value || 'aadhaar').toLowerCase();
+
+        // AI Smart Resume / CV Maker Pipeline
+        if (docType === 'resume') {
+            await handleResumeSubmit();
             return;
         }
-
-        const docType = (document.getElementById('selected-document-type')?.value || 'aadhaar').toLowerCase();
 
         // AI Background Remover Pipeline
         if (docType === 'bg_remover' || docType === 'bgremover' || docType === 'bg-remover') {
@@ -1821,6 +1829,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // AI Passport Photo Studio Pipeline
         if (docType === 'passport') {
             await handlePassportPhotoSubmit();
+            return;
+        }
+
+        if (fileInput.files.length === 0) {
+            window.showToast('Please select a file to upload.', 'warning');
             return;
         }
 
