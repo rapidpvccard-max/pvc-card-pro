@@ -1442,7 +1442,7 @@ async def generate_bg_remover(
     file: UploadFile = File(...),
     bg_color: str = Form("transparent"),
     custom_hex: Optional[str] = Form(None),
-    precision: str = Form("studio"),
+    precision: str = Form("turbo"),
     current_user: models.User = Depends(auth.get_current_user),
     db: Session = Depends(database.get_db)
 ):
