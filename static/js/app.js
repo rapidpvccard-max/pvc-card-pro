@@ -1406,6 +1406,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resPhotoPreview = document.getElementById('res-photo-preview');
     const resPhotoEmpty = document.getElementById('res-photo-empty');
     const btnRemoveResPhoto = document.getElementById('btn-remove-res-photo');
+    const chkIncludePhoto = document.getElementById('chk-include-photo');
 
     if (resPhotoFile) {
         resPhotoFile.addEventListener('change', (e) => {
@@ -1419,6 +1420,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     if (resPhotoEmpty) resPhotoEmpty.style.display = 'none';
                     if (btnRemoveResPhoto) btnRemoveResPhoto.style.display = 'inline-block';
+                    if (chkIncludePhoto) chkIncludePhoto.checked = true;
                 };
                 reader.readAsDataURL(file);
             }
@@ -1434,6 +1436,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 resPhotoPreview.style.display = 'none';
             }
             if (resPhotoEmpty) resPhotoEmpty.style.display = 'block';
+            if (chkIncludePhoto) chkIncludePhoto.checked = false;
             btnRemoveResPhoto.style.display = 'none';
         });
     }
@@ -1660,8 +1663,13 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('declaration_date', document.getElementById('res-date')?.value?.trim() || '');
         formData.append('template_style', theme);
 
+        const chkIncludePhotoEl = document.getElementById('chk-include-photo');
         const photoInput = document.getElementById('res-photo-file');
-        if (photoInput && photoInput.files && photoInput.files[0]) {
+        const hasPhoto = Boolean(photoInput && photoInput.files && photoInput.files[0]);
+        const shouldIncludePhoto = Boolean(hasPhoto && chkIncludePhotoEl && chkIncludePhotoEl.checked);
+
+        formData.append('include_photo', shouldIncludePhoto ? 'true' : 'false');
+        if (shouldIncludePhoto) {
             formData.append('photo', photoInput.files[0]);
         }
 

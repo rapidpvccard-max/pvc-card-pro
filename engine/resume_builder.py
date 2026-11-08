@@ -207,23 +207,23 @@ def generate_resume_html(data: Dict[str, Any], photo_b64: str = "", is_sample: b
                 experience_html += f"<div style='font-size: 10.5pt; color: #374151; margin-top: 1px;'>{desc}</div>"
             experience_html += "</li>"
 
-    # Photo Box HTML
+    # Photo Box HTML (Only include if photo provided and include_photo is True)
+    include_photo = data.get("include_photo")
+    if include_photo is None:
+        include_photo = bool(photo_b64)
+    elif isinstance(include_photo, str):
+        include_photo = include_photo.lower() not in ("0", "false", "no", "off")
+
     photo_box_html = ""
-    if photo_b64:
+    if photo_b64 and include_photo:
         photo_box_html = f"""
         <div class="photo-wrapper">
             <img src="{photo_b64}" alt="Profile Photo" class="photo-img">
         </div>
         """
     else:
-        # Subtle cyber-cafe blank photo placeholder box
-        photo_box_html = """
-        <div class="photo-wrapper photo-placeholder">
-            <div style="font-size: 8pt; color: #94a3b8; text-align: center; text-transform: uppercase;">
-                Affix Photo<br>Here
-            </div>
-        </div>
-        """
+        # User requested NO PHOTO or did not upload a photo -> NO placeholder box!
+        photo_box_html = ""
 
     # Sample Watermark HTML
     watermark_html = ""
@@ -290,29 +290,47 @@ def generate_resume_html(data: Dict[str, Any], photo_b64: str = "", is_sample: b
         flex: 1;
     }}
     .candidate-name {{
-        font-size: 15.5pt;
+        font-size: 16pt;
         font-weight: 800;
         letter-spacing: 0.5px;
         color: {primary_color};
         margin: 0 0 2px 0;
         text-transform: uppercase;
+        line-height: 1.2;
     }}
     .candidate-role {{
-        font-size: 10.5pt;
+        font-size: 10pt;
         font-weight: 700;
-        color: #374151;
-        margin-bottom: 4px;
+        color: #4b5563;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }}
-    .bio-line {{
+    .header-contact-table {{
+        border-collapse: collapse;
         font-size: 9.5pt;
-        color: #1f2937;
-        margin: 1.5px 0;
-        line-height: 1.3;
+        line-height: 1.35;
+        margin-top: 2px;
     }}
-    .bio-line strong {{
+    .header-contact-table td {{
+        padding: 1.5px 0;
+        vertical-align: top;
+    }}
+    .header-contact-table td.h-label {{
+        font-weight: 700;
         color: #111827;
-        display: inline-block;
-        width: 75px;
+        width: 68px;
+        white-space: nowrap;
+    }}
+    .header-contact-table td.h-colon {{
+        font-weight: 700;
+        color: #111827;
+        width: 14px;
+        text-align: center;
+        padding-right: 4px;
+    }}
+    .header-contact-table td.h-val {{
+        color: #1f2937;
     }}
     
     /* Passport Photo Box */
@@ -484,9 +502,11 @@ def generate_resume_html(data: Dict[str, Any], photo_b64: str = "", is_sample: b
         <div class="header-bio">
             <h1 class="candidate-name">{html.escape(full_name)}</h1>
             {"<div class='candidate-role'>" + html.escape(job_title) + "</div>" if job_title else ""}
-            <div class="bio-line"><strong>Address:</strong> {html.escape(address)}</div>
-            <div class="bio-line"><strong>Mobile:</strong> {html.escape(mobile)}</div>
-            {"<div class='bio-line'><strong>Email:</strong> " + html.escape(email) + "</div>" if email else ""}
+            <table class="header-contact-table">
+                {"<tr><td class='h-label'>Address</td><td class='h-colon'>:</td><td class='h-val'>" + html.escape(address) + "</td></tr>" if address else ""}
+                {"<tr><td class='h-label'>Mobile</td><td class='h-colon'>:</td><td class='h-val'>" + html.escape(mobile) + "</td></tr>" if mobile else ""}
+                {"<tr><td class='h-label'>Email</td><td class='h-colon'>:</td><td class='h-val'>" + html.escape(email) + "</td></tr>" if email else ""}
+            </table>
         </div>
         {photo_box_html}
     </div>
@@ -631,3 +651,4 @@ def build_resume_document(
         "height": preview_h,
         "is_sample": is_sample
     }
+

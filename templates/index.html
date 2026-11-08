@@ -1859,16 +1859,20 @@
 
                             <!-- Right Photo Upload Box -->
                             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                                <label for="res-photo-file" style="cursor: pointer; width: 110px; height: 135px; border: 2px dashed #94a3b8; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f8fafc; overflow: hidden; position: relative; transition: all 0.2s;" id="res-photo-box">
+                                <label for="res-photo-file" style="cursor: pointer; width: 110px; height: 135px; border: 2px dashed #94a3b8; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f8fafc; overflow: hidden; position: relative; transition: all 0.2s;" id="res-photo-box" title="Click to upload optional passport photo">
                                     <img id="res-photo-preview" src="" alt="Photo" style="display: none; width: 100%; height: 100%; object-fit: cover;">
                                     <div id="res-photo-empty" style="text-align: center; padding: 6px;">
                                         <span style="font-size: 1.5rem; display: block; margin-bottom: 4px;">📷</span>
-                                        <span style="font-size: 0.7rem; font-weight: 700; color: #475569; line-height: 1.2; display: block;">Upload Photo</span>
-                                        <span style="font-size: 0.62rem; color: #94a3b8;">(Optional)</span>
+                                        <span style="font-size: 0.72rem; font-weight: 700; color: #475569; line-height: 1.2; display: block;">Upload Photo</span>
+                                        <span style="font-size: 0.64rem; color: #94a3b8;">(Optional)</span>
                                     </div>
                                 </label>
                                 <input type="file" id="res-photo-file" accept="image/*" style="display: none;">
-                                <button type="button" id="btn-remove-res-photo" style="display: none; margin-top: 6px; background: none; border: none; font-size: 0.72rem; color: #ef4444; font-weight: 700; cursor: pointer;">✕ Remove Photo</button>
+                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; margin-top: 6px; font-size: 0.72rem; font-weight: 700; color: #475569;" title="Uncheck to exclude photo completely from final PDF">
+                                    <input type="checkbox" id="chk-include-photo" style="accent-color: #4f46e5; cursor: pointer;">
+                                    <span>Print Photo</span>
+                                </label>
+                                <button type="button" id="btn-remove-res-photo" style="display: none; margin-top: 4px; background: none; border: none; font-size: 0.72rem; color: #ef4444; font-weight: 700; cursor: pointer;">✕ Remove Photo</button>
                             </div>
                         </div>
                     </div>
@@ -2611,5 +2615,5 @@ Tally ERP 9 & Accounting Fundamentals</textarea>
         input.type = input.type === 'password' ? 'text' : 'password';
     }
 </script>
-<script src="/static/js/app.js?v=36"></script>
+<script src="/static/js/app.js?v=37"></script>
 {% endblock %}

@@ -1672,6 +1672,7 @@ async def generate_resume(
     declaration_date: Optional[str] = Form(None),
     declaration_place: Optional[str] = Form(None),
     template_style: Optional[str] = Form("classic"),
+    include_photo: Optional[str] = Form("auto"),
     photo: Optional[UploadFile] = File(None),
     current_user: models.User = Depends(auth.get_current_user),
     db: Session = Depends(database.get_db)
@@ -1740,6 +1741,14 @@ async def generate_resume(
     output_dir = os.path.join("static", "renders", run_id)
     os.makedirs(output_dir, exist_ok=True)
 
+    include_photo_str = (include_photo or "auto").lower()
+    if include_photo_str in ("true", "1", "yes", "on"):
+        include_photo_bool = True
+    elif include_photo_str in ("false", "0", "no", "off"):
+        include_photo_bool = False
+    else:
+        include_photo_bool = bool(photo_bytes and len(photo_bytes) > 0)
+
     data_payload = {
         "full_name": full_name,
         "job_title": job_title,
@@ -1764,6 +1773,7 @@ async def generate_resume(
         "declaration_date": declaration_date,
         "declaration_place": declaration_place,
         "template_style": template_style,
+        "include_photo": include_photo_bool,
     }
 
     try:
