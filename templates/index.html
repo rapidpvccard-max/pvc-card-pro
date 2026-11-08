@@ -22,7 +22,7 @@
     /* Document Type Selector Tabs */
     .doc-type-selector-bar {
         display: grid;
-        grid-template-columns: repeat(6, minmax(0, 1fr));
+        grid-template-columns: repeat(7, minmax(0, 1fr));
         gap: 8px;
         margin-bottom: 20px;
         align-items: stretch;
@@ -52,6 +52,29 @@
         background: #ecfeff !important;
         color: #0891b2 !important;
         border-color: #a5f3fc !important;
+    }
+
+    .doc-type-btn.resume-tab .doc-tab-icon {
+        background: #eef2ff;
+        color: #4f46e5;
+    }
+
+    .doc-type-btn.active.resume-tab {
+        border-color: #6366f1;
+        background: linear-gradient(135deg, #eef2ff 0%, #ffffff 100%);
+        box-shadow: 0 10px 20px -3px rgba(99, 102, 241, 0.2);
+    }
+
+    .doc-type-btn.active.resume-tab .doc-tab-icon {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        color: #ffffff;
+        box-shadow: 0 6px 14px rgba(99, 102, 241, 0.35);
+    }
+
+    .doc-type-btn.active.resume-tab .doc-tab-badge {
+        background: #eef2ff !important;
+        color: #4f46e5 !important;
+        border-color: #c7d2fe !important;
     }
 
     .doc-type-btn {
@@ -1133,6 +1156,19 @@
                 <div class="doc-tab-subtitle">Instant HD Cutout</div>
             </div>
         </button>
+
+        <button type="button" class="doc-type-btn resume-tab" id="doc-btn-resume" onclick="setDocumentType('resume')">
+            <div class="doc-tab-top">
+                <div class="doc-tab-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+                </div>
+                <span class="doc-tab-badge" id="badge-tab-resume" style="background: #eef2ff; color: #4f46e5; border: 1px solid #c7d2fe;">New 📄</span>
+            </div>
+            <div class="doc-tab-content">
+                <div class="doc-tab-title">AI Resume Maker</div>
+                <div class="doc-tab-subtitle">1-Click Job-Ready CV</div>
+            </div>
+        </button>
     </div>
 </div>
 
@@ -1736,6 +1772,329 @@
                     </div>
                 </div>
 
+                <!-- Dedicated AI Smart Resume / CV Maker Builder Container -->
+                <div id="resume-builder-container" style="display: none; background: #ffffff; border: 1.5px solid #c7d2fe; border-radius: 20px; padding: 22px; margin-bottom: 22px; box-shadow: 0 10px 30px -5px rgba(99, 102, 241, 0.1); min-width: 0; max-width: 100%; box-sizing: border-box;">
+                    
+                    <!-- Header -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; border-bottom: 1px solid #e0e7ff; padding-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.25rem; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);">
+                                📄
+                            </div>
+                            <div>
+                                <h4 style="margin: 0; font-size: 1.12rem; font-weight: 800; color: #0f172a; font-family: 'Plus Jakarta Sans', sans-serif;">AI Smart Resume / CV Maker</h4>
+                                <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: #64748b;">Instant 1-Click Job-Ready Indian CV • 300 DPI Vector A4 PDF & Preview</p>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="background: #eef2ff; color: #4338ca; font-size: 0.74rem; font-weight: 800; padding: 4px 12px; border-radius: 14px; border: 1px solid #c7d2fe; white-space: nowrap;">
+                                Single-Page A4 Guaranteed
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Theme / Style Selector -->
+                    <div style="margin-bottom: 20px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 12px 16px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+                            <label style="font-size: 0.82rem; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.5px; margin: 0;">
+                                🎨 Choose Resume Template Theme:
+                            </label>
+                            <span style="font-size: 0.75rem; color: #64748b;">Cyber-Cafe & Official Job Format</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;">
+                            <label class="resume-theme-card active" data-theme="classic" style="cursor: pointer; border: 2px solid #4f46e5; background: #eef2ff; border-radius: 12px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; transition: all 0.2s;">
+                                <input type="radio" name="resume_theme" value="classic" checked style="accent-color: #4f46e5;">
+                                <div>
+                                    <div style="font-size: 0.86rem; font-weight: 800; color: #312e81;">Classic Executive ⭐</div>
+                                    <div style="font-size: 0.72rem; color: #4338ca;">Standard Black & White / Sarkari</div>
+                                </div>
+                            </label>
+                            <label class="resume-theme-card" data-theme="modern" style="cursor: pointer; border: 2px solid #e2e8f0; background: #ffffff; border-radius: 12px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; transition: all 0.2s;">
+                                <input type="radio" name="resume_theme" value="modern" style="accent-color: #4f46e5;">
+                                <div>
+                                    <div style="font-size: 0.86rem; font-weight: 800; color: #334155;">Modern Blue</div>
+                                    <div style="font-size: 0.72rem; color: #64748b;">Corporate Navy Accent</div>
+                                </div>
+                            </label>
+                            <label class="resume-theme-card" data-theme="minimal" style="cursor: pointer; border: 2px solid #e2e8f0; background: #ffffff; border-radius: 12px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; transition: all 0.2s;">
+                                <input type="radio" name="resume_theme" value="minimal" style="accent-color: #4f46e5;">
+                                <div>
+                                    <div style="font-size: 0.86rem; font-weight: 800; color: #334155;">Minimal Slate</div>
+                                    <div style="font-size: 0.72rem; color: #64748b;">Clean Contemporary Typography</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 1. Personal Information & Photo Section -->
+                    <div style="margin-bottom: 20px; background: #fdfefe; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 16px;">
+                        <div style="font-size: 0.92rem; font-weight: 800; color: #1e293b; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                            <span>👤</span> 1. Personal Details & Passport Photo
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 140px; gap: 16px; align-items: start;">
+                            <!-- Left Fields Grid -->
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                                <div>
+                                    <label style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Full Name <span style="color: #ef4444;">*</span></label>
+                                    <input type="text" id="res-full-name" placeholder="e.g. SACHIN KUMAR" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; font-weight: 700; text-transform: uppercase;">
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Job Title / Designation</label>
+                                    <input type="text" id="res-job-title" placeholder="e.g. Computer Operator / Data Entry" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; font-weight: 600;">
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Mobile Number <span style="color: #ef4444;">*</span></label>
+                                    <input type="text" id="res-mobile" placeholder="+91 98XXXXXXXX" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; font-weight: 600;">
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Email Address</label>
+                                    <input type="email" id="res-email" placeholder="e.g. sachin.kumar@gmail.com" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem;">
+                                </div>
+                                <div style="grid-column: 1 / -1;">
+                                    <label style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Full Address <span style="color: #ef4444;">*</span></label>
+                                    <input type="text" id="res-address" placeholder="H.No., Gali No., Landmark, City, State - PIN Code" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem;">
+                                </div>
+                            </div>
+
+                            <!-- Right Photo Upload Box -->
+                            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <label for="res-photo-file" style="cursor: pointer; width: 110px; height: 135px; border: 2px dashed #94a3b8; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f8fafc; overflow: hidden; position: relative; transition: all 0.2s;" id="res-photo-box">
+                                    <img id="res-photo-preview" src="" alt="Photo" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+                                    <div id="res-photo-empty" style="text-align: center; padding: 6px;">
+                                        <span style="font-size: 1.5rem; display: block; margin-bottom: 4px;">📷</span>
+                                        <span style="font-size: 0.7rem; font-weight: 700; color: #475569; line-height: 1.2; display: block;">Upload Photo</span>
+                                        <span style="font-size: 0.62rem; color: #94a3b8;">(Optional)</span>
+                                    </div>
+                                </label>
+                                <input type="file" id="res-photo-file" accept="image/*" style="display: none;">
+                                <button type="button" id="btn-remove-res-photo" style="display: none; margin-top: 6px; background: none; border: none; font-size: 0.72rem; color: #ef4444; font-weight: 700; cursor: pointer;">✕ Remove Photo</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Career Objective Section -->
+                    <div style="margin-bottom: 20px; background: #fdfefe; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 16px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                            <div style="font-size: 0.92rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                                <span>🎯</span> 2. Career Objective
+                            </div>
+                            <span style="font-size: 0.74rem; color: #64748b;">⚡ 1-Click Cyber Cafe Presets:</span>
+                        </div>
+
+                        <!-- Quick 1-Click Objective Chips -->
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
+                            <button type="button" class="btn-res-obj-preset" data-preset="fresher" style="background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; border-radius: 20px; padding: 4px 10px; font-size: 0.74rem; font-weight: 700; cursor: pointer;">✨ Fresher / Entry Level</button>
+                            <button type="button" class="btn-res-obj-preset" data-preset="computer_operator" style="background: #ecfeff; color: #0e7490; border: 1px solid #a5f3fc; border-radius: 20px; padding: 4px 10px; font-size: 0.74rem; font-weight: 700; cursor: pointer;">💻 Computer Operator</button>
+                            <button type="button" class="btn-res-obj-preset" data-preset="accountant" style="background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; border-radius: 20px; padding: 4px 10px; font-size: 0.74rem; font-weight: 700; cursor: pointer;">📊 Accountant / Tally</button>
+                            <button type="button" class="btn-res-obj-preset" data-preset="sales" style="background: #fefce8; color: #854d0e; border: 1px solid #fef08a; border-radius: 20px; padding: 4px 10px; font-size: 0.74rem; font-weight: 700; cursor: pointer;">🎯 Sales & Marketing</button>
+                            <button type="button" class="btn-res-obj-preset" data-preset="office_assistant" style="background: #fdf2f8; color: #be185d; border: 1px solid #fbcfe8; border-radius: 20px; padding: 4px 10px; font-size: 0.74rem; font-weight: 700; cursor: pointer;">🏢 Office Assistant</button>
+                        </div>
+
+                        <textarea id="res-objective" rows="3" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.86rem; line-height: 1.4; resize: vertical;" placeholder="Enter career objective...">To obtain a challenging and rewarding position in an organization where I can utilize my skills and educational background to contribute to company growth while continuously expanding my knowledge and capabilities.</textarea>
+                    </div>
+
+                    <!-- 3. Academic Qualifications Table -->
+                    <div style="margin-bottom: 20px; background: #fdfefe; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 16px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                            <div style="font-size: 0.92rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                                <span>🎓</span> 3. Academic Qualifications (Tabular Layout)
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <button type="button" id="btn-add-qual-row" style="background: #4f46e5; color: #ffffff; border: none; border-radius: 8px; padding: 5px 12px; font-size: 0.76rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                    + Add Row
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Qualifications Table -->
+                        <div style="overflow-x: auto;">
+                            <table id="tbl-qualifications" style="width: 100%; border-collapse: collapse; font-size: 0.84rem;">
+                                <thead>
+                                    <tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1;">
+                                        <th style="padding: 8px; text-align: center; width: 40px; font-weight: 700;">#</th>
+                                        <th style="padding: 8px; text-align: left; font-weight: 700;">Degree / Exam</th>
+                                        <th style="padding: 8px; text-align: left; font-weight: 700;">Board / University</th>
+                                        <th style="padding: 8px; text-align: center; width: 100px; font-weight: 700;">Year</th>
+                                        <th style="padding: 8px; text-align: center; width: 110px; font-weight: 700;">% / Grade</th>
+                                        <th style="padding: 8px; text-align: center; width: 45px; font-weight: 700;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbl-qual-body">
+                                    <!-- Pre-populated default Indian rows -->
+                                    <tr>
+                                        <td style="padding: 6px; text-align: center; font-weight: 700;">1</td>
+                                        <td style="padding: 6px;"><input type="text" class="qual-degree" value="10th" placeholder="10th" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px;"></td>
+                                        <td style="padding: 6px;"><input type="text" class="qual-board" value="CBSE Board" placeholder="CBSE / State Board" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px;"></td>
+                                        <td style="padding: 6px;"><input type="text" class="qual-year" value="2016" placeholder="2016" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;"></td>
+                                        <td style="padding: 6px;"><input type="text" class="qual-pct" value="68%" placeholder="68%" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;"></td>
+                                        <td style="padding: 6px; text-align: center;"><button type="button" class="btn-del-qual-row" style="background: none; border: none; color: #ef4444; font-size: 1rem; cursor: pointer;">🗑️</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 6px; text-align: center; font-weight: 700;">2</td>
+                                        <td style="padding: 6px;"><input type="text" class="qual-degree" value="12th" placeholder="12th" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px;"></td>
+                                        <td style="padding: 6px;"><input type="text" class="qual-board" value="CBSE Board" placeholder="CBSE / State Board" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px;"></td>
+                                        <td style="padding: 6px;"><input type="text" class="qual-year" value="2018" placeholder="2018" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;"></td>
+                                        <td style="padding: 6px;"><input type="text" class="qual-pct" value="72%" placeholder="72%" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;"></td>
+                                        <td style="padding: 6px; text-align: center;"><button type="button" class="btn-del-qual-row" style="background: none; border: none; color: #ef4444; font-size: 1rem; cursor: pointer;">🗑️</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 6px; text-align: center; font-weight: 700;">3</td>
+                                        <td style="padding: 6px;"><input type="text" class="qual-degree" value="B.Com" placeholder="B.Com / B.A / B.Sc" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px;"></td>
+                                        <td style="padding: 6px;"><input type="text" class="qual-board" value="Delhi University" placeholder="University Name" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px;"></td>
+                                        <td style="padding: 6px;"><input type="text" class="qual-year" value="2021" placeholder="2021" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;"></td>
+                                        <td style="padding: 6px;"><input type="text" class="qual-pct" value="65%" placeholder="65%" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;"></td>
+                                        <td style="padding: 6px; text-align: center;"><button type="button" class="btn-del-qual-row" style="background: none; border: none; color: #ef4444; font-size: 1rem; cursor: pointer;">🗑️</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 4. Other Qualifications & Technical Skills -->
+                    <div style="margin-bottom: 20px; background: #fdfefe; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 16px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                            <div style="font-size: 0.92rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                                <span>🛠️</span> 4. Technical / Computer Skills & Certifications
+                            </div>
+                            <span style="font-size: 0.74rem; color: #64748b;">(One skill per line)</span>
+                        </div>
+
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
+                            <button type="button" class="btn-add-skill-chip" data-skill="Basic Knowledge of Computer (MS Word, Excel, PowerPoint & Internet)" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 20px; padding: 4px 10px; font-size: 0.74rem; font-weight: 700; cursor: pointer;">+ MS Office & Internet</button>
+                            <button type="button" class="btn-add-skill-chip" data-skill="Typing Speed: English 35 WPM / Hindi 30 WPM" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 20px; padding: 4px 10px; font-size: 0.74rem; font-weight: 700; cursor: pointer;">+ Typing 35 WPM</button>
+                            <button type="button" class="btn-add-skill-chip" data-skill="Tally ERP 9 / Tally Prime & GST Billing" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 20px; padding: 4px 10px; font-size: 0.74rem; font-weight: 700; cursor: pointer;">+ Tally ERP / Prime</button>
+                            <button type="button" class="btn-add-skill-chip" data-skill="Photoshop & CorelDraw Graphic Design" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 20px; padding: 4px 10px; font-size: 0.74rem; font-weight: 700; cursor: pointer;">+ Graphic Design</button>
+                            <button type="button" class="btn-add-skill-chip" data-skill="Computer Hardware & Networking Fundamentals" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 20px; padding: 4px 10px; font-size: 0.74rem; font-weight: 700; cursor: pointer;">+ Hardware/Network</button>
+                        </div>
+
+                        <textarea id="res-skills" rows="3" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.86rem; line-height: 1.4; resize: vertical;" placeholder="Enter skills (one per line)...">Basic Knowledge of Computer (MS Office, MS Word, Excel, PowerPoint & Internet)
+Typing Speed: English 35 WPM / Hindi 30 WPM
+Tally ERP 9 & Accounting Fundamentals</textarea>
+                    </div>
+
+                    <!-- 5. Work Experience Section -->
+                    <div style="margin-bottom: 20px; background: #fdfefe; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 16px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                            <div style="font-size: 0.92rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                                <span>💼</span> 5. Work Experience
+                            </div>
+                            <div style="display: flex; gap: 12px;">
+                                <label style="font-size: 0.82rem; font-weight: 700; color: #334155; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                                    <input type="radio" name="res_exp_type" value="fresher" checked style="accent-color: #4f46e5;"> Fresher
+                                </label>
+                                <label style="font-size: 0.82rem; font-weight: 700; color: #334155; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                                    <input type="radio" name="res_exp_type" value="experienced" style="accent-color: #4f46e5;"> Experienced
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Fresher Note -->
+                        <div id="res-exp-fresher-box" style="padding: 10px 14px; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1; font-size: 0.84rem; color: #475569;">
+                            ✅ <strong>Fresher Selected:</strong> Resume me auto-statement print hoga: <em>"Fresher — Ready to learn, adaptable, and enthusiastic to contribute to organizational success."</em>
+                        </div>
+
+                        <!-- Experienced Dynamic Form -->
+                        <div id="res-exp-experienced-box" style="display: none; margin-top: 10px;">
+                            <div id="res-exp-rows-container" style="display: flex; flex-direction: column; gap: 12px;">
+                                <div class="exp-item-card" style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px;">
+                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 8px;">
+                                        <div>
+                                            <label style="display: block; font-size: 0.74rem; font-weight: 700; color: #475569; margin-bottom: 2px;">Company / Organization Name</label>
+                                            <input type="text" class="exp-company" placeholder="e.g. XYZ Pvt. Ltd., New Delhi" style="width: 100%; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.84rem;">
+                                        </div>
+                                        <div>
+                                            <label style="display: block; font-size: 0.74rem; font-weight: 700; color: #475569; margin-bottom: 2px;">Designation / Role</label>
+                                            <input type="text" class="exp-role" placeholder="e.g. Computer Operator" style="width: 100%; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.84rem;">
+                                        </div>
+                                        <div>
+                                            <label style="display: block; font-size: 0.74rem; font-weight: 700; color: #475569; margin-bottom: 2px;">Duration / Time Period</label>
+                                            <input type="text" class="exp-duration" placeholder="e.g. 2 Years (June 2022 - Present)" style="width: 100%; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.84rem;">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.74rem; font-weight: 700; color: #475569; margin-bottom: 2px;">Job Description / Key Responsibilities (Optional)</label>
+                                        <input type="text" class="exp-desc" placeholder="e.g. Handled daily data entry, customer documentation & reports" style="width: 100%; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.84rem;">
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" id="btn-add-exp-row" style="margin-top: 10px; background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; border-radius: 8px; padding: 6px 12px; font-size: 0.76rem; font-weight: 700; cursor: pointer;">
+                                + Add Another Experience
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 6. Personal Information / Biodata -->
+                    <div style="margin-bottom: 20px; background: #fdfefe; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 16px;">
+                        <div style="font-size: 0.92rem; font-weight: 800; color: #1e293b; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                            <span>📋</span> 6. Personal Information / Biodata
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                            <div>
+                                <label style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Father's Name</label>
+                                <input type="text" id="res-father-name" placeholder="e.g. Sh. Pramod Kumar" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.86rem; font-weight: 600;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Date of Birth (DOB)</label>
+                                <input type="text" id="res-dob" placeholder="DD/MM/YYYY (e.g. 27/08/1999)" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.86rem; font-weight: 600;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Gender</label>
+                                <select id="res-gender" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.86rem; font-weight: 600; background: #ffffff;">
+                                    <option value="Male" selected>Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Marital Status</label>
+                                <select id="res-marital-status" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.86rem; font-weight: 600; background: #ffffff;">
+                                    <option value="Unmarried" selected>Unmarried</option>
+                                    <option value="Married">Married</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Languages Known</label>
+                                <input type="text" id="res-languages" value="Hindi & English" placeholder="e.g. Hindi & English" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.86rem; font-weight: 600;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Nationality</label>
+                                <input type="text" id="res-nationality" value="Indian" placeholder="Indian" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.86rem; font-weight: 600;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 7. Declaration & Signatory Section -->
+                    <div style="margin-bottom: 22px; background: #fdfefe; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 16px;">
+                        <div style="font-size: 0.92rem; font-weight: 800; color: #1e293b; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                            <span>✍️</span> 7. Declaration, Date & Place
+                        </div>
+
+                        <div style="margin-bottom: 12px;">
+                            <label style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Declaration Statement</label>
+                            <input type="text" id="res-declaration-text" value="I hereby declare that all the information mentioned above is true and correct to the best of my knowledge and belief." style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.84rem;">
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div>
+                                <label style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Place / City</label>
+                                <input type="text" id="res-place" placeholder="e.g. New Delhi" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.86rem; font-weight: 600;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Date</label>
+                                <input type="text" id="res-date" placeholder="DD/MM/YYYY" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.86rem; font-weight: 600;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Submit Button -->
+                    <button type="button" class="btn-generate-main" id="btn-generate-resume" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); border: none; border-radius: 14px; font-size: 1.05rem; font-weight: 800; color: #ffffff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 8px 24px -4px rgba(79, 70, 229, 0.45); transition: all 0.2s;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+                        <span id="btn-resume-text">Generate Job-Ready Resume PDF (-₹0.95)</span>
+                    </button>
+                </div>
+
                 <!-- Submit Button -->
                 <button type="submit" class="btn-generate-main" id="upload-btn" disabled>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
@@ -2002,6 +2361,70 @@
 
                 </div>
             </div>
+            <!-- AI Smart Resume / CV Result Content -->
+            <div id="resume-result-content" style="display: none; margin-bottom: 32px;">
+                <div style="background: #ffffff; border: 1.5px solid #c7d2fe; border-radius: 20px; padding: 24px; box-shadow: 0 10px 30px -5px rgba(99, 102, 241, 0.12);">
+                    
+                    <!-- Header -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid #e0e7ff; flex-wrap: wrap; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 1.35rem;">📄</span>
+                            <div>
+                                <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #0f172a; font-family: 'Plus Jakarta Sans', sans-serif;">Job-Ready Resume PDF Generated!</h3>
+                                <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: #64748b;">Vector-crisp 300 DPI A4 document ready for printing or job submission.</p>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span id="res-badge-size" style="background: #eef2ff; color: #4338ca; font-size: 0.76rem; font-weight: 800; padding: 4px 12px; border-radius: 12px; border: 1px solid #c7d2fe;">
+                                A4 Single Page (300 DPI)
+                            </span>
+                            <span id="res-badge-pages" style="background: #f1f5f9; color: #475569; font-size: 0.76rem; font-weight: 700; padding: 4px 10px; border-radius: 12px;">
+                                1 Page Guaranteed
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Document Preview Canvas -->
+                    <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 16px; padding: 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: center; min-height: 480px; max-height: 650px; overflow: auto; box-shadow: inset 0 2px 6px rgba(0,0,0,0.04);">
+                        <img id="resume-preview-img" src="" alt="Resume Document Preview" style="max-height: 600px; max-width: 100%; object-fit: contain; box-shadow: 0 10px 25px rgba(0,0,0,0.18); border: 1px solid #cbd5e1; background: #ffffff;">
+                    </div>
+
+                    <!-- Action Buttons Grid -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 18px;">
+                        <!-- Primary: Download A4 PDF -->
+                        <a id="btn-dl-resume-pdf" href="#" download class="btn-primary" style="justify-content: center; font-size: 0.98rem; padding: 14px 20px; background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); border: none; font-weight: 800; color: #ffffff; text-decoration: none; border-radius: 14px; box-shadow: 0 6px 18px rgba(79, 70, 229, 0.35); display: inline-flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s ease;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            <span>Download Print-Ready A4 PDF</span>
+                        </a>
+
+                        <!-- Secondary: Direct Print -->
+                        <button id="btn-print-resume" type="button" class="btn-primary" style="justify-content: center; font-size: 0.95rem; padding: 14px 20px; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); border: none; font-weight: 800; color: #ffffff; border-radius: 14px; box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35); display: inline-flex; align-items: center; gap: 10px; cursor: pointer;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                            <span>Direct Print PDF</span>
+                        </button>
+
+                        <!-- Tertiary: Download Preview Image (PNG) -->
+                        <a id="btn-dl-resume-img" href="#" download class="btn-outline" style="justify-content: center; font-size: 0.92rem; padding: 14px 20px; border: 1.5px solid #cbd5e1; font-weight: 800; color: #0f172a; text-decoration: none; border-radius: 14px; background: #ffffff; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            <span>Download PNG Image</span>
+                        </a>
+
+                        <!-- Edit Details Button -->
+                        <button id="btn-resume-edit" type="button" class="btn-outline" style="justify-content: center; font-size: 0.92rem; padding: 14px 20px; border: 1.5px solid #cbd5e1; font-weight: 800; color: #0f172a; border-radius: 14px; background: #ffffff; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                            <span>✏️ Edit Resume Details</span>
+                        </button>
+                    </div>
+
+                    <!-- Footer Tip -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid #f1f5f9; font-size: 0.78rem; color: #64748b;">
+                        <span>💡 <strong>Cyber Cafe Tip:</strong> A4 paper par print karte samay printer settings me <strong>Fit to Printable Area</strong> ya <strong>Actual Size</strong> select karein.</span>
+                        <span id="resume-filesize-info" style="font-weight: 700; color: #4f46e5;"></span>
+                    </div>
+
+                </div>
+            </div>
+
             <!-- Passport Studio Result Content (Shown when docType == passport) -->
             <div id="passport-result-content" style="display: none; margin-bottom: 32px;">
                 <div class="passport-result-grid">
@@ -2188,5 +2611,5 @@
         input.type = input.type === 'password' ? 'text' : 'password';
     }
 </script>
-<script src="/static/js/app.js?v=35"></script>
+<script src="/static/js/app.js?v=36"></script>
 {% endblock %}

@@ -231,6 +231,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnPassport) btnPassport.classList.remove('active');
         const btnBgRemover = document.getElementById('doc-btn-bg-remover');
         if (btnBgRemover) btnBgRemover.classList.remove('active');
+        const btnResume = document.getElementById('doc-btn-resume');
+        if (btnResume) btnResume.classList.remove('active');
+
+        const resumeBuilderContainer = document.getElementById('resume-builder-container');
+        if (resumeBuilderContainer) {
+            resumeBuilderContainer.style.display = (type === 'resume') ? 'block' : 'none';
+        }
+
+        const dropArea = document.getElementById('file-drop-area');
+        if (dropArea) {
+            dropArea.style.display = (type === 'resume') ? 'none' : 'flex';
+        }
+
+        const uploadMainBtn = document.getElementById('upload-btn');
+        if (uploadMainBtn) {
+            uploadMainBtn.style.display = (type === 'resume') ? 'none' : 'flex';
+        }
 
         const instantCropContainer = document.getElementById('instant-autocrop-container');
         if (instantCropContainer) {
@@ -249,7 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const pwContainer = document.getElementById('password-group-container');
         if (pwContainer) {
-            pwContainer.style.display = (type === 'passport' || type === 'bg_remover' || type === 'bgremover' || type === 'bg-remover') ? 'none' : 'block';
+            pwContainer.style.display = (type === 'passport' || type === 'bg_remover' || type === 'bgremover' || type === 'bg-remover' || type === 'resume') ? 'none' : 'block';
         }
 
         const uploadLimit = document.getElementById('upload-zone-limit');
@@ -273,7 +290,38 @@ document.addEventListener('DOMContentLoaded', () => {
         const resTitle = document.getElementById('result-title');
         const resSubtitle = document.getElementById('result-subtitle');
 
-        if (type === 'bg_remover' || type === 'bgremover' || type === 'bg-remover') {
+        if (type === 'resume') {
+            if (pdfPasswordInput) {
+                pdfPasswordInput.required = false;
+                pdfPasswordInput.value = '';
+            }
+            if (fileInput) {
+                fileInput.required = false;
+            }
+            if (inputDoc) inputDoc.value = 'resume';
+            if (inputStyle) inputStyle.value = 'classic';
+            if (btnResume) btnResume.classList.add('active');
+            if (heroTitle) heroTitle.textContent = 'AI Smart Resume / CV Maker 📄';
+            if (heroDesc) heroDesc.textContent = 'Create professional 1-page Indian CVs for job applications. Print-ready 300 DPI A4 PDF & high-res preview.';
+
+            // Left Stepper
+            if (s1Title) s1Title.textContent = 'Personal Details';
+            if (s1Sub) s1Sub.textContent = 'Name, contact & photo';
+            if (s2Title) s2Title.textContent = 'Qualifications';
+            if (s2Sub) s2Sub.textContent = 'Tabular degree list';
+            if (s3Title) s3Title.textContent = 'Skills & Exp';
+            if (s3Sub) s3Sub.textContent = 'Technical background';
+            if (s4Title) s4Title.textContent = 'Declaration';
+            if (s4Sub) s4Sub.textContent = 'Formal statement';
+            if (s5Title) s5Title.textContent = 'Vector A4 PDF';
+            if (s5Sub) s5Sub.textContent = 'Crisp 300 DPI export';
+
+            if (guideTitle) guideTitle.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Resume Print Tips`;
+            if (guideDesc) guideDesc.innerHTML = 'A4 standard paper par print karein. 1-Page Indian cyber-cafe format jobs, company & government submissions ke liye 100% verified hai.';
+            if (rateBadge) rateBadge.textContent = '⚡ Rate: ₹0.95 / Resume';
+            if (resTitle) resTitle.textContent = '🎉 Job-Ready Resume Ready!';
+            if (resSubtitle) resSubtitle.textContent = 'Vector-crisp 300 DPI A4 document ready for printing or job submission.';
+        } else if (type === 'bg_remover' || type === 'bgremover' || type === 'bg-remover') {
             if (pdfPasswordInput) {
                 pdfPasswordInput.required = false;
                 pdfPasswordInput.value = '';
@@ -554,6 +602,14 @@ document.addEventListener('DOMContentLoaded', () => {
         docBtnBgRemover.addEventListener('click', (e) => {
             e.preventDefault();
             window.setDocumentType('bg_remover');
+        });
+    }
+
+    const docBtnResume = document.getElementById('doc-btn-resume');
+    if (docBtnResume) {
+        docBtnResume.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.setDocumentType('resume');
         });
     }
 
@@ -1314,6 +1370,414 @@ document.addEventListener('DOMContentLoaded', () => {
         } finally {
             isBgRemoverSubmitting = false;
         }
+    }
+
+    // ---------------------------------------------------------------------------
+    // AI SMART RESUME / CV BUILDER LOGIC
+    // ---------------------------------------------------------------------------
+    const resDateInput = document.getElementById('res-date');
+    if (resDateInput && !resDateInput.value) {
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const yyyy = today.getFullYear();
+        resDateInput.value = `${dd}/${mm}/${yyyy}`;
+    }
+
+    // Theme Selector
+    const resumeThemeCards = document.querySelectorAll('.resume-theme-card');
+    resumeThemeCards.forEach(card => {
+        card.addEventListener('click', () => {
+            resumeThemeCards.forEach(c => {
+                c.classList.remove('active');
+                c.style.borderColor = '#e2e8f0';
+                c.style.background = '#ffffff';
+            });
+            card.classList.add('active');
+            card.style.borderColor = '#4f46e5';
+            card.style.background = '#eef2ff';
+            const radio = card.querySelector('input[type="radio"]');
+            if (radio) radio.checked = true;
+        });
+    });
+
+    // Photo Upload Preview
+    const resPhotoFile = document.getElementById('res-photo-file');
+    const resPhotoPreview = document.getElementById('res-photo-preview');
+    const resPhotoEmpty = document.getElementById('res-photo-empty');
+    const btnRemoveResPhoto = document.getElementById('btn-remove-res-photo');
+
+    if (resPhotoFile) {
+        resPhotoFile.addEventListener('change', (e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    if (resPhotoPreview) {
+                        resPhotoPreview.src = evt.target.result;
+                        resPhotoPreview.style.display = 'block';
+                    }
+                    if (resPhotoEmpty) resPhotoEmpty.style.display = 'none';
+                    if (btnRemoveResPhoto) btnRemoveResPhoto.style.display = 'inline-block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    if (btnRemoveResPhoto) {
+        btnRemoveResPhoto.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (resPhotoFile) resPhotoFile.value = '';
+            if (resPhotoPreview) {
+                resPhotoPreview.src = '';
+                resPhotoPreview.style.display = 'none';
+            }
+            if (resPhotoEmpty) resPhotoEmpty.style.display = 'block';
+            btnRemoveResPhoto.style.display = 'none';
+        });
+    }
+
+    // Objective Presets Map
+    const OBJECTIVE_PRESETS = {
+        fresher: "To obtain a challenging and rewarding position in an organization where I can utilize my skills and educational background to contribute to company growth while continuously expanding my knowledge and capabilities.",
+        computer_operator: "To secure a position as a Computer Operator / Data Entry Specialist where I can leverage my typing speed, MS Office expertise, and administrative abilities to ensure efficient and accurate data management.",
+        accountant: "Seeking a responsible role as an Accountant / Tally Operator to utilize my knowledge of accounting principles, GST filing, Tally ERP/Prime, and financial record-keeping for organizational efficiency.",
+        sales: "Energetic and goal-driven professional seeking a Sales / Marketing Executive role to drive business growth, expand client relationships, and achieve revenue targets through proactive communication and dedication.",
+        office_assistant: "Hardworking and reliable individual seeking an Office Assistant / Administrative role to maintain organized office operations, handle correspondence, and assist day-to-day administrative functions efficiently."
+    };
+
+    const objPresetBtns = document.querySelectorAll('.btn-res-obj-preset');
+    const resObjTextarea = document.getElementById('res-objective');
+    objPresetBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const presetKey = btn.getAttribute('data-preset');
+            if (presetKey && OBJECTIVE_PRESETS[presetKey] && resObjTextarea) {
+                resObjTextarea.value = OBJECTIVE_PRESETS[presetKey];
+                window.showToast("Objective preset applied!", "info");
+            }
+        });
+    });
+
+    // Qualifications Dynamic Table
+    const btnAddQualRow = document.getElementById('btn-add-qual-row');
+    const tblQualBody = document.getElementById('tbl-qual-body');
+
+    function renumberQualRows() {
+        if (!tblQualBody) return;
+        const rows = tblQualBody.querySelectorAll('tr');
+        rows.forEach((r, idx) => {
+            const firstTd = r.querySelector('td:first-child');
+            if (firstTd) firstTd.textContent = idx + 1;
+        });
+    }
+
+    if (btnAddQualRow && tblQualBody) {
+        btnAddQualRow.addEventListener('click', () => {
+            const count = tblQualBody.querySelectorAll('tr').length + 1;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="padding: 6px; text-align: center; font-weight: 700;">${count}</td>
+                <td style="padding: 6px;"><input type="text" class="qual-degree" placeholder="Degree / Course" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px;"></td>
+                <td style="padding: 6px;"><input type="text" class="qual-board" placeholder="Board / University" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px;"></td>
+                <td style="padding: 6px;"><input type="text" class="qual-year" placeholder="Year" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;"></td>
+                <td style="padding: 6px;"><input type="text" class="qual-pct" placeholder="% / Grade" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;"></td>
+                <td style="padding: 6px; text-align: center;"><button type="button" class="btn-del-qual-row" style="background: none; border: none; color: #ef4444; font-size: 1rem; cursor: pointer;">🗑️</button></td>
+            `;
+            tblQualBody.appendChild(tr);
+        });
+
+        tblQualBody.addEventListener('click', (e) => {
+            if (e.target && (e.target.classList.contains('btn-del-qual-row') || e.target.closest('.btn-del-qual-row'))) {
+                const tr = e.target.closest('tr');
+                if (tr && tblQualBody.querySelectorAll('tr').length > 1) {
+                    tr.remove();
+                    renumberQualRows();
+                } else {
+                    window.showToast("At least one qualification row is required.", "warning");
+                }
+            }
+        });
+    }
+
+    // Skills Chips
+    const skillChips = document.querySelectorAll('.btn-add-skill-chip');
+    const resSkillsTextarea = document.getElementById('res-skills');
+    skillChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            const skill = chip.getAttribute('data-skill');
+            if (skill && resSkillsTextarea) {
+                const current = resSkillsTextarea.value.trim();
+                if (!current.includes(skill)) {
+                    resSkillsTextarea.value = current ? `${current}\n${skill}` : skill;
+                    window.showToast(`Skill added: ${skill.slice(0, 25)}...`, "info");
+                }
+            }
+        });
+    });
+
+    // Experience Type Switcher
+    const expTypeRadios = document.querySelectorAll('input[name="res_exp_type"]');
+    const expFresherBox = document.getElementById('res-exp-fresher-box');
+    const expExperiencedBox = document.getElementById('res-exp-experienced-box');
+    const btnAddExpRow = document.getElementById('btn-add-exp-row');
+    const expRowsContainer = document.getElementById('res-exp-rows-container');
+
+    expTypeRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            if (radio.value === 'experienced') {
+                if (expFresherBox) expFresherBox.style.display = 'none';
+                if (expExperiencedBox) expExperiencedBox.style.display = 'block';
+            } else {
+                if (expFresherBox) expFresherBox.style.display = 'block';
+                if (expExperiencedBox) expExperiencedBox.style.display = 'none';
+            }
+        });
+    });
+
+    if (btnAddExpRow && expRowsContainer) {
+        btnAddExpRow.addEventListener('click', () => {
+            const div = document.createElement('div');
+            div.className = 'exp-item-card';
+            div.style = 'background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px; margin-top: 8px; position: relative;';
+            div.innerHTML = `
+                <button type="button" class="btn-del-exp" style="position: absolute; top: 8px; right: 8px; background: none; border: none; color: #ef4444; font-size: 0.9rem; cursor: pointer;">✕</button>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 8px;">
+                    <div>
+                        <label style="display: block; font-size: 0.74rem; font-weight: 700; color: #475569; margin-bottom: 2px;">Company / Organization Name</label>
+                        <input type="text" class="exp-company" placeholder="e.g. ABC Technologies" style="width: 100%; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.84rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.74rem; font-weight: 700; color: #475569; margin-bottom: 2px;">Designation / Role</label>
+                        <input type="text" class="exp-role" placeholder="e.g. Assistant Executive" style="width: 100%; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.84rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.74rem; font-weight: 700; color: #475569; margin-bottom: 2px;">Duration / Time Period</label>
+                        <input type="text" class="exp-duration" placeholder="e.g. 1 Year (2023 - 2024)" style="width: 100%; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.84rem;">
+                    </div>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.74rem; font-weight: 700; color: #475569; margin-bottom: 2px;">Job Description / Key Responsibilities (Optional)</label>
+                    <input type="text" class="exp-desc" placeholder="Brief role description" style="width: 100%; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.84rem;">
+                </div>
+            `;
+            expRowsContainer.appendChild(div);
+            div.querySelector('.btn-del-exp').addEventListener('click', () => div.remove());
+        });
+    }
+
+    // Submit Resume Generator
+    let isResumeSubmitting = false;
+    async function handleResumeSubmit() {
+        if (isResumeSubmitting) return;
+
+        const fullName = document.getElementById('res-full-name')?.value?.trim();
+        const mobile = document.getElementById('res-mobile')?.value?.trim();
+        const address = document.getElementById('res-address')?.value?.trim();
+
+        if (!fullName) {
+            window.showToast("Kripya candidate ka Full Name dalein.", "error");
+            document.getElementById('res-full-name')?.focus();
+            return;
+        }
+        if (!mobile) {
+            window.showToast("Kripya Mobile Number dalein.", "error");
+            document.getElementById('res-mobile')?.focus();
+            return;
+        }
+        if (!address) {
+            window.showToast("Kripya Address dalein.", "error");
+            document.getElementById('res-address')?.focus();
+            return;
+        }
+
+        // Collect qualifications from table
+        const qualRows = document.querySelectorAll('#tbl-qual-body tr');
+        const qualifications = [];
+        qualRows.forEach((row, idx) => {
+            const deg = row.querySelector('.qual-degree')?.value?.trim();
+            const board = row.querySelector('.qual-board')?.value?.trim();
+            const year = row.querySelector('.qual-year')?.value?.trim();
+            const pct = row.querySelector('.qual-pct')?.value?.trim();
+            if (deg || board || year || pct) {
+                qualifications.push({
+                    sno: idx + 1,
+                    degree: deg || '',
+                    board: board || '',
+                    year: year || '',
+                    percentage: pct || ''
+                });
+            }
+        });
+
+        // Collect skills from textarea
+        const skillsText = document.getElementById('res-skills')?.value || '';
+        const skills = skillsText.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+
+        // Collect experience
+        const expType = document.querySelector('input[name="res_exp_type"]:checked')?.value || 'fresher';
+        const expList = [];
+        if (expType === 'experienced') {
+            const expCards = document.querySelectorAll('#res-exp-rows-container .exp-item-card');
+            expCards.forEach(card => {
+                const comp = card.querySelector('.exp-company')?.value?.trim();
+                const role = card.querySelector('.exp-role')?.value?.trim();
+                const dur = card.querySelector('.exp-duration')?.value?.trim();
+                const desc = card.querySelector('.exp-desc')?.value?.trim();
+                if (comp || role || dur || desc) {
+                    expList.push({
+                        company: comp || '',
+                        role: role || '',
+                        duration: dur || '',
+                        description: desc || ''
+                    });
+                }
+            });
+        }
+
+        // Theme
+        const theme = document.querySelector('input[name="resume_theme"]:checked')?.value || 'classic';
+
+        const formData = new FormData();
+        formData.append('full_name', fullName);
+        formData.append('job_title', document.getElementById('res-job-title')?.value?.trim() || '');
+        formData.append('mobile', mobile);
+        formData.append('email', document.getElementById('res-email')?.value?.trim() || '');
+        formData.append('address', address);
+        formData.append('career_objective', document.getElementById('res-objective')?.value?.trim() || '');
+        formData.append('qualifications', JSON.stringify(qualifications));
+        formData.append('skills', JSON.stringify(skills));
+        formData.append('experience_type', expType);
+        formData.append('experience_list', JSON.stringify(expList));
+        formData.append('father_name', document.getElementById('res-father-name')?.value?.trim() || '');
+        formData.append('dob', document.getElementById('res-dob')?.value?.trim() || '');
+        formData.append('gender', document.getElementById('res-gender')?.value || 'Male');
+        formData.append('marital_status', document.getElementById('res-marital-status')?.value || 'Unmarried');
+        formData.append('languages', document.getElementById('res-languages')?.value?.trim() || 'Hindi & English');
+        formData.append('nationality', document.getElementById('res-nationality')?.value?.trim() || 'Indian');
+        formData.append('declaration_text', document.getElementById('res-declaration-text')?.value?.trim() || '');
+        formData.append('declaration_place', document.getElementById('res-place')?.value?.trim() || '');
+        formData.append('declaration_date', document.getElementById('res-date')?.value?.trim() || '');
+        formData.append('template_style', theme);
+
+        const photoInput = document.getElementById('res-photo-file');
+        if (photoInput && photoInput.files && photoInput.files[0]) {
+            formData.append('photo', photoInput.files[0]);
+        }
+
+        isResumeSubmitting = true;
+        uploadSection.style.display = 'none';
+        if (processingSection) processingSection.style.display = 'block';
+        document.getElementById('workflow-indicator').style.display = 'flex';
+        resetProgress();
+        setStepState(0, 'completed');
+        setStepState(1, 'active');
+
+        try {
+            const response = await fetch('/api/resume/generate', {
+                method: 'POST',
+                body: formData
+            });
+
+            setStepState(1, 'completed');
+            setStepState(2, 'completed');
+            setStepState(3, 'completed');
+            setStepState(4, 'active');
+
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+            if (response.status === 402) {
+                let errJson = null;
+                try { errJson = await response.json(); } catch(e){}
+                throw new Error(errJson?.error || "Insufficient wallet balance to generate Resume. Please recharge your wallet.");
+            }
+
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || "Failed to generate resume.");
+            }
+
+            setStepState(4, 'completed');
+
+            if (processingSection) processingSection.style.display = 'none';
+            resultSection.style.display = 'block';
+
+            // Hide other result sections
+            const dualGrid = document.querySelector('.dual-preview-grid');
+            const masterA4 = document.querySelector('.master-a4-box');
+            const passportResContent = document.getElementById('passport-result-content');
+            const bgRemResContent = document.getElementById('bg-remover-result-content');
+            const resumeResContent = document.getElementById('resume-result-content');
+
+            if (dualGrid) dualGrid.style.display = 'none';
+            if (masterA4) masterA4.style.display = 'none';
+            if (passportResContent) passportResContent.style.display = 'none';
+            if (bgRemResContent) bgRemResContent.style.display = 'none';
+            if (resumeResContent) resumeResContent.style.display = 'block';
+
+            // Update Preview & Downloads
+            const previewImg = document.getElementById('resume-preview-img');
+            const btnPdf = document.getElementById('btn-dl-resume-pdf');
+            const btnImg = document.getElementById('btn-dl-resume-img');
+            const btnPrint = document.getElementById('btn-print-resume');
+            const btnEdit = document.getElementById('btn-resume-edit');
+            const sizeInfo = document.getElementById('resume-filesize-info');
+
+            if (previewImg) previewImg.src = data.preview_url;
+            if (btnPdf) btnPdf.href = data.pdf_url;
+            if (btnImg) btnImg.href = data.preview_url;
+            if (sizeInfo) sizeInfo.textContent = `PDF Size: ${data.pdf_size_kb || 0} KB • Vector A4`;
+
+            if (btnPrint) {
+                btnPrint.onclick = () => {
+                    const printWin = window.open(data.pdf_url, '_blank');
+                    if (printWin) {
+                        printWin.focus();
+                    }
+                };
+            }
+
+            if (btnEdit) {
+                btnEdit.onclick = () => {
+                    resultSection.style.display = 'none';
+                    uploadSection.style.display = 'block';
+                    window.setDocumentType('resume');
+                };
+            }
+
+            const sampleNotice = document.getElementById('sample-card-notice');
+            if (sampleNotice) {
+                sampleNotice.style.display = data.is_sample ? 'block' : 'none';
+            }
+
+            if (data.wallet_balance !== undefined && typeof window.refreshUserCredits === 'function') {
+                window.refreshUserCredits();
+            }
+
+            if (typeof startExpiryTimer === 'function') {
+                startExpiryTimer(300, data.run_id);
+            }
+
+            window.showToast('Job-Ready Resume generated successfully!', 'success');
+
+        } catch (err) {
+            console.error("Resume generation error:", err);
+            if (processingSection) processingSection.style.display = 'none';
+            uploadSection.style.display = 'block';
+            window.showToast(err.message || 'Error generating resume', 'error');
+        } finally {
+            isResumeSubmitting = false;
+        }
+    }
+
+    const btnGenerateResume = document.getElementById('btn-generate-resume');
+    if (btnGenerateResume) {
+        btnGenerateResume.addEventListener('click', (e) => {
+            e.preventDefault();
+            handleResumeSubmit();
+        });
     }
 
     // Direct Upload Button Click Handler to guarantee trigger

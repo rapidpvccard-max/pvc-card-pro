@@ -30,6 +30,8 @@ class UserCreditsResponse(BaseModel):
     sample_ayushman: Optional[bool] = True
     sample_crop: Optional[bool] = True
     sample_passport: Optional[bool] = True
+    sample_bg_remover: Optional[bool] = True
+    sample_resume: Optional[bool] = True
     
     class Config:
         from_attributes = True

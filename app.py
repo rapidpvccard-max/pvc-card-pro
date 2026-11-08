@@ -88,6 +88,7 @@ try:
     from engine.watermark import apply_card_watermark
     from engine.passport_photo import process_passport_studio
     from engine.bg_remover import process_background_removal
+    from engine.resume_builder import build_resume_document, OBJECTIVE_SUGGESTIONS
     from engine.card_cropper import (
         PRESETS,
         generate_page_preview,
@@ -132,7 +133,8 @@ def is_service_sample_available(user_credits, category: str) -> bool:
         "ayushman": "sample_ayushman",
         "crop": "sample_crop",
         "passport": "sample_passport",
-        "bg_remover": "sample_bg_remover"
+        "bg_remover": "sample_bg_remover",
+        "resume": "sample_resume"
     }
     col_name = col_map.get(category)
     if col_name and hasattr(user_credits, col_name):
@@ -149,7 +151,8 @@ def consume_service_sample(user_credits, category: str):
         "ayushman": "sample_ayushman",
         "crop": "sample_crop",
         "passport": "sample_passport",
-        "bg_remover": "sample_bg_remover"
+        "bg_remover": "sample_bg_remover",
+        "resume": "sample_resume"
     }
     col_name = col_map.get(category)
     if col_name and hasattr(user_credits, col_name):
@@ -158,7 +161,7 @@ def consume_service_sample(user_credits, category: str):
     # Check if any demo remains across all services
     has_remaining = any(
         bool(getattr(user_credits, c, False))
-        for c in ["sample_aadhaar", "sample_aadhaar_color", "sample_ayushman", "sample_crop", "sample_passport", "sample_bg_remover"]
+        for c in ["sample_aadhaar", "sample_aadhaar_color", "sample_ayushman", "sample_crop", "sample_passport", "sample_bg_remover", "sample_resume"]
         if hasattr(user_credits, c)
     )
     user_credits.free_sample_available = has_remaining
@@ -1615,6 +1618,246 @@ async def download_bg_remover_file(
         media_type = "image/jpeg"
     else:
         return JSONResponse(status_code=400, content={"success": False, "error": "Invalid background removal file type requested."})
+
+    is_expired = False
+    if history.created_at:
+        elapsed = (datetime.datetime.utcnow() - history.created_at).total_seconds()
+        if elapsed > 300:
+            is_expired = True
+    elif os.path.exists(file_path) and (time.time() - os.path.getmtime(file_path) > 300):
+        is_expired = True
+
+    if is_expired or not os.path.exists(file_path):
+        if os.path.exists(run_dir):
+            shutil.rmtree(run_dir, ignore_errors=True)
+        return JSONResponse(
+            status_code=410,
+            content={"success": False, "error": "File session expired. For zero-retention privacy, temporary files are permanently purged after 5 minutes."}
+        )
+
+    from fastapi.responses import FileResponse
+    return FileResponse(
+        path=file_path,
+        filename=download_name,
+        media_type=media_type
+    )
+
+
+# ===========================================================================
+# 7. AI SMART RESUME / CV MAKER ENDPOINTS
+# ===========================================================================
+
+@app.post("/api/resume/generate")
+async def generate_resume(
+    full_name: str = Form(...),
+    job_title: Optional[str] = Form(None),
+    mobile: str = Form(...),
+    email: Optional[str] = Form(None),
+    address: str = Form(...),
+    career_objective: Optional[str] = Form(None),
+    qualifications: Optional[str] = Form(None),
+    skills: Optional[str] = Form(None),
+    experience_type: Optional[str] = Form("fresher"),
+    experience_list: Optional[str] = Form(None),
+    experience_note: Optional[str] = Form(None),
+    father_name: Optional[str] = Form(None),
+    mother_name: Optional[str] = Form(None),
+    dob: Optional[str] = Form(None),
+    gender: Optional[str] = Form(None),
+    marital_status: Optional[str] = Form(None),
+    languages: Optional[str] = Form("Hindi & English"),
+    nationality: Optional[str] = Form("Indian"),
+    permanent_address: Optional[str] = Form(None),
+    declaration_text: Optional[str] = Form(None),
+    declaration_date: Optional[str] = Form(None),
+    declaration_place: Optional[str] = Form(None),
+    template_style: Optional[str] = Form("classic"),
+    photo: Optional[UploadFile] = File(None),
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    service_category = "resume"
+    user_rate = float(getattr(current_user.credits, 'cost_per_card', 0.95) or 0.95) if current_user.credits else 0.95
+    wallet_balance = float(getattr(current_user.credits, 'wallet_balance', 0.0) or 0.0) if current_user.credits else 0.0
+    sample_available = is_service_sample_available(current_user.credits, service_category)
+
+    is_sample_generation = False
+    if wallet_balance < user_rate:
+        if sample_available:
+            is_sample_generation = True
+        else:
+            return JSONResponse(
+                status_code=402,
+                content={"success": False, "error": f"Insufficient wallet balance to generate Resume. Required: ₹{user_rate:.2f} (Demo already used)."}
+            )
+
+    parsed_qualifications = []
+    if qualifications:
+        try:
+            parsed_qualifications = json.loads(qualifications)
+        except Exception:
+            parsed_qualifications = []
+
+    parsed_skills = []
+    if skills:
+        try:
+            if skills.strip().startswith("["):
+                parsed_skills = json.loads(skills)
+            else:
+                parsed_skills = [s.strip() for s in skills.split("\n") if s.strip()]
+        except Exception:
+            parsed_skills = [s.strip() for s in skills.split("\n") if s.strip()]
+
+    parsed_experience = []
+    if experience_list:
+        try:
+            parsed_experience = json.loads(experience_list)
+        except Exception:
+            parsed_experience = []
+
+    photo_bytes = None
+    if photo and photo.filename:
+        photo_bytes = await photo.read(MAX_FILE_SIZE + 1)
+        if len(photo_bytes) > MAX_FILE_SIZE:
+            return JSONResponse(status_code=413, content={"success": False, "error": "Profile photo exceeds 10 MB limit."})
+
+    run_id = str(uuid.uuid4())
+    doc_label = "resume"
+    if is_sample_generation:
+        doc_label += " [SAMPLE DEMO]"
+
+    history = models.GenerationHistory(
+        id=run_id,
+        user_id=current_user.id,
+        run_id=run_id,
+        document_type=doc_label,
+        is_sample=is_sample_generation,
+        status="processing"
+    )
+    db.add(history)
+    db.commit()
+
+    output_dir = os.path.join("static", "renders", run_id)
+    os.makedirs(output_dir, exist_ok=True)
+
+    data_payload = {
+        "full_name": full_name,
+        "job_title": job_title,
+        "mobile": mobile,
+        "email": email,
+        "address": address,
+        "career_objective": career_objective,
+        "qualifications": parsed_qualifications,
+        "skills": parsed_skills,
+        "experience_type": experience_type,
+        "experience_list": parsed_experience,
+        "experience_note": experience_note,
+        "father_name": father_name,
+        "mother_name": mother_name,
+        "dob": dob,
+        "gender": gender,
+        "marital_status": marital_status,
+        "languages": languages,
+        "nationality": nationality,
+        "permanent_address": permanent_address,
+        "declaration_text": declaration_text,
+        "declaration_date": declaration_date,
+        "declaration_place": declaration_place,
+        "template_style": template_style,
+    }
+
+    try:
+        res = await run_in_threadpool(
+            build_resume_document,
+            data=data_payload,
+            photo_bytes=photo_bytes,
+            output_dir=output_dir,
+            is_sample=is_sample_generation
+        )
+
+        if is_sample_generation:
+            consume_service_sample(current_user.credits, service_category)
+            current_user.credits.total_generated += 1
+            history.status = "success"
+            history.is_sample = True
+            history.completed_at = datetime.datetime.utcnow()
+            history.output_file = res["pdf_path"]
+
+            tx = models.CreditTransaction(
+                user_id=current_user.id,
+                amount=0.0,
+                transaction_type="free_sample",
+                reference_id=run_id,
+                balance_after=current_user.credits.wallet_balance
+            )
+            db.add(tx)
+            db.commit()
+        else:
+            current_user.credits.wallet_balance -= user_rate
+            current_user.credits.total_generated += 1
+            history.status = "success"
+            history.completed_at = datetime.datetime.utcnow()
+            history.output_file = res["pdf_path"]
+
+            tx = models.CreditTransaction(
+                user_id=current_user.id,
+                amount=-user_rate,
+                transaction_type="generation_usage",
+                reference_id=run_id,
+                balance_after=current_user.credits.wallet_balance
+            )
+            db.add(tx)
+            db.commit()
+
+        return {
+            "success": True,
+            "run_id": run_id,
+            "pdf_url": f"/download-resume/{run_id}/pdf",
+            "preview_url": f"/download-resume/{run_id}/preview",
+            "pdf_filename": res["pdf_filename"],
+            "preview_filename": res["preview_filename"],
+            "pdf_size_kb": res["pdf_size_kb"],
+            "preview_size_kb": res["preview_size_kb"],
+            "width": res["width"],
+            "height": res["height"],
+            "is_sample": is_sample_generation,
+            "wallet_balance": current_user.credits.wallet_balance if current_user.credits else 0.0
+        }
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        history.status = "failed"
+        history.completed_at = datetime.datetime.utcnow()
+        db.commit()
+        return JSONResponse(status_code=500, content={"success": False, "error": f"Resume generation failed: {str(e)}"})
+
+
+@app.get("/download-resume/{run_id}/{file_type}")
+async def download_resume_file(
+    run_id: str,
+    file_type: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    history = db.query(models.GenerationHistory).filter(
+        models.GenerationHistory.run_id == run_id,
+        models.GenerationHistory.user_id == current_user.id
+    ).first()
+
+    if not history:
+        return JSONResponse(status_code=403, content={"success": False, "error": "Access denied or run_id not found."})
+
+    run_dir = os.path.join("static", "renders", run_id)
+    if file_type == "pdf":
+        file_path = os.path.join(run_dir, "resume.pdf")
+        download_name = f"Resume_{run_id[:8]}.pdf"
+        media_type = "application/pdf"
+    elif file_type == "preview":
+        file_path = os.path.join(run_dir, "preview.png")
+        download_name = f"Resume_Preview_{run_id[:8]}.png"
+        media_type = "image/png"
+    else:
+        return JSONResponse(status_code=400, content={"success": False, "error": "Invalid resume file type requested."})
 
     is_expired = False
     if history.created_at:

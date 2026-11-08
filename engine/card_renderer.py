@@ -139,6 +139,32 @@ class PersistentBrowserWorker:
                         task = self.req_queue.get()
                         if task is None:
                             break
+
+                        if isinstance(task, tuple) and len(task) == 4 and task[0] == "pdf":
+                            _, html_content, pdf_path, res_queue = task
+                            page = None
+                            try:
+                                page = ctx.new_page()
+                                page.set_content(html_content, wait_until="load", timeout=10000)
+                                page.pdf(
+                                    path=pdf_path,
+                                    format="A4",
+                                    print_background=True,
+                                    margin={"top": "0mm", "bottom": "0mm", "left": "0mm", "right": "0mm"}
+                                )
+                                res_queue.put((True, None))
+                            except Exception as e:
+                                print(f"[CardRenderer] PDF render error in persistent worker: {e}")
+                                res_queue.put((False, str(e)))
+                            finally:
+                                if page:
+                                    try:
+                                        page.close()
+                                    except Exception:
+                                        pass
+                                self.req_queue.task_done()
+                            continue
+
                         front_html, back_html, front_path, back_path, res_queue = task
                         page = None
                         try:
@@ -183,9 +209,49 @@ class PersistentBrowserWorker:
             return _cold_start_render_html(front_html, back_html, front_path, back_path)
         return front_path, back_path
 
+    def render_pdf(self, html_content: str, pdf_path: str, timeout: int = 15):
+        if not self.ready_event.is_set():
+            self.ready_event.wait(timeout=5)
+
+        res_queue = queue.Queue()
+        self.req_queue.put(("pdf", html_content, pdf_path, res_queue))
+        try:
+            success, err = res_queue.get(timeout=timeout)
+        except queue.Empty:
+            success, err = False, "Worker queue timeout"
+
+        if not success:
+            print(f"[CardRenderer] Persistent PDF render fallback ({err}), running direct render...")
+            return _cold_start_render_pdf(html_content, pdf_path)
+        return pdf_path
+
     def stop(self):
         self._stopped = True
         self.req_queue.put(None)
+
+
+def _cold_start_render_pdf(html_content: str, pdf_path: str):
+    from playwright.sync_api import sync_playwright
+    with sync_playwright() as p:
+        b = p.chromium.launch(
+            headless=True,
+            args=CHROMIUM_STABLE_ARGS
+        )
+        page = b.new_page()
+        page.set_content(html_content, wait_until="load", timeout=10000)
+        page.pdf(
+            path=pdf_path,
+            format="A4",
+            print_background=True,
+            margin={"top": "0mm", "bottom": "0mm", "left": "0mm", "right": "0mm"}
+        )
+        b.close()
+    return pdf_path
+
+
+def render_html_to_pdf(html_content: str, pdf_path: str, timeout: int = 15) -> str:
+    """Renders HTML directly to an A4 PDF using the persistent browser worker."""
+    return _worker.render_pdf(html_content, pdf_path, timeout=timeout)
 
 
 def _cold_start_render_html(front_html: str, back_html: str, front_path: str, back_path: str):

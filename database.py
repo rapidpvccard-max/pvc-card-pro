@@ -83,6 +83,7 @@ def ensure_database_schema(engine):
                 ('sample_crop', 'BOOLEAN DEFAULT TRUE'),
                 ('sample_passport', 'BOOLEAN DEFAULT TRUE'),
                 ('sample_bg_remover', 'BOOLEAN DEFAULT TRUE'),
+                ('sample_resume', 'BOOLEAN DEFAULT TRUE'),
                 ('updated_at', 'TIMESTAMP'),
             ],
             'generation_history': [

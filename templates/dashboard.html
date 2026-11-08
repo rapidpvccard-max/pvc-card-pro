@@ -313,6 +313,33 @@
         box-shadow: 0 16px 30px -5px rgba(8, 145, 178, 0.2);
     }
 
+    .service-showcase-card.card-resume:hover {
+        border-color: #6366f1;
+        box-shadow: 0 16px 30px -5px rgba(99, 102, 241, 0.2);
+    }
+
+    .service-badge-pill.indigo-badge {
+        background: #eef2ff;
+        color: #4f46e5;
+        border: 1px solid #c7d2fe;
+    }
+
+    .service-price-pill.indigo {
+        background: #eef2ff;
+        color: #4338ca;
+        border: 1px solid #c7d2fe;
+    }
+
+    .service-icon-box.indigo {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: #ffffff;
+        box-shadow: 0 4px 10px -2px rgba(99, 102, 241, 0.35);
+    }
+
+    .service-launch-link.indigo {
+        color: #4f46e5;
+    }
+
     .service-badge-pill.teal-badge {
         background: #ecfeff;
         color: #0891b2;
@@ -1190,6 +1217,48 @@
             <span>HD Image Studio</span>
             <span class="service-launch-link teal">
                 Remove Background &rarr;
+            </span>
+        </div>
+    </div>
+
+    <!-- 7. AI Resume / CV Maker -->
+    <div class="service-showcase-card card-resume" onclick="window.location.href='/generator?type=resume'">
+        <div>
+            <div class="service-card-top">
+                <div class="service-icon-box indigo">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+                </div>
+                <div class="service-badges-wrap">
+                    <span class="service-badge-pill indigo-badge">New 📄</span>
+                    <span class="service-price-pill indigo" id="badge-home-resume">₹0.95</span>
+                </div>
+            </div>
+
+            <div class="service-title-box">
+                <h3 class="service-name">Instant Resume Maker</h3>
+                <p class="service-subtitle">Fast 1-Page Indian CV for Cyber Cafes & Jobs</p>
+            </div>
+            
+            <div class="service-features-list">
+                <div class="service-feature-item">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>1-Page A4 Resume (Print & Vector PDF)</span>
+                </div>
+                <div class="service-feature-item">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Qualifications Table & Skills Generator</span>
+                </div>
+                <div class="service-feature-item">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Photo Box & Standard Cyber-Cafe Layout</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="service-card-footer">
+            <span>A4 Print & PDF</span>
+            <span class="service-launch-link indigo">
+                Create Resume &rarr;
             </span>
         </div>
     </div>
