@@ -709,6 +709,45 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // AI Background Remover: Precision Mode (Ultra-HD Studio vs Turbo Fast)
+    const bgRemPrecisionBtns = document.querySelectorAll('.btn-bgrem-precision');
+    const bgRemPrecisionInput = document.getElementById('bgrem-precision-input');
+    const bgRemPrecisionBadge = document.getElementById('bgrem-precision-badge');
+
+    bgRemPrecisionBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const mode = btn.getAttribute('data-mode') || 'studio';
+            bgRemPrecisionBtns.forEach(b => {
+                b.classList.remove('active');
+                b.style.background = 'transparent';
+                b.style.color = '#64748b';
+                b.style.boxShadow = 'none';
+                b.style.fontWeight = '700';
+            });
+            btn.classList.add('active');
+            btn.style.background = '#ffffff';
+            btn.style.color = '#0891b2';
+            btn.style.boxShadow = '0 2px 6px rgba(0,0,0,0.06)';
+            btn.style.fontWeight = '800';
+
+            if (bgRemPrecisionInput) bgRemPrecisionInput.value = mode;
+            if (bgRemPrecisionBadge) {
+                if (mode === 'studio') {
+                    bgRemPrecisionBadge.textContent = 'Zero-Halo Studio';
+                    bgRemPrecisionBadge.style.background = '#ecfeff';
+                    bgRemPrecisionBadge.style.color = '#0891b2';
+                    bgRemPrecisionBadge.style.borderColor = '#a5f3fc';
+                } else {
+                    bgRemPrecisionBadge.textContent = 'Turbo Speed';
+                    bgRemPrecisionBadge.style.background = '#fef3c7';
+                    bgRemPrecisionBadge.style.color = '#b45309';
+                    bgRemPrecisionBadge.style.borderColor = '#fde68a';
+                }
+            }
+        });
+    });
+
     // Auto-detect and set initial document type from URL query param (e.g. /generator?type=crop)
     try {
         const urlParams = new URLSearchParams(window.location.search);
@@ -1157,9 +1196,11 @@ document.addEventListener('DOMContentLoaded', () => {
             bgColor = radioVal || 'transparent';
         }
 
+        const precisionMode = document.getElementById('bgrem-precision-input')?.value || 'studio';
         const formData = new FormData();
         formData.append('file', fileInput.files[0]);
         formData.append('bg_color', bgColor);
+        formData.append('precision', precisionMode);
         if (customHex) {
             formData.append('custom_hex', customHex);
         }
@@ -1238,6 +1279,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const resBadge = document.getElementById('bgrem-res-badge');
             const timeBadge = document.getElementById('bgrem-time-badge');
             const sizeInfo = document.getElementById('bgrem-size-info');
+            const precBadge = document.getElementById('bgrem-precision-result-badge');
+
+            if (precBadge) {
+                precBadge.textContent = data.precision_mode === 'turbo' ? '⚡ Turbo Speed' : '💎 Ultra-HD Studio';
+            }
 
             const w = data.width || 0;
             const h = data.height || 0;

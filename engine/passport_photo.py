@@ -215,7 +215,17 @@ def remove_and_replace_background(
     try:
         from rembg import remove
         sess = _get_rembg_session()
-        cutout = remove(pil_img, session=sess) if sess is not None else remove(pil_img)
+        cutout = remove(pil_img, session=sess, post_process_mask=True, decontaminate=True) if sess is not None else remove(pil_img, post_process_mask=True, decontaminate=True)
+        
+        # Clean alpha noise floor to wipe out residual dark specks
+        arr = np.array(cutout)
+        if arr.ndim == 3 and arr.shape[2] == 4:
+            alpha = arr[:, :, 3]
+            alpha[alpha < 18] = 0
+            alpha[alpha > 240] = 255
+            arr[:, :, 3] = alpha
+            cutout = Image.fromarray(arr)
+
         # Cutout is RGBA
         if target_color is not None:
             bg = Image.new("RGBA", cutout.size, target_color + (255,))

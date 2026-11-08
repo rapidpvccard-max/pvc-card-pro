@@ -44,19 +44,32 @@ def test_bg_remover_engine_and_api():
     with open(temp_img_path, "wb") as f:
         f.write(img_data)
 
-    # Test Transparent Mode
+    # Test Transparent Mode (Ultra-HD Studio)
     res_trans = process_background_removal(
         input_file_path=temp_img_path,
         output_dir=os.path.join(out_dir, "trans"),
-        bg_color_name="transparent"
+        bg_color_name="transparent",
+        precision_mode="studio"
     )
     assert res_trans["success"] is True, "Engine transparent mode failed"
     assert os.path.exists(res_trans["transparent_path"]), "transparent.png does not exist"
     assert res_trans["has_color"] is False
+    assert res_trans["precision_mode"] == "studio"
     with Image.open(res_trans["transparent_path"]) as cutout:
         assert cutout.mode == "RGBA", f"Expected RGBA, got {cutout.mode}"
         assert cutout.size[0] == 600 and cutout.size[1] == 600
-    print("  ✅ Engine Transparent Cutout Generated Successfully (600x600 RGBA)")
+    print("  ✅ Engine Ultra-HD Studio Transparent Cutout Generated Successfully (600x600 RGBA)")
+
+    # Test Turbo Mode
+    res_turbo = process_background_removal(
+        input_file_path=temp_img_path,
+        output_dir=os.path.join(out_dir, "turbo"),
+        bg_color_name="transparent",
+        precision_mode="turbo"
+    )
+    assert res_turbo["success"] is True
+    assert res_turbo["precision_mode"] == "turbo"
+    print("  ✅ Engine Turbo Mode Generated Successfully")
 
     # Test Studio Color Mode (light_blue)
     res_blue = process_background_removal(

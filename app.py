@@ -1442,6 +1442,7 @@ async def generate_bg_remover(
     file: UploadFile = File(...),
     bg_color: str = Form("transparent"),
     custom_hex: Optional[str] = Form(None),
+    precision: str = Form("studio"),
     current_user: models.User = Depends(auth.get_current_user),
     db: Session = Depends(database.get_db)
 ):
@@ -1509,7 +1510,8 @@ async def generate_bg_remover(
             input_file_path=temp_filepath,
             output_dir=output_dir,
             bg_color_name=bg_color,
-            custom_hex=custom_hex
+            custom_hex=custom_hex,
+            precision_mode=precision
         )
 
         try:
@@ -1563,6 +1565,7 @@ async def generate_bg_remover(
             "transparent_url": f"/download-bg-remover/{run_id}/transparent",
             "colored_url": f"/download-bg-remover/{run_id}/colored" if bg_res.get("has_color") else None,
             "has_color": bool(bg_res.get("has_color")),
+            "precision_mode": bg_res.get("precision_mode", "studio"),
             "width": bg_res.get("width"),
             "height": bg_res.get("height"),
             "original_width": bg_res.get("original_width"),
