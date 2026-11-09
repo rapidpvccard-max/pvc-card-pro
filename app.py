@@ -44,6 +44,9 @@ async def cleanup_temporary_files():
                             if os.path.isfile(filepath) and os.stat(filepath).st_mtime < now - retention_seconds:
                                 os.remove(filepath)
                                 print(f"[Zero-Retention] Purged stale file: {filepath}")
+                            elif os.path.isdir(filepath) and os.stat(filepath).st_mtime < now - retention_seconds:
+                                shutil.rmtree(filepath, ignore_errors=True)
+                                print(f"[Zero-Retention] Purged stale directory: {filepath}")
                         except Exception:
                             pass
 
@@ -68,10 +71,15 @@ async def cleanup_temporary_files():
 async def lifespan(app: FastAPI):
     # Startup
     task = asyncio.create_task(cleanup_temporary_files())
-    # Pre-warm AI passport model in background thread for instant response
+    # Pre-warm AI passport & bg remover models in background threads for instant response
     try:
         from engine.passport_photo import _get_rembg_session
         asyncio.create_task(run_in_threadpool(_get_rembg_session))
+    except Exception:
+        pass
+    try:
+        from engine.bg_remover import _get_bg_remover_session
+        asyncio.create_task(run_in_threadpool(_get_bg_remover_session, "turbo"))
     except Exception:
         pass
     yield
