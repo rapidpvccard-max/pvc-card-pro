@@ -1725,6 +1725,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (bgRemResContent) bgRemResContent.style.display = 'none';
             if (resumeResContent) resumeResContent.style.display = 'block';
 
+            // Update main result headline for resume maker
+            const resTitle = document.getElementById('result-title');
+            const resSubtitle = document.getElementById('result-subtitle');
+            if (resTitle) resTitle.textContent = '📄 Job-Ready Resume Ready!';
+            if (resSubtitle) resSubtitle.textContent = 'Vector-crisp 300 DPI A4 document ready for printing or job submission.';
+
             // Update Preview & Downloads
             const previewImg = document.getElementById('resume-preview-img');
             const btnPdf = document.getElementById('btn-dl-resume-pdf');

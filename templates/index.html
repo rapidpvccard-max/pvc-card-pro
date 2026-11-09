@@ -291,6 +291,46 @@
         }
     }
 
+    /* Resume Action Buttons - Perfect 1-Line Row (4 Columns) */
+    .resume-action-buttons-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 18px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .resume-action-btn {
+        justify-content: center;
+        font-size: 0.88rem;
+        padding: 13px 12px;
+        font-weight: 800;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        white-space: nowrap;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+        border: none;
+        min-width: 0;
+    }
+    .resume-action-btn:hover {
+        transform: translateY(-2px);
+    }
+    @media (max-width: 960px) {
+        .resume-action-buttons-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+    }
+    @media (max-width: 520px) {
+        .resume-action-buttons-grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
+
     /* Passport Studio Background Color - Modern Studio Tile Bar */
     .passport-bg-color-wrapper {
         margin-bottom: 20px;
@@ -2393,30 +2433,30 @@ Tally ERP 9 & Accounting Fundamentals</textarea>
                         <img id="resume-preview-img" src="" alt="Resume Document Preview" style="max-height: 600px; max-width: 100%; object-fit: contain; box-shadow: 0 10px 25px rgba(0,0,0,0.18); border: 1px solid #cbd5e1; background: #ffffff;">
                     </div>
 
-                    <!-- Action Buttons Grid -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 18px;">
-                        <!-- Primary: Download A4 PDF -->
-                        <a id="btn-dl-resume-pdf" href="#" download class="btn-primary" style="justify-content: center; font-size: 0.98rem; padding: 14px 20px; background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); border: none; font-weight: 800; color: #ffffff; text-decoration: none; border-radius: 14px; box-shadow: 0 6px 18px rgba(79, 70, 229, 0.35); display: inline-flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s ease;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                            <span>Download Print-Ready A4 PDF</span>
+                    <!-- Action Buttons: Clean 1-Line Row (4 Equal Columns) with Zero Wrapping -->
+                    <div class="resume-action-buttons-grid">
+                        <!-- 1. Primary: Download A4 PDF -->
+                        <a id="btn-dl-resume-pdf" href="#" download class="resume-action-btn" style="background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); color: #ffffff; box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            <span>Download PDF</span>
                         </a>
 
-                        <!-- Secondary: Direct Print -->
-                        <button id="btn-print-resume" type="button" class="btn-primary" style="justify-content: center; font-size: 0.95rem; padding: 14px 20px; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); border: none; font-weight: 800; color: #ffffff; border-radius: 14px; box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35); display: inline-flex; align-items: center; gap: 10px; cursor: pointer;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-                            <span>Direct Print PDF</span>
+                        <!-- 2. Secondary: Direct Print -->
+                        <button id="btn-print-resume" type="button" class="resume-action-btn" style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #ffffff; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                            <span>Direct Print</span>
                         </button>
 
-                        <!-- Tertiary: Download Preview Image (PNG) -->
-                        <a id="btn-dl-resume-img" href="#" download class="btn-outline" style="justify-content: center; font-size: 0.92rem; padding: 14px 20px; border: 1.5px solid #cbd5e1; font-weight: 800; color: #0f172a; text-decoration: none; border-radius: 14px; background: #ffffff; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <!-- 3. Tertiary: Download Preview Image (PNG) -->
+                        <a id="btn-dl-resume-img" href="#" download class="resume-action-btn" style="background: #ffffff; border: 1.5px solid #cbd5e1; color: #0f172a; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                            <span>Download PNG Image</span>
+                            <span>Download PNG</span>
                         </a>
 
-                        <!-- Edit Details Button -->
-                        <button id="btn-resume-edit" type="button" class="btn-outline" style="justify-content: center; font-size: 0.92rem; padding: 14px 20px; border: 1.5px solid #cbd5e1; font-weight: 800; color: #0f172a; border-radius: 14px; background: #ffffff; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <!-- 4. Edit Details Button -->
+                        <button id="btn-resume-edit" type="button" class="resume-action-btn" style="background: #ffffff; border: 1.5px solid #cbd5e1; color: #475569; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                            <span>✏️ Edit Resume Details</span>
+                            <span>Edit Details</span>
                         </button>
                     </div>
 
@@ -2615,5 +2655,5 @@ Tally ERP 9 & Accounting Fundamentals</textarea>
         input.type = input.type === 'password' ? 'text' : 'password';
     }
 </script>
-<script src="/static/js/app.js?v=38"></script>
+<script src="/static/js/app.js?v=39"></script>
 {% endblock %}
