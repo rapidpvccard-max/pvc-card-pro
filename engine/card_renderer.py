@@ -121,14 +121,16 @@ class PersistentBrowserWorker:
                     )
                     page_front = ctx.new_page()
                     page_back = ctx.new_page()
+                    page_pdf = ctx.new_page()
 
                     # Pre-warm Chromium layout engine and Indian fonts
                     try:
                         warm_html = "<html><head><style>body{font-family:'Nirmala UI','Noto Sans','Noto Sans Devanagari','Noto Sans Gujarati',sans-serif;}</style></head><body><h1>भारत સરકાર 1234</h1></body></html>"
-                        page_front.set_content(warm_html, wait_until="commit", timeout=5000)
+                        page_front.set_content(warm_html, wait_until="domcontentloaded", timeout=5000)
                         page_front.screenshot(type="png")
-                        page_back.set_content(warm_html, wait_until="commit", timeout=5000)
+                        page_back.set_content(warm_html, wait_until="domcontentloaded", timeout=5000)
                         page_back.screenshot(type="png")
+                        page_pdf.set_content(warm_html, wait_until="domcontentloaded", timeout=5000)
                     except Exception as we:
                         print(f"[CardRenderer] Pre-warm notice: {we}")
 
@@ -142,11 +144,9 @@ class PersistentBrowserWorker:
 
                         if isinstance(task, tuple) and len(task) == 4 and task[0] == "pdf":
                             _, html_content, pdf_path, res_queue = task
-                            page = None
                             try:
-                                page = ctx.new_page()
-                                page.set_content(html_content, wait_until="load", timeout=10000)
-                                page.pdf(
+                                page_pdf.set_content(html_content, wait_until="domcontentloaded", timeout=10000)
+                                page_pdf.pdf(
                                     path=pdf_path,
                                     format="A4",
                                     print_background=True,
@@ -155,38 +155,47 @@ class PersistentBrowserWorker:
                                 res_queue.put((True, None))
                             except Exception as e:
                                 print(f"[CardRenderer] PDF render error in persistent worker: {e}")
+                                try:
+                                    page_pdf.close()
+                                except Exception:
+                                    pass
+                                try:
+                                    page_pdf = ctx.new_page()
+                                except Exception:
+                                    pass
                                 res_queue.put((False, str(e)))
                             finally:
-                                if page:
-                                    try:
-                                        page.close()
-                                    except Exception:
-                                        pass
                                 self.req_queue.task_done()
                             continue
 
                         front_html, back_html, front_path, back_path, res_queue = task
-                        page = None
                         try:
-                            page = ctx.new_page()
-                            # Render Front
-                            page.set_content(front_html, wait_until="domcontentloaded", timeout=10000)
-                            page.screenshot(path=front_path, type="png")
+                            # Render Front on dedicated reusable page
+                            page_front.set_content(front_html, wait_until="domcontentloaded", timeout=10000)
+                            page_front.screenshot(path=front_path, type="png")
 
-                            # Render Back
-                            page.set_content(back_html, wait_until="domcontentloaded", timeout=10000)
-                            page.screenshot(path=back_path, type="png")
+                            # Render Back on dedicated reusable page
+                            page_back.set_content(back_html, wait_until="domcontentloaded", timeout=10000)
+                            page_back.screenshot(path=back_path, type="png")
 
                             res_queue.put((True, None))
                         except Exception as e:
                             print(f"[CardRenderer] Render error in persistent worker: {e}")
+                            try:
+                                page_front.close()
+                            except Exception:
+                                pass
+                            try:
+                                page_back.close()
+                            except Exception:
+                                pass
+                            try:
+                                page_front = ctx.new_page()
+                                page_back = ctx.new_page()
+                            except Exception:
+                                pass
                             res_queue.put((False, str(e)))
                         finally:
-                            if page:
-                                try:
-                                    page.close()
-                                except Exception:
-                                    pass
                             self.req_queue.task_done()
             except Exception as e:
                 print(f"[CardRenderer] Worker thread error ({e}). Restarting worker in 1s...")
