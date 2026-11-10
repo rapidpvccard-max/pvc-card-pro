@@ -1034,8 +1034,8 @@ document.addEventListener('DOMContentLoaded', () => {
             uploadBtn.disabled = false;
         } else {
             fileDropArea.classList.remove('has-file');
-            //
-            Array.from(fileDropArea.children).forEach(c => { if(c.tagName !== 'INPUT') c.style.display = 'block'; });
+            // Restore default CSS display properties
+            Array.from(fileDropArea.children).forEach(c => { if(c.tagName !== 'INPUT') c.style.display = ''; });
             
             fileInfo.style.display = 'none';
             uploadBtn.disabled = true;

@@ -669,7 +669,10 @@
 
     /* Modern Drag & Drop Zone */
     .luxury-dropzone {
-        display: block;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
         width: 100%;
         border: 2px dashed #93c5fd;
         border-radius: 20px;
@@ -679,6 +682,7 @@
         background: linear-gradient(180deg, #f8fafc 0%, #eff6ff 100%);
         transition: all 0.25s ease;
         position: relative;
+        box-sizing: border-box;
     }
 
     .luxury-dropzone:hover {
@@ -699,6 +703,7 @@
         margin: 0 auto 16px;
         box-shadow: 0 8px 20px -3px rgba(37, 99, 235, 0.25);
         transition: transform 0.2s ease;
+        flex-shrink: 0;
     }
 
     .luxury-dropzone:hover .dropzone-icon-box {
@@ -711,11 +716,15 @@
         color: #0f172a;
         font-family: 'Plus Jakarta Sans', sans-serif;
         margin-bottom: 6px;
+        text-align: center;
+        width: 100%;
     }
 
     .dropzone-subtitle {
         font-size: 0.92rem;
         color: #64748b;
+        text-align: center;
+        width: 100%;
     }
 
     .dropzone-limit {
@@ -723,6 +732,8 @@
         color: #94a3b8;
         margin-top: 8px;
         font-weight: 600;
+        text-align: center;
+        width: 100%;
     }
 
     /* File Attached Banner */
@@ -2655,5 +2666,5 @@ Tally ERP 9 & Accounting Fundamentals</textarea>
         input.type = input.type === 'password' ? 'text' : 'password';
     }
 </script>
-<script src="/static/js/app.js?v=39"></script>
+<script src="/static/js/app.js?v=40"></script>
 {% endblock %}

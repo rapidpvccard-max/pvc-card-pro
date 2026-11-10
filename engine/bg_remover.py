@@ -152,9 +152,9 @@ def process_background_removal(
     # 2. Fast Vectorized Defringing & Residual Noise Cleanup (30ms)
     cutout = defringe_and_clean_alpha(raw_cutout, noise_cutoff=24, solid_cutoff=238)
 
-    # 3. Save Transparent PNG (compress_level=3 for instant 30ms write without loss)
+    # 3. Save Transparent PNG
     transparent_path = os.path.join(output_dir, "transparent.png")
-    cutout.save(transparent_path, format="PNG", compress_level=3)
+    cutout.save(transparent_path, format="PNG", optimize=True)
 
     # 4. Handle Color Replacement (if requested)
     colored_path = None
