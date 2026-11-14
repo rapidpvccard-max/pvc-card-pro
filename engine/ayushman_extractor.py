@@ -1244,9 +1244,13 @@ def detect_vay_vandana(doc: fitz.Document) -> bool:
     'Ayushman Vay Vandana Card' (Senior Citizens 70+) vs standard 'Ayushman Card'.
     Checks:
     1. PDF text layer for Vay Vandana keywords in English, Hindi, Gujarati, Marathi, etc.
-    2. Front card header contour analysis on embedded background images:
-       Vay Vandana header contains two stacked lines with 22-character English text
-       'AYUSHMAN VAY VANDANA CARD' (width > 330px), whereas standard card has 'AYUSHMAN CARD' (12 chars).
+    2. Front card header analysis on the FRONT card background template:
+       - Strictly identifies the FRONT card by its bottom dark green footer (filtering out the back card).
+       - In Ayushman Vay Vandana cards, the orange header contains TWO stacked lines of text
+         (top row local language + bottom row English 'AYUSHMAN VAY VANDANA CARD'),
+         meaning substantial white text exists in both the upper (10-42%) and lower (58-90%) vertical slices.
+       - In standard Ayushman cards, text is printed on ONE single line in the middle
+         (upper slice is empty, top_white < 800).
     """
     try:
         full_text = ""
@@ -1271,21 +1275,39 @@ def detect_vay_vandana(doc: fitz.Document) -> bool:
                         continue
                     img_pil = Image.open(io.BytesIO(img_bytes)).convert("RGB")
                     img_np = np.array(img_pil)
-                    hdr = img_np[0:int(0.18 * h), int(0.40 * w):w]
-                    gray = cv2.cvtColor(hdr, cv2.COLOR_RGB2GRAY)
-                    _, thresh = cv2.threshold(gray, 220, 255, cv2.THRESH_BINARY)
-                    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                    english_letters = [
-                        cv2.boundingRect(c) for c in contours 
-                        if cv2.contourArea(c) > 25 and 40 <= cv2.boundingRect(c)[1] <= 85
-                    ]
-                    if english_letters:
-                        min_x = min(b[0] for b in english_letters)
-                        max_x = max(b[0] + b[2] for b in english_letters)
-                        span_w = max_x - min_x
-                        char_count = len(english_letters)
-                        if span_w > 330 and char_count >= 18:
-                            return True
+
+                    # Strictly verify this is the FRONT card by detecting the dark green footer
+                    # Ayushman front cards have a prominent green footer at the bottom 12%
+                    bot = img_np[int(0.88 * h):, :]
+                    r_bot, g_bot, b_bot = bot[:, :, 0], bot[:, :, 1], bot[:, :, 2]
+                    green_pixels = (g_bot > 80) & (r_bot < 70) & (b_bot < 70)
+                    if np.sum(green_pixels) < 5000:
+                        continue  # Skip back card templates or unrendered layers
+
+                    # Front card header crop (top 14% height, right 45% width)
+                    hdr_crop = img_np[0:int(0.14 * h), int(0.55 * w):w]
+                    r, g, b = hdr_crop[:, :, 0], hdr_crop[:, :, 1], hdr_crop[:, :, 2]
+                    orange = (r > 190) & (g > 50) & (g < 175) & (b < 100)
+                    if np.sum(orange) < 1000:
+                        continue
+
+                    ys, xs = np.where(orange)
+                    ymin, ymax = ys.min(), ys.max()
+                    bar_h = ymax - ymin
+                    if bar_h < 30:
+                        continue
+
+                    # Inside the orange bar, detect white text pixels
+                    white = (r > 210) & (g > 210) & (b > 210)
+                    top_slice = white[ymin + int(0.10 * bar_h) : ymin + int(0.42 * bar_h), :]
+                    bot_slice = white[ymin + int(0.58 * bar_h) : ymin + int(0.90 * bar_h), :]
+
+                    top_white = np.sum(top_slice)
+                    bot_white = np.sum(bot_slice)
+                    if top_white > 1500 and bot_white > 1500:
+                        return True
+                    else:
+                        return False
     except Exception as e:
         logger.warning(f"detect_vay_vandana check exception: {e}")
     return False
@@ -1415,6 +1437,15 @@ def extract_ayushman_data(pdf_path: str, password: Optional[str] = None) -> Ayus
                 m_year = re.search(r'\b(19\d{2}|20\d{2})\b', page1_text)
                 if m_year:
                     data.yob = m_year.group(1)
+
+        # Age validation: Ayushman Vay Vandana Card is legally and exclusively for Senior Citizens 70+
+        if data.is_vay_vandana and data.yob and str(data.yob).strip().isdigit():
+            yob_val = int(str(data.yob).strip())
+            # Beneficiary must be 70+ years of age (born in or before 1956)
+            if (2026 - yob_val) < 70:
+                data.is_vay_vandana = False
+                data.card_title_en = "AYUSHMAN CARD"
+                trace.append(f"Beneficiary YOB is {yob_val} (age {2026 - yob_val} < 70). Reverted to standard Ayushman Card.")
 
         if not data.gender:
             m_gender = re.search(r'(?:GENDER|Gender|જાતિ|लिंग)\s*[:/]?\s*(MALE|FEMALE|TRANSGENDER|Male|Female|पुरुष|महिला|\bF\b|\bM\b)', page1_text, re.IGNORECASE)
