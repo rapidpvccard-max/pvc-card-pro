@@ -1023,12 +1023,12 @@ def initiate_cashfree_payment(
             detail="Cashfree Payment Gateway is not configured. Please set CASHFREE_APP_ID and CASHFREE_SECRET_KEY in server environment."
         )
 
-    # Determine Base URL
-    env_base_url = os.environ.get("BASE_URL", "https://rapidpvc.online").rstrip("/")
+    # Determine Base URL - Cashfree strictly mandates HTTPS return_url in production
+    env_base_url = os.environ.get("BASE_URL", "").rstrip("/")
     req_base_url = str(request.base_url).rstrip("/")
-    if "localhost" in req_base_url or "127.0.0.1" in req_base_url:
+    if req_base_url.startswith("https://"):
         base_url = req_base_url
-    elif env_base_url:
+    elif env_base_url and env_base_url.startswith("https://"):
         base_url = env_base_url
     else:
         base_url = "https://rapidpvc.online"
