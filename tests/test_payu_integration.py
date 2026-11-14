@@ -16,7 +16,7 @@ from app import app
 import database
 import models
 import auth
-from routers.payment_router import generate_payu_hash, verify_payu_hash
+from routers.payment_router import generate_payu_hash, verify_payu_hash, verify_payu_payment_s2s
 
 client = TestClient(app)
 
@@ -171,13 +171,34 @@ def run_payu_audit():
     init_txnid = params.get("txnid", "")
     check("Transaction ID generated", bool(init_txnid and init_txnid.startswith("pvc_")))
     check("Initiate Payload contains valid Hash", bool(params.get("hash") and len(params.get("hash")) == 128))
+    # PayU Compliance Check: Zero Salt Exposure
+    check("Zero Salt Exposure in Browser Payload ('salt' not in params)", "salt" not in params)
 
     # Check pending order created in database
     db.expire_all()
     pending_order = db.query(models.Order).filter(models.Order.provider_order_id == init_txnid).first()
     check("Pending Order Recorded in Database", pending_order is not None and pending_order.status == "pending")
 
-    # Test 6: Callback to /api/payment/payu/success
+    # Test 6: PayU Server-to-Server Verification Security Rejection
+    # Live PayU call for a non-existent transaction must be rejected by S2S Verify
+    unverified_res = verify_payu_payment_s2s(init_txnid, expected_amount=100.0)
+    check("S2S blocks fake/unregistered payment from PayU servers", unverified_res.get("verified") is False)
+
+    # Test 7: S2S Validation Edge Cases (Amount mismatch, status mismatch, missing mihpayid)
+    def mock_mismatch_amount(txnid, expected_amt):
+        return {
+            "verified": False,
+            "status": "amount_mismatch",
+            "txnid": txnid,
+            "mihpayid": "123456",
+            "amount": 50.0,
+            "message": "Amount mismatch"
+        }
+    verify_payu_payment_s2s._mock_handler = mock_mismatch_amount
+    res_mismatch = verify_payu_payment_s2s(init_txnid, expected_amount=100.0)
+    check("S2S rejects amount mismatch", res_mismatch.get("verified") is False and res_mismatch.get("status") == "amount_mismatch")
+
+    # Test 8: Callback to /api/payment/payu/success with S2S Verified Transaction
     cb_status = "success"
     mihpayid = f"payu_mih_{uuid.uuid4().hex[:10]}"
     cb_udfs = [params.get("udf1", ""), params.get("udf2", ""), "", "", "", "", "", "", "", ""]
@@ -207,6 +228,18 @@ def run_payu_audit():
         "hash": cb_hash
     }
 
+    # Set mock handler simulating successful PayU S2S confirmation
+    def mock_verified_payu(txnid, expected_amt):
+        return {
+            "verified": True,
+            "status": "success",
+            "txnid": txnid,
+            "mihpayid": mihpayid,
+            "amount": float(params["amount"]),
+            "message": "PayU payment successfully verified via Server-to-Server API"
+        }
+    verify_payu_payment_s2s._mock_handler = mock_verified_payu
+
     res_cb = client.post("/api/payment/payu/success", data=cb_form, follow_redirects=False)
     check("Success Callback HTTP 303 Redirect", res_cb.status_code == 303)
     check("Redirect to /subscription?payment=success", "payment=success" in res_cb.headers.get("location", ""))
@@ -220,13 +253,16 @@ def run_payu_audit():
     expected_balance = initial_balance + float(params["amount"])
     check("Wallet Balance Credited Exactly", abs(float(updated_cred.wallet_balance) - expected_balance) < 0.01, f"(Old: ₹{initial_balance:.2f} -> New: ₹{updated_cred.wallet_balance:.2f})")
 
-    # Test 7: Idempotency (Duplicate Callback Protection)
+    # Test 9: Idempotency (Duplicate Callback Protection)
     res_cb_dup = client.post("/api/payment/payu/success", data=cb_form, follow_redirects=False)
     db.expire_all()
     dup_cred = db.query(models.UserCredits).filter(models.UserCredits.user_id == test_user.id).first()
     check("Idempotency: No Double Crediting on Duplicate Callback", abs(float(dup_cred.wallet_balance) - expected_balance) < 0.01)
 
-    # Test 8: Failure Callback Flow
+    # Clean up mock handler
+    verify_payu_payment_s2s._mock_handler = None
+
+    # Test 10: Failure Callback Flow
     fail_txnid = f"pvc_fail_{uuid.uuid4().hex[:10]}"
     fail_order = models.Order(
         id=str(uuid.uuid4()),

@@ -5,6 +5,7 @@ import uuid
 import hashlib
 import hmac
 import base64
+import requests
 from typing import Any, cast
 import stripe
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -257,6 +258,190 @@ async def stripe_webhook(request: Request, db: Session = Depends(database.get_db
 PAYU_MERCHANT_KEY = os.environ.get("PAYU_MERCHANT_KEY", "HbMDKB")
 PAYU_MERCHANT_SALT = os.environ.get("PAYU_MERCHANT_SALT", "5zmZRvGOsrXkLcajkaIRWzdDGfZ0WYEB")
 PAYU_PAYMENT_URL = os.environ.get("PAYU_PAYMENT_URL", "https://secure.payu.in/_payment")
+PAYU_VERIFY_URL = os.environ.get("PAYU_VERIFY_URL", "https://info.payu.in/merchant/postservice.php?form=2")
+
+
+def get_payu_verify_url() -> str:
+    """
+    Get the official PayU PostService Verification endpoint.
+    Live: https://info.payu.in/merchant/postservice.php?form=2
+    Test: https://test.payu.in/merchant/postservice.php?form=2
+    """
+    verify_url = os.environ.get("PAYU_VERIFY_URL", PAYU_VERIFY_URL).strip()
+    if verify_url:
+        return verify_url
+    payment_url = os.environ.get("PAYU_PAYMENT_URL", PAYU_PAYMENT_URL).strip().lower()
+    if "test.payu.in" in payment_url:
+        return "https://test.payu.in/merchant/postservice.php?form=2"
+    return "https://info.payu.in/merchant/postservice.php?form=2"
+
+
+def verify_payu_payment_s2s(txnid: str, expected_amount: float = None) -> dict:
+    """
+    Server-to-Server Payment Verification API (verify_payment command).
+    Mandated by PayU Security Compliance to prevent tampered or spoofed payments.
+
+    Calls PayU PostService S2S API:
+      POST https://info.payu.in/merchant/postservice.php?form=2
+      Payload: { key, command='verify_payment', var1=txnid, hash=sha512(key|command|var1|salt) }
+
+    Validates:
+      1. Cryptographic S2S hash
+      2. PayU API status == 1
+      3. Transaction ID (txnid) match
+      4. PayU ID (mihpayid) valid and not 'Not Found'
+      5. Payment status == 'success'
+      6. Payment amount matches expected order amount
+    """
+    key = os.environ.get("PAYU_MERCHANT_KEY", PAYU_MERCHANT_KEY).strip()
+    salt = os.environ.get("PAYU_MERCHANT_SALT", PAYU_MERCHANT_SALT).strip()
+    command = "verify_payment"
+
+    # Allow test suite mocking when running in test mode
+    mock_handler = getattr(verify_payu_payment_s2s, "_mock_handler", None)
+    if os.environ.get("TESTING") == "1" and callable(mock_handler):
+        return mock_handler(txnid, expected_amount)
+
+    if not key or not salt or not txnid:
+        return {
+            "verified": False,
+            "status": "error",
+            "txnid": txnid,
+            "mihpayid": None,
+            "amount": 0.0,
+            "raw": {},
+            "message": "Missing key, salt, or txnid for PayU verification"
+        }
+
+    hash_str = f"{key}|{command}|{txnid}|{salt}"
+    hash_val = hashlib.sha512(hash_str.encode("utf-8")).hexdigest().lower()
+
+    verify_url = get_payu_verify_url()
+    payload = {
+        "key": key,
+        "command": command,
+        "var1": txnid,
+        "hash": hash_val
+    }
+
+    try:
+        resp = requests.post(
+            verify_url,
+            data=payload,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            timeout=15
+        )
+        resp_data = resp.json()
+    except Exception as e:
+        print(f"[PayU S2S Verify Request Error] {e}")
+        return {
+            "verified": False,
+            "status": "network_error",
+            "txnid": txnid,
+            "mihpayid": None,
+            "amount": 0.0,
+            "raw": {},
+            "message": f"Failed to contact PayU verification endpoint: {str(e)}"
+        }
+
+    root_status = resp_data.get("status")
+    if str(root_status) != "1":
+        msg = resp_data.get("msg", "PayU verify returned status 0 (unsuccessful)")
+        print(f"[PayU S2S Verify Status 0] txnid={txnid}, msg={msg}")
+        return {
+            "verified": False,
+            "status": "unverified",
+            "txnid": txnid,
+            "mihpayid": None,
+            "amount": 0.0,
+            "raw": resp_data,
+            "message": msg
+        }
+
+    tx_details = resp_data.get("transaction_details", {})
+    tx_info = tx_details.get(txnid)
+    if not tx_info and isinstance(tx_details, dict) and len(tx_details) == 1:
+        tx_info = next(iter(tx_details.values()))
+
+    if not tx_info or not isinstance(tx_info, dict):
+        return {
+            "verified": False,
+            "status": "not_found",
+            "txnid": txnid,
+            "mihpayid": None,
+            "amount": 0.0,
+            "raw": resp_data,
+            "message": f"No transaction details found for txnid {txnid}"
+        }
+
+    payu_status = str(tx_info.get("status", "")).strip().lower()
+    mihpayid = str(tx_info.get("mihpayid", "")).strip()
+    returned_txnid = str(tx_info.get("txnid", "")).strip()
+
+    raw_amt = tx_info.get("amt") or tx_info.get("transaction_amount") or 0.0
+    try:
+        verified_amt = float(raw_amt)
+    except (ValueError, TypeError):
+        verified_amt = 0.0
+
+    # 1. Validate payment status is 'success'
+    if payu_status != "success":
+        return {
+            "verified": False,
+            "status": payu_status,
+            "txnid": txnid,
+            "mihpayid": mihpayid,
+            "amount": verified_amt,
+            "raw": resp_data,
+            "message": f"PayU payment status is '{payu_status}', expected 'success'"
+        }
+
+    # 2. Validate transaction ID (txnid)
+    if returned_txnid and returned_txnid != txnid:
+        return {
+            "verified": False,
+            "status": "mismatch",
+            "txnid": txnid,
+            "mihpayid": mihpayid,
+            "amount": verified_amt,
+            "raw": resp_data,
+            "message": f"txnid mismatch: expected {txnid}, got {returned_txnid}"
+        }
+
+    # 3. Validate PayU ID (mihpayid)
+    if not mihpayid or mihpayid.lower() == "not found":
+        return {
+            "verified": False,
+            "status": "missing_mihpayid",
+            "txnid": txnid,
+            "mihpayid": None,
+            "amount": verified_amt,
+            "raw": resp_data,
+            "message": "PayU mihpayid is missing or invalid"
+        }
+
+    # 4. Validate payment amount
+    if expected_amount is not None:
+        if abs(verified_amt - float(expected_amount)) > 0.05:
+            return {
+                "verified": False,
+                "status": "amount_mismatch",
+                "txnid": txnid,
+                "mihpayid": mihpayid,
+                "amount": verified_amt,
+                "raw": resp_data,
+                "message": f"Amount mismatch: expected ₹{expected_amount:.2f}, verified ₹{verified_amt:.2f}"
+            }
+
+    return {
+        "verified": True,
+        "status": "success",
+        "txnid": txnid,
+        "mihpayid": mihpayid,
+        "amount": verified_amt,
+        "raw": resp_data,
+        "message": "PayU payment successfully verified via Server-to-Server API"
+    }
 
 def generate_payu_hash(
     key: str,
@@ -401,28 +586,33 @@ def initiate_payu_payment(
     db.add(new_order)
     db.commit()
 
+    params = {
+        "key": key,
+        "txnid": txnid,
+        "amount": amount_str,
+        "productinfo": productinfo,
+        "firstname": firstname,
+        "email": email,
+        "phone": phone,
+        "surl": surl,
+        "furl": furl,
+        "hash": hash_val,
+        "udf1": udf1,
+        "udf2": udf2
+    }
+    # Compliance Security: Ensure merchant salt is NEVER present in browser payload
+    params.pop("salt", None)
+
     return {
         "action": action_url,
-        "params": {
-            "key": key,
-            "txnid": txnid,
-            "amount": amount_str,
-            "productinfo": productinfo,
-            "firstname": firstname,
-            "email": email,
-            "phone": phone,
-            "surl": surl,
-            "furl": furl,
-            "hash": hash_val,
-            "udf1": udf1,
-            "udf2": udf2
-        }
+        "params": params
     }
 
 
 def _process_payu_payment_success(data: dict, db: Session) -> tuple[bool, str, float]:
     """
     Internal helper to atomically mark order as paid and credit user's wallet.
+    Validates PayU Server-to-Server verify_payment API before crediting funds.
     Returns (success, txnid, recharge_amount).
     """
     txnid = data.get("txnid", "")
@@ -455,71 +645,87 @@ def _process_payu_payment_success(data: dict, db: Session) -> tuple[bool, str, f
     if order.status == "paid":
         return True, txnid, float(order.amount)
 
-    if str(status).lower() == "success":
-        order.status = "paid"
-        order.provider_payment_id = str(mihpayid)
-
-        user_credits: Any = db.query(models.UserCredits).filter(models.UserCredits.user_id == order.user_id).first()
-        if not user_credits:
-            user_credits = models.UserCredits(user_id=order.user_id, wallet_balance=0.0, total_generated=0, cost_per_card=0.95)
-            db.add(user_credits)
-
-        recharge_amount = float(order.amount)
-        user_credits.wallet_balance = float(user_credits.wallet_balance or 0.0) + recharge_amount
-
-        # Update per-card rate
-        plan: Any = db.query(models.Plan).filter(models.Plan.id == order.plan_id).first()
-        if plan and (plan.id == 1 or "trial" in str(plan.name).lower()):
-            user_credits.cost_per_card = 2.00
-        else:
-            user_credits.cost_per_card = 0.95
-
-        tx = models.CreditTransaction(
-            user_id=order.user_id,
-            amount=recharge_amount,
-            transaction_type="purchase",
-            reference_id=txnid,
-            balance_after=user_credits.wallet_balance
-        )
-        db.add(tx)
-        db.commit()
-
-        # Dispatch Payment Receipt & Tax Invoice Email to User & Alert to Admin
-        try:
-            from services.email_service import send_payment_invoice_email, send_admin_payment_notification
-            paid_user: Any = db.query(models.User).filter(models.User.id == order.user_id).first()
-            if paid_user and paid_user.email:
-                plan_name_val = plan.name if plan and getattr(plan, 'name', None) else f"Plan #{order.plan_id}"
-                # 1. Customer Tax Invoice
-                send_payment_invoice_email(
-                    to_email=str(paid_user.email),
-                    user_name=str(paid_user.name or "Operator"),
-                    txnid=str(txnid),
-                    amount=float(recharge_amount),
-                    plan_name=str(plan_name_val),
-                    new_wallet_balance=float(user_credits.wallet_balance or 0.0),
-                    cost_per_card=float(user_credits.cost_per_card or 0.95),
-                    mihpayid=str(mihpayid) if mihpayid else None
-                )
-                # 2. Dedicated Admin Sales Notification directly to Admin Inbox
-                send_admin_payment_notification(
-                    user_name=str(paid_user.name or "Operator"),
-                    user_email=str(paid_user.email),
-                    txnid=str(txnid),
-                    amount=float(recharge_amount),
-                    plan_name=str(plan_name_val),
-                    new_wallet_balance=float(user_credits.wallet_balance or 0.0),
-                    gateway="PayU",
-                    gateway_ref=str(mihpayid) if mihpayid else None
-                )
-        except Exception as email_err:
-            print(f"[Payment Invoice Email Dispatch Error] {email_err}")
-
-        return True, txnid, recharge_amount
-    else:
+    # Initial browser callback status check
+    if str(status).lower() != "success":
         order.status = "failed"
         db.commit()
         return False, txnid, 0.0
+
+    # =========================================================================
+    # PAYU COMPLIANCE: Server-to-Server Verify Payment API Call
+    # Confirms amount, txnid, mihpayid, and status directly with PayU servers
+    # =========================================================================
+    verify_result = verify_payu_payment_s2s(txnid=txnid, expected_amount=float(order.amount))
+    if not verify_result.get("verified"):
+        print(f"[PayU Compliance Alert] S2S Verification failed for txnid={txnid}: {verify_result.get('message')}")
+        order.status = "failed"
+        db.commit()
+        return False, txnid, 0.0
+
+    verified_mihpayid = str(verify_result.get("mihpayid") or mihpayid)
+    recharge_amount = float(verify_result.get("amount") or order.amount)
+
+    order.status = "paid"
+    order.gateway = "payu"
+    order.provider_payment_id = verified_mihpayid
+
+    user_credits: Any = db.query(models.UserCredits).filter(models.UserCredits.user_id == order.user_id).first()
+    if not user_credits:
+        user_credits = models.UserCredits(user_id=order.user_id, wallet_balance=0.0, total_generated=0, cost_per_card=0.95)
+        db.add(user_credits)
+
+    user_credits.wallet_balance = float(user_credits.wallet_balance or 0.0) + recharge_amount
+
+    # Update per-card rate
+    plan: Any = db.query(models.Plan).filter(models.Plan.id == order.plan_id).first()
+    if plan and (plan.id == 1 or "trial" in str(plan.name).lower()):
+        user_credits.cost_per_card = 2.00
+    else:
+        user_credits.cost_per_card = 0.95
+
+    tx = models.CreditTransaction(
+        user_id=order.user_id,
+        amount=recharge_amount,
+        transaction_type="purchase",
+        reference_id=txnid,
+        balance_after=user_credits.wallet_balance
+    )
+    db.add(tx)
+    db.commit()
+
+    # Dispatch Payment Receipt & Tax Invoice Email to User & Alert to Admin
+    try:
+        from services.email_service import send_payment_invoice_email, send_admin_payment_notification
+        paid_user: Any = db.query(models.User).filter(models.User.id == order.user_id).first()
+        if paid_user and paid_user.email:
+            plan_name_val = plan.name if plan and getattr(plan, 'name', None) else f"Plan #{order.plan_id}"
+            # 1. Customer Tax Invoice
+            send_payment_invoice_email(
+                to_email=str(paid_user.email),
+                user_name=str(paid_user.name or "Operator"),
+                txnid=str(txnid),
+                amount=float(recharge_amount),
+                plan_name=str(plan_name_val),
+                new_wallet_balance=float(user_credits.wallet_balance or 0.0),
+                cost_per_card=float(user_credits.cost_per_card or 0.95),
+                mihpayid=str(verified_mihpayid) if verified_mihpayid else None,
+                gateway="PayU"
+            )
+            # 2. Dedicated Admin Sales Notification directly to Admin Inbox
+            send_admin_payment_notification(
+                user_name=str(paid_user.name or "Operator"),
+                user_email=str(paid_user.email),
+                txnid=str(txnid),
+                amount=float(recharge_amount),
+                plan_name=str(plan_name_val),
+                new_wallet_balance=float(user_credits.wallet_balance or 0.0),
+                gateway="PayU",
+                gateway_ref=str(verified_mihpayid) if verified_mihpayid else None
+            )
+    except Exception as email_err:
+        print(f"[Payment Invoice Email Dispatch Error] {email_err}")
+
+    return True, txnid, recharge_amount
 
 
 @router.api_route("/payu/success", methods=["GET", "POST"])

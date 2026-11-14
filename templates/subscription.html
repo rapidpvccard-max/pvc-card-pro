@@ -1185,6 +1185,7 @@
                 form.style.display = 'none';
                 
                 for (const [key, value] of Object.entries(result.params)) {
+                    if (key.toLowerCase() === 'salt') continue; // PayU Security: Never send salt in browser form
                     const input = document.createElement('input');
                     input.type = 'hidden';
                     input.name = key;
