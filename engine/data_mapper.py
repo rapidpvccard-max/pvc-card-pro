@@ -388,7 +388,9 @@ def map_ayushman_data(engine_data: dict) -> dict:
             "ration_label": get_str("ration_label") or "Ration/Other ID:"
         },
         "scheme": {
-            "card_title_local": get_str("card_title_local") or "आयुष्मान कार्ड",
+            "is_vay_vandana": bool(engine_data.get("is_vay_vandana", False)),
+            "card_title_local": get_str("card_title_local") or ("आयुष्मान वय वंदना कार्ड" if engine_data.get("is_vay_vandana") else "आयुष्मान कार्ड"),
+            "card_title_en": get_str("card_title_en") or ("AYUSHMAN VAY VANDANA CARD" if engine_data.get("is_vay_vandana") else "AYUSHMAN CARD"),
             "coverage_amount_local": get_str("coverage_amount_local") or "₹ ५ लाख तक",
             "treatment_text_local": get_str("treatment_text_local") or "मुफ्त उपचार",
             "scheme_footer_local": footer_loc,

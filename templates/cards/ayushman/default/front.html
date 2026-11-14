@@ -40,6 +40,36 @@
             gap: 10px;
             z-index: 10;
         }
+        .vay-vandana-wrap {
+            right: 40px;
+            height: 80px;
+        }
+        .vay-vandana-box {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 2px;
+        }
+        .vay-vandana-local {
+            font-family: 'Nirmala UI', 'Noto Sans Devanagari', 'Noto Sans Gujarati', 'Noto Sans Telugu', 'Noto Sans Tamil', 'Noto Sans Kannada', 'Noto Sans Bengali', 'Noto Sans Malayalam', 'Noto Sans Gurmukhi', 'Noto Sans Oriya', 'Roboto', sans-serif;
+            font-size: 25px;
+            font-weight: 900;
+            color: #ffffff;
+            line-height: 1.1;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+        .vay-vandana-en {
+            font-family: 'Roboto', sans-serif;
+            font-size: 19px;
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            line-height: 1.1;
+            white-space: nowrap;
+        }
         .header-title-local {
             font-family: 'Nirmala UI', 'Noto Sans Devanagari', 'Noto Sans Gujarati', 'Noto Sans Telugu', 'Noto Sans Tamil', 'Noto Sans Kannada', 'Noto Sans Bengali', 'Noto Sans Malayalam', 'Noto Sans Gurmukhi', 'Noto Sans Oriya', 'Roboto', sans-serif;
             font-size: 32px;
@@ -358,11 +388,20 @@
 <div class="card">
 
     <!-- ── Top Header Title: Local Language + English (Inside Orange Header Bar) ── -->
+    {% if scheme.is_vay_vandana %}
+    <div class="header-title-wrap vay-vandana-wrap">
+        <div class="vay-vandana-box">
+            <span class="vay-vandana-local">{{ scheme.card_title_local }}</span>
+            <span class="vay-vandana-en">{{ scheme.card_title_en }}</span>
+        </div>
+    </div>
+    {% else %}
     <div class="header-title-wrap">
         <span class="header-title-local">{{ scheme.card_title_local or ('આયુષ્માન કાર્ડ' if person.state == 'Gujarat' else 'आयुष्मान कार्ड') }}</span>
         <span class="header-title-divider">/</span>
-        <span class="header-title-en">AYUSHMAN CARD</span>
+        <span class="header-title-en">{{ scheme.card_title_en or 'AYUSHMAN CARD' }}</span>
     </div>
+    {% endif %}
 
     <!-- ── Top Right: 2 Lines in LOCAL LANGUAGE (Below Orange Bar, in White Area) ── -->
     <div class="benefit-banner">

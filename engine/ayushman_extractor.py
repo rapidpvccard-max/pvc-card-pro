@@ -20,6 +20,8 @@ import logging
 from dataclasses import dataclass, asdict, field
 from typing import Optional, Any, Dict
 
+import cv2
+import numpy as np
 import fitz  # PyMuPDF
 from PIL import Image, ImageOps
 from pyzbar.pyzbar import decode as zbar_decode
@@ -36,6 +38,22 @@ if not logger.handlers:
     logger.addHandler(_h)
 logger.setLevel(logging.INFO)
 
+
+# Scheme Titles for Ayushman Vay Vandana Card (Senior Citizens 70+)
+VAY_VANDANA_TITLES: Dict[str, str] = {
+    "hi": "आयुष्मान वय वंदना कार्ड",
+    "mr": "आयुष्मान वय वंदना कार्ड",
+    "gu": "આયુષ્માન વય વંદના કાર્ડ",
+    "te": "ఆయుష్మాన్ వయ వందన కార్డ్",
+    "ta": "ஆயுஷ்மான் வய வந்தனா அட்டை",
+    "kn": "ಆಯುಷ್ಮಾನ್ ವಯ ವಂದನಾ ಕಾರ್ಡ್",
+    "bn": "আয়ুষ্মান বয় বন্দনা কার্ড",
+    "pa": "ਆਯੁਸ਼ਮਾਨ ਵਯ ਵੰਦਨਾ ਕਾਰਡ",
+    "or": "ଆୟୁଷ୍ମାନ ବୟ ବନ୍ଦନା କାର୍ଡ",
+    "ml": "ആയുഷ്മാൻ വയോ വന്ദന കാർഡ്",
+    "as": "আয়ুষ্মান বয় বন্দনা কাৰ্ড",
+    "ur": "آیوشمان وی وندنا کارڈ",
+}
 
 # State to Local Language and Scheme Titles Mapping for all Indian States
 STATE_LANGUAGE_MAP: Dict[str, Dict[str, str]] = {
@@ -979,6 +997,8 @@ class AyushmanData:
     # State & Local Language Titles
     language_code: str = "hi"
     language_name: str = "Hindi"
+    is_vay_vandana: bool = False
+    card_title_en: str = "AYUSHMAN CARD"
     card_title_local: str = "आयुष्मान कार्ड"
     coverage_amount_local: str = "₹ ५ लाख तक"
     treatment_text_local: str = "मुफ्त उपचार"
@@ -1218,6 +1238,59 @@ def parse_pmjay_qr_text(qr_raw_text: str) -> Dict[str, str]:
     return res
 
 
+def detect_vay_vandana(doc: fitz.Document) -> bool:
+    """
+    Deterministically detects whether an Ayushman PDF is for the
+    'Ayushman Vay Vandana Card' (Senior Citizens 70+) vs standard 'Ayushman Card'.
+    Checks:
+    1. PDF text layer for Vay Vandana keywords in English, Hindi, Gujarati, Marathi, etc.
+    2. Front card header contour analysis on embedded background images:
+       Vay Vandana header contains two stacked lines with 22-character English text
+       'AYUSHMAN VAY VANDANA CARD' (width > 330px), whereas standard card has 'AYUSHMAN CARD' (12 chars).
+    """
+    try:
+        full_text = ""
+        for page in doc:
+            full_text += page.get_text() + " "
+        full_text_lower = full_text.lower()
+        if any(kw in full_text_lower for kw in [
+            "vay vandana", "वय वंदना", "વય વંદના", "वन्दना", "वय वन्दना",
+            "vayo vandana", "வய வந்தனா", "ವಯ ವಂದನಾ", "వయ వందన",
+            "বয় বন্দনা", "ਵਯ ਵੰਦਨਾ", "ବୟ ବନ୍ଦନା", "vaya vandana"
+        ]):
+            return True
+
+        for page in doc:
+            for img_info in page.get_images(full=True):
+                xref = img_info[0]
+                base_image = doc.extract_image(xref)
+                w, h = base_image.get("width", 0), base_image.get("height", 0)
+                if w > 900 and h > 600:
+                    img_bytes = base_image.get("image")
+                    if not img_bytes:
+                        continue
+                    img_pil = Image.open(io.BytesIO(img_bytes)).convert("RGB")
+                    img_np = np.array(img_pil)
+                    hdr = img_np[0:int(0.18 * h), int(0.40 * w):w]
+                    gray = cv2.cvtColor(hdr, cv2.COLOR_RGB2GRAY)
+                    _, thresh = cv2.threshold(gray, 220, 255, cv2.THRESH_BINARY)
+                    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                    english_letters = [
+                        cv2.boundingRect(c) for c in contours 
+                        if cv2.contourArea(c) > 25 and 40 <= cv2.boundingRect(c)[1] <= 85
+                    ]
+                    if english_letters:
+                        min_x = min(b[0] for b in english_letters)
+                        max_x = max(b[0] + b[2] for b in english_letters)
+                        span_w = max_x - min_x
+                        char_count = len(english_letters)
+                        if span_w > 330 and char_count >= 18:
+                            return True
+    except Exception as e:
+        logger.warning(f"detect_vay_vandana check exception: {e}")
+    return False
+
+
 def extract_ayushman_data(pdf_path: str, password: Optional[str] = None) -> AyushmanData:
     """Main extraction powerhouse for Ayushman / PM-JAY 2-page PDFs."""
     data = AyushmanData()
@@ -1236,43 +1309,51 @@ def extract_ayushman_data(pdf_path: str, password: Optional[str] = None) -> Ayus
                 data.errors.append("Incorrect PDF password. Please enter the correct password.")
                 return data
 
-        # 1. Extract Photo
+        # 1. Detect Vay Vandana Card Variant
+        if detect_vay_vandana(doc):
+            data.is_vay_vandana = True
+            data.card_title_en = "AYUSHMAN VAY VANDANA CARD"
+            trace.append("Ayushman Vay Vandana Card variant detected.")
+
+        # 2. Extract Photo
         photo_b64 = extract_ayushman_photo(doc, trace=trace)
         if photo_b64:
             data.photo_png_base64 = photo_b64
             trace.append("Beneficiary photo successfully extracted from Page 1.")
 
-        # 2. Scan Rendered Pages for Demographic QR Code
+        # 3. Scan Rendered Pages for Demographic QR Code
+        # Multi-DPI scan (300 DPI then 450 DPI) ensures high-density demographic QR codes
+        # on Page 1 are decoded accurately, while strictly excluding app store download links.
         qr_raw_data = ""
-        for page_idx in range(min(len(doc), 2)):
-            page = doc[page_idx]
-            pix = page.get_pixmap(dpi=300)
-            pil_page = Image.open(io.BytesIO(pix.tobytes("png")))
-            decs = zbar_decode(pil_page)
-            if decs:
-                # Find demographic QR (exclude app store download links)
-                demo_decs = [d for d in decs if not d.data.decode("utf-8", errors="ignore").startswith("http")]
-                target_dec = demo_decs[0] if demo_decs else decs[0]
-                
-                t_str = target_dec.data.decode("utf-8", errors="ignore")
-                if not t_str.startswith("http"):
-                    qr_raw_data = t_str
+        for dpi_val in [300, 450]:
+            if qr_raw_data:
+                break
+            for page_idx in range(min(len(doc), 2)):
+                page = doc[page_idx]
+                pix = page.get_pixmap(dpi=dpi_val)
+                pil_page = Image.open(io.BytesIO(pix.tobytes("png")))
+                decs = zbar_decode(pil_page)
+                if decs:
+                    # Find demographic QR (strictly exclude app store download links)
+                    demo_decs = [d for d in decs if not d.data.decode("utf-8", errors="ignore").startswith("http")]
+                    if demo_decs:
+                        target_dec = demo_decs[0]
+                        qr_raw_data = target_dec.data.decode("utf-8", errors="ignore")
 
-                # Crop original QR code directly from page render
-                rect = target_dec.rect
-                pad = 8
-                x0 = max(0, rect.left - pad)
-                y0 = max(0, rect.top - pad)
-                x1 = min(pil_page.width, rect.left + rect.width + pad)
-                y1 = min(pil_page.height, rect.top + rect.height + pad)
-                
-                qr_cropped = pil_page.crop((x0, y0, x1, y1))
-                buf = io.BytesIO()
-                qr_cropped.save(buf, format="PNG")
-                data.qr_base64 = base64.b64encode(buf.getvalue()).decode("ascii")
-                trace.append(f"QR code and demographic payload successfully decoded from Page {page_idx+1}.")
-                if qr_raw_data:
-                    break
+                        # Crop original QR code directly from page render
+                        rect = target_dec.rect
+                        pad = 8
+                        x0 = max(0, rect.left - pad)
+                        y0 = max(0, rect.top - pad)
+                        x1 = min(pil_page.width, rect.left + rect.width + pad)
+                        y1 = min(pil_page.height, rect.top + rect.height + pad)
+                        
+                        qr_cropped = pil_page.crop((x0, y0, x1, y1))
+                        buf = io.BytesIO()
+                        qr_cropped.save(buf, format="PNG")
+                        data.qr_base64 = base64.b64encode(buf.getvalue()).decode("ascii")
+                        trace.append(f"Front demographic QR code and payload decoded at {dpi_val} DPI from Page {page_idx+1}.")
+                        break
 
         # If QR payload was found, populate fields from it
         if qr_raw_data:
@@ -1624,7 +1705,12 @@ def extract_ayushman_data(pdf_path: str, password: Optional[str] = None) -> Ayus
         data.language_code = detected_lang["lang_code"]
         data.language_name = detected_lang["lang_name"]
         data.state_local = detected_lang.get("state_local", data.state)
-        data.card_title_local = detected_lang["card_title_local"]
+        if data.is_vay_vandana:
+            data.card_title_en = "AYUSHMAN VAY VANDANA CARD"
+            data.card_title_local = VAY_VANDANA_TITLES.get(data.language_code, "आयुष्मान वय वंदना कार्ड")
+        else:
+            data.card_title_en = "AYUSHMAN CARD"
+            data.card_title_local = detected_lang["card_title_local"]
         data.coverage_amount_local = detected_lang["coverage_amount_local"]
         data.treatment_text_local = detected_lang["treatment_text_local"]
         data.scheme_footer_local = detected_lang["scheme_footer_local"]
