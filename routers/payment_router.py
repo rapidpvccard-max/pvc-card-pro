@@ -255,8 +255,8 @@ async def stripe_webhook(request: Request, db: Session = Depends(database.get_db
 # PayU Hosted Checkout Integration (Live)
 # ==========================================
 
-PAYU_MERCHANT_KEY = os.environ.get("PAYU_MERCHANT_KEY", "HbMDKB")
-PAYU_MERCHANT_SALT = os.environ.get("PAYU_MERCHANT_SALT", "5zmZRvGOsrXkLcajkaIRWzdDGfZ0WYEB")
+PAYU_MERCHANT_KEY = os.environ.get("PAYU_MERCHANT_KEY", "")
+PAYU_MERCHANT_SALT = os.environ.get("PAYU_MERCHANT_SALT", "")
 PAYU_PAYMENT_URL = os.environ.get("PAYU_PAYMENT_URL", "https://secure.payu.in/_payment")
 PAYU_VERIFY_URL = os.environ.get("PAYU_VERIFY_URL", "https://info.payu.in/merchant/postservice.php?form=2")
 

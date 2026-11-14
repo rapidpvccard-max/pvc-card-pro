@@ -20,8 +20,8 @@ from routers.payment_router import generate_payu_hash, verify_payu_hash, verify_
 
 client = TestClient(app)
 
-TEST_KEY = "HbMDKB"
-TEST_SALT = "5zmZRvGOsrXkLcajkaIRWzdDGfZ0WYEB"
+TEST_KEY = os.environ.get("PAYU_MERCHANT_KEY") or "test_payu_key"
+TEST_SALT = os.environ.get("PAYU_MERCHANT_SALT") or "test_payu_salt_sample_1234567890abcdef"
 
 
 def make_official_payu_req_hash(key, txnid, amount, productinfo, firstname, email, udfs, salt):
