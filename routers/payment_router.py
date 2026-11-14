@@ -968,7 +968,7 @@ def get_payment_gateways():
     cf_env = os.environ.get("CASHFREE_ENV", CASHFREE_ENV).strip().lower()
 
     return {
-        "default_gateway": "payu",
+        "default_gateway": "cashfree",
         "cashfree": {
             "enabled": True,
             "configured": cf_configured,
