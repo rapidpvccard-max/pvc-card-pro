@@ -174,8 +174,18 @@ def test_all_4_services_independent_free_samples():
     db.commit()
     assert app.is_service_sample_available(user.credits, "passport") == False
     assert app.is_service_sample_available(user.credits, "crop") == False
+
+    # Consume BG Remover demo
+    app.consume_service_sample(user.credits, "bg_remover")
+    db.commit()
+    assert app.is_service_sample_available(user.credits, "bg_remover") == False
+
+    # Consume Resume demo
+    app.consume_service_sample(user.credits, "resume")
+    db.commit()
+    assert app.is_service_sample_available(user.credits, "resume") == False
     assert user.credits.free_sample_available == False
-    print("✅ All 5 service sample flags independently tracked & consumed!")
+    print("✅ All 7 service sample flags independently tracked & consumed!")
 
 if __name__ == "__main__":
     test_watermark_engine_direct()

@@ -41,6 +41,8 @@ def run_tests():
     assert data.get("pmjay_id") == "P9QBPEP3Y", f"Expected PM-JAY ID P9QBPEP3Y, got {data.get('pmjay_id')}"
     assert data.get("district").upper() == "RAJKOT", f"Expected District RAJKOT, got {data.get('district')}"
     assert data.get("state") == "Gujarat", f"Expected State Gujarat, got {data.get('state')}"
+    assert data.get("is_vay_vandana") is False, "Standard Ayushman card must not be detected as Vay Vandana"
+    assert data.get("card_title_en") == "AYUSHMAN CARD", "Standard card English title must be AYUSHMAN CARD"
     assert bool(data.get("photo_png_base64")), "Photo base64 should be extracted"
     assert bool(data.get("qr_base64")), "QR base64 should be extracted"
     print("  [PASS] Test 1: Ayushman PDF extraction passed!")
@@ -51,7 +53,9 @@ def run_tests():
     assert mapped["document_type"] == "ayushman"
     assert mapped["person"]["name"].upper() == "NISHAD GANESHBHAI DINDYALBHAI"
     assert mapped["identity"]["pmjay_id"] == "P9QBPEP3Y"
+    assert mapped["scheme"]["is_vay_vandana"] is False
     assert mapped["scheme"]["card_title_local"] == "આયુષ્માન કાર્ડ"
+    assert mapped["scheme"]["card_title_en"] == "AYUSHMAN CARD"
     print("  [PASS] Test 2: Data mapping passed!")
 
     # 3. Card Rendering Test
