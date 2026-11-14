@@ -700,11 +700,8 @@ Start printing PVC cards: https://rapidpvc.online/generator
     msg["From"] = f"{config['from_name']} <{config['from_email']}>"
     msg["To"] = to_email
 
-    # Also BCC admin for real-time sales visibility
-    admin_email = os.environ.get("ADMIN_EMAILS", "rapidpvccard@gmail.com").split(",")[0].strip() or "rapidpvccard@gmail.com"
+    # Customer invoice goes directly to customer ONLY (no admin CC/BCC to prevent duplicate emails)
     recipients = [to_email]
-    if admin_email and admin_email.lower() != to_email.lower():
-        recipients.append(admin_email)
 
     msg.attach(MIMEText(plain_text, "plain"))
     msg.attach(MIMEText(html_content, "html"))
@@ -743,12 +740,11 @@ def send_admin_payment_notification(
     if not config["is_configured"]:
         return False, "SMTP credentials not configured."
 
-    # Collect all admin recipient addresses
+    # Collect admin recipient addresses
     admin_emails_env = os.environ.get("ADMIN_EMAILS", "rapidpvccard@gmail.com")
     admin_list = [e.strip() for e in admin_emails_env.split(",") if e.strip() and "@" in e]
-    for fallback in ["rapidpvccard@gmail.com", "patilavinash900@gmail.com"]:
-        if fallback not in admin_list:
-            admin_list.append(fallback)
+    if not admin_list:
+        admin_list = ["rapidpvccard@gmail.com"]
 
     gw_clean = (gateway or "PayU").strip()
     is_cashfree = gw_clean.lower() == "cashfree"
