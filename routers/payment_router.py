@@ -324,24 +324,42 @@ def verify_payu_payment_s2s(txnid: str, expected_amount: float = None) -> dict:
         "hash": hash_val
     }
 
-    try:
-        resp = requests.post(
-            verify_url,
-            data=payload,
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-            timeout=15
-        )
-        resp_data = resp.json()
-    except Exception as e:
-        print(f"[PayU S2S Verify Request Error] {e}")
+    resp_data = None
+    for attempt in range(2):
+        try:
+            resp = requests.post(
+                verify_url,
+                data=payload,
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
+                timeout=12
+            )
+            resp_data = resp.json()
+            break
+        except Exception as e:
+            if attempt == 0:
+                import time
+                time.sleep(0.5)
+                continue
+            print(f"[PayU S2S Verify Request Error] {e}")
+            return {
+                "verified": False,
+                "status": "network_error",
+                "txnid": txnid,
+                "mihpayid": None,
+                "amount": 0.0,
+                "raw": {},
+                "message": f"Failed to contact PayU verification endpoint: {str(e)}"
+            }
+
+    if not resp_data:
         return {
             "verified": False,
-            "status": "network_error",
+            "status": "empty_response",
             "txnid": txnid,
             "mihpayid": None,
             "amount": 0.0,
             "raw": {},
-            "message": f"Failed to contact PayU verification endpoint: {str(e)}"
+            "message": "Empty response from PayU verification endpoint"
         }
 
     root_status = resp_data.get("status")
@@ -420,9 +438,17 @@ def verify_payu_payment_s2s(txnid: str, expected_amount: float = None) -> dict:
             "message": "PayU mihpayid is missing or invalid"
         }
 
-    # 4. Validate payment amount
+    # 4. Validate payment amount (with optional surcharge tolerance)
     if expected_amount is not None:
-        if abs(verified_amt - float(expected_amount)) > 0.05:
+        try:
+            add_charges = float(tx_info.get("additional_charges") or 0.0)
+        except (ValueError, TypeError):
+            add_charges = 0.0
+        exp_f = float(expected_amount)
+        base_match = abs(verified_amt - exp_f) <= 0.05
+        net_match = abs((verified_amt - add_charges) - exp_f) <= 0.05
+        gross_match = abs(verified_amt - (exp_f + add_charges)) <= 0.05
+        if not (base_match or net_match or gross_match):
             return {
                 "verified": False,
                 "status": "amount_mismatch",
@@ -430,7 +456,7 @@ def verify_payu_payment_s2s(txnid: str, expected_amount: float = None) -> dict:
                 "mihpayid": mihpayid,
                 "amount": verified_amt,
                 "raw": resp_data,
-                "message": f"Amount mismatch: expected ₹{expected_amount:.2f}, verified ₹{verified_amt:.2f}"
+                "message": f"Amount mismatch: expected ₹{exp_f:.2f}, verified ₹{verified_amt:.2f}"
             }
 
     return {
